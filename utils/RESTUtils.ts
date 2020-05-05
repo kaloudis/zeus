@@ -1,5 +1,6 @@
 import axios from 'axios';
 import SettingsStore from './../stores/SettingsStore';
+import https from 'https';
 
 const lndRoutes: any = {
     getTransactions: '/v1/transactions',
@@ -77,6 +78,14 @@ const getInvoicesToken = axios.CancelToken.source().token;
 const getPaymentsToken = axios.CancelToken.source().token;
 const getNodeInfoToken = axios.CancelToken.source().token;
 
+const httpsAgent = new https.Agent({
+  host: 'localhost',
+  rejectUnauthorized: false, // (NOTE: this will disable client verification)
+  // cert: 'a',
+  // key: fs.readFileSync("./key.pem"),
+  // passphrase: "YYY"
+});
+
 class RESTUtils {
     axiosReq = (
         headers: Headers,
@@ -90,7 +99,8 @@ class RESTUtils {
             url,
             headers,
             cancelToken,
-            data
+            data,
+            agent: httpsAgent
         });
     };
 
