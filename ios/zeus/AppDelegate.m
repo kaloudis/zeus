@@ -57,6 +57,7 @@
    openURL:(NSURL *)url
    options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
+  OnionConnecter().start();
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 
