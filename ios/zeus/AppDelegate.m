@@ -15,6 +15,8 @@
 #import <UMReactNativeAdapter/UMNativeModulesProxy.h>
 #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
 
+#import "zeus-Swift.h"
+
 @implementation AppDelegate
 
 @synthesize window = _window;
@@ -57,7 +59,7 @@
    openURL:(NSURL *)url
    options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  OnionConnecter().start();
+  OnionConnecter.start();
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 
