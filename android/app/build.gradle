@@ -128,11 +128,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.zeusln.zeus"
+        applicationId "app.zeusln.zeusBeta"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 24
-        versionName "0.5.1"
+        versionName "0.5.2"
         multiDexEnabled true
     }
     signingConfigs {
