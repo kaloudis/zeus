@@ -169,7 +169,7 @@ export default class LND {
             enableTor
         } = stores.settingsStore;
         const auth = macaroonHex || accessToken;
-        const headers: any = this.getHeaders(auth);
+        const headers: any = {};
         headers['Content-Type'] = 'application/json';
         const url = this.getURL(host || lndhubUrl, port, route);
         return this.restReq(

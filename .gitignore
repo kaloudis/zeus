@@ -69,3 +69,6 @@ buck-out/
 ios/Pods
 **.swp
 yarn.lock
+
+# LND
+android/lndmobile/Lndmobile.aar

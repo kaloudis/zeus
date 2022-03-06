@@ -1,4 +1,7 @@
-apply plugin: "com.android.application"
+plugins {
+    id "com.android.application"
+    id "com.google.protobuf"
+}
 
 import com.android.build.OutputFile
 
@@ -195,6 +198,14 @@ android {
             useLegacyPackaging true
         }
     }
+
+    sourceSets {
+       main {
+           proto {
+
+           }
+       }
+   }
 }
 
 dependencies {
@@ -211,6 +222,13 @@ dependencies {
     // gif
     implementation 'com.facebook.fresco:fresco:2.6.0'
     implementation 'com.facebook.fresco:animated-gif:2.6.0'
+    // lnd
+    implementation 'com.google.protobuf:protobuf-java:3.10.0'
+    implementation 'com.google.api.grpc:proto-google-common-protos:1.17.0'
+    implementation project(":lndmobile")
+    //
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // implementation "com.google.protobuf:protobuf-javalite:${rootProject.ext.javalite_version}"
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
@@ -218,6 +236,21 @@ dependencies {
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
         implementation jscFlavor
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.4"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
     }
 }
 

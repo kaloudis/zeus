@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Animated,
+    NativeModules,
     PanResponder,
     Text,
     TouchableOpacity,
@@ -37,6 +38,7 @@ import Temple from './../../assets/images/SVG/Temple.svg';
 import ChannelsIcon from './../../assets/images/SVG/Channels.svg';
 import CaretUp from './../../assets/images/SVG/Caret Up.svg';
 import WordLogo from './../../assets/images/SVG/Word Logo - no outline.svg';
+import { LNDNative } from 'native'
 
 interface WalletProps {
     enterSetup: any;
@@ -81,10 +83,13 @@ export default class Wallet extends React.Component<WalletProps, {}> {
         });
     }
 
-    componentDidMount() {
-        // triggers when loaded from navigation or back action
-        this.props.navigation.addListener('didFocus', () => {
-            this.getSettingsAndNavigate();
+    async componentDidMount() {
+        await NativeModules.LndReactModule.start();
+        this.props.navigation.addListener('didFocus', async () => {
+            setTimeout(() => {
+            // triggers when loaded from navigation or back action
+                this.getSettingsAndNavigate();
+              }, 2000);
         });
     }
 
@@ -162,7 +167,7 @@ export default class Wallet extends React.Component<WalletProps, {}> {
             ]);
             NodeInfoStore.getNodeInfo();
             ChannelsStore.getChannels();
-            FeeStore.getFees();
+            // FeeStore.getFees();
         }
 
         if (implementation === 'lnd') {
