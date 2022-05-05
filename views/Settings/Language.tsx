@@ -130,6 +130,15 @@ export default class Language extends React.Component<
                                                       fiat: settings.fiat,
                                                       passphrase:
                                                           settings.passphrase,
+                                                      duressPassphrase:
+                                                          settings.duressPassphrase,
+                                                      pin: settings.pin,
+                                                      duressPin:
+                                                          settings.duressPin,
+                                                      scramblePin:
+                                                          settings.scramblePin,
+                                                      authenticationAttempts:
+                                                          settings.authenticationAttempts,
                                                       locale: item.value,
                                                       privacy: settings.privacy
                                                   }

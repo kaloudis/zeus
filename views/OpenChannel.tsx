@@ -48,6 +48,7 @@ interface OpenChannelState {
     node_pubkey_string: string;
     local_funding_amount: string;
     min_confs: number;
+    spend_unconfirmed: boolean;
     sat_per_byte: string;
     private: boolean;
     host: string;
@@ -68,6 +69,7 @@ export default class OpenChannel extends React.Component<
             node_pubkey_string: '',
             local_funding_amount: '',
             min_confs: 1,
+            spend_unconfirmed: false,
             sat_per_byte: '2',
             private: false,
             host: '',
@@ -213,11 +215,11 @@ export default class OpenChannel extends React.Component<
             host,
             sat_per_byte,
             suggestImport,
-            utxoBalance
+            utxoBalance,
+            private
         } = this.state;
         const { implementation, settings } = SettingsStore;
         const { privacy } = settings;
-        const privateChannel = this.state.private;
         const enableMempoolRates = privacy && privacy.enableMempoolRates;
 
         const {
@@ -407,11 +409,13 @@ export default class OpenChannel extends React.Component<
                         keyboardType="numeric"
                         placeholder={'1'}
                         value={min_confs.toString()}
-                        onChangeText={(text: string) =>
+                        onChangeText={(text: string) => {
+                            const newMinConfs = Number(text);
                             this.setState({
-                                min_confs: Number(text) || min_confs
-                            })
-                        }
+                                min_confs: newMinConfs,
+                                spend_unconfirmed: newMinConfs === 0
+                            });
+                        }}
                         editable={!openingChannel}
                     />
 
@@ -484,10 +488,10 @@ export default class OpenChannel extends React.Component<
                             {localeString('views.OpenChannel.private')}
                         </Text>
                         <Switch
-                            value={privateChannel}
+                            value={private}
                             onValueChange={() =>
                                 this.setState({
-                                    private: !privateChannel
+                                    private: !private
                                 })
                             }
                             trackColor={{

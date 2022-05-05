@@ -123,7 +123,7 @@ export default class Receive extends React.Component<
         const { selectedIndex, memo, value, expiry, ampInvoice, routeHints } =
             this.state;
         const { units, changeUnits, getAmount } = UnitsStore;
-        const { fiatRates }: any = FiatStore;
+        const { fiatRates, getSymbol }: any = FiatStore;
 
         const {
             createInvoice,
@@ -160,7 +160,8 @@ export default class Receive extends React.Component<
                 break;
             case 'fiat':
                 satAmount = Number(
-                    (Number(value) / Number(rate)) * Number(satoshisPerBTC)
+                    (Number(value.replace(/,/g, '.')) / Number(rate)) *
+                        Number(satoshisPerBTC)
                 ).toFixed(0);
                 break;
         }
@@ -359,8 +360,7 @@ export default class Receive extends React.Component<
                                             color: themeColor('secondaryText')
                                         }}
                                     >
-                                        {localeString('views.Receive.amount')} (
-                                        {units === 'fiat' ? fiat : units})
+                                        {localeString('views.Receive.amount')}
                                         {lnurl &&
                                         lnurl.minWithdrawable !==
                                             lnurl.maxWithdrawable
@@ -374,7 +374,7 @@ export default class Receive extends React.Component<
                                 </TouchableOpacity>
                                 <TextInput
                                     keyboardType="numeric"
-                                    placeholder={'100'}
+                                    placeholder={'0'}
                                     value={value}
                                     onChangeText={(text: string) => {
                                         this.setState({ value: text });
@@ -386,6 +386,22 @@ export default class Receive extends React.Component<
                                             ? false
                                             : true
                                     }
+                                    prefix={
+                                        units !== 'sats' &&
+                                        (units === 'BTC'
+                                            ? '₿'
+                                            : !getSymbol().rtl
+                                            ? getSymbol().symbol
+                                            : null)
+                                    }
+                                    suffix={
+                                        units === 'sats'
+                                            ? units
+                                            : getSymbol().rtl &&
+                                              units === 'fiat' &&
+                                              getSymbol().symbol
+                                    }
+                                    toggleUnits={changeUnits}
                                 />
                                 {units !== 'sats' && (
                                     <Amount
@@ -524,7 +540,7 @@ export default class Receive extends React.Component<
                                         onPress={() =>
                                             createInvoice(
                                                 memo,
-                                                satAmount.toString(),
+                                                satAmount.toString() || '0',
                                                 expiry,
                                                 lnurl,
                                                 ampInvoice,

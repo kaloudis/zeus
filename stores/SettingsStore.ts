@@ -34,6 +34,11 @@ interface Settings {
     theme?: string;
     selectedNode?: number;
     passphrase?: string;
+    duressPassphrase?: string;
+    pin?: string;
+    duressPin?: string;
+    scramblePin?: boolean;
+    authenticationAttempts?: number;
     fiat?: string;
     locale?: string;
     privacy: PrivacySettings;
@@ -96,7 +101,7 @@ export const CURRENCY_KEYS = [
     { key: '🇬🇧 Great British Pound (GBP)', value: 'GBP' },
     { key: '🇩🇰 Danish Krone (DKK)', value: 'DKK' },
     { key: '🇸🇪 Swedish Krona (SEK)', value: 'SEK' },
-    { key: '🇮🇸 Icelandic Krona (ISK)', value: 'ISK' },
+    // { key: '🇮🇸 Icelandic Krona (ISK)', value: 'ISK' },
     { key: '🇨🇭 Swiss Franc (CHF)', value: 'CHF' },
     { key: '🇧🇷 Brazilian Real (BRL)', value: 'BRL' },
     { key: '🇪🇺 Eurozone Euro (EUR)', value: 'EUR' },
@@ -130,10 +135,11 @@ export default class SettingsStore {
         privacy: {
             defaultBlockExplorer: 'mempool.space',
             customBlockExplorer: '',
-            clipboard: false,
+            clipboard: true,
             lurkerMode: false,
-            enableMempoolRates: false
-        }
+            enableMempoolRates: true
+        },
+        scramblePin: true
     };
     @observable public loading = false;
     @observable btcPayError: string | null;
@@ -301,7 +307,6 @@ export default class SettingsStore {
                     this.certVerification = node.certVerification || false;
                     this.enableTor = node.enableTor;
                 }
-                return this.settings;
             } else {
                 console.log('No credentials stored');
             }
@@ -310,6 +315,8 @@ export default class SettingsStore {
         } finally {
             this.loading = false;
         }
+
+        return this.settings;
     }
 
     @action

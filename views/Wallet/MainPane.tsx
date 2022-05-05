@@ -121,8 +121,8 @@ export default class MainPane extends React.PureComponent<MainPaneProps, {}> {
             mainPane = (
                 <View
                     style={{
-                        height: 220,
                         alignItems: 'center',
+                        height: 240,
                         backgroundColor: themeColor('background')
                     }}
                 >
@@ -130,26 +130,23 @@ export default class MainPane extends React.PureComponent<MainPaneProps, {}> {
                         navigation={navigation}
                         SettingsStore={SettingsStore}
                     />
-                    {!BalanceStore.loadingLightningBalance &&
-                        !BalanceStore.loadingBlockchainBalance && (
-                            <View style={{ marginTop: 20 }}>
-                                {implementation === 'lndhub' ? (
-                                    <LightningBalance />
-                                ) : (
-                                    <BalanceViewCombined />
-                                )}
-                                {infoValue !== 'ⓘ' && (
-                                    <View
-                                        style={{
-                                            marginTop: 5,
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <NetworkBadge />
-                                    </View>
-                                )}
+                    <View style={{ marginTop: 40 }}>
+                        {implementation === 'lndhub' ? (
+                            <LightningBalance />
+                        ) : (
+                            <BalanceViewCombined />
+                        )}
+                        {infoValue !== 'ⓘ' && (
+                            <View
+                                style={{
+                                    marginTop: 5,
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <NetworkBadge />
                             </View>
                         )}
+                    </View>
                 </View>
             );
         } else {
