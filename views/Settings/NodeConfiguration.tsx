@@ -63,12 +63,15 @@ interface NodeConfigurationState {
     showLndHubModal: boolean;
     showCertModal: boolean;
     enableTor: boolean;
-    // lnc
+    // LNC
     pairingPhrase: string;
     mailboxServer: string;
     customMailboxServer: string;
     localKey: string;
     remoteKey: string;
+    // LNSocket
+    pubkey: string;
+    rune: string;
 }
 
 const ScanBadge = ({ navigation }: { navigation: any }) => (
@@ -106,12 +109,15 @@ export default class NodeConfiguration extends React.Component<
         username: '',
         password: '',
         accessKey: '',
-        // lnc
+        // LNC
         pairingPhrase: '',
         mailboxServer: 'mailbox.terminal.lightning.today:443',
         customMailboxServer: '',
         localKey: '',
-        remoteKey: ''
+        remoteKey: '',
+        // LNSocket
+        pubkey: '',
+        rune: ''
     };
 
     async UNSAFE_componentWillMount() {
@@ -235,7 +241,9 @@ export default class NodeConfiguration extends React.Component<
                 enableTor,
                 pairingPhrase,
                 mailboxServer,
-                customMailboxServer
+                customMailboxServer,
+                pubkey,
+                rune
             } = node;
 
             this.setState({
@@ -258,7 +266,9 @@ export default class NodeConfiguration extends React.Component<
                 enableTor: tor || enableTor,
                 pairingPhrase,
                 mailboxServer,
-                customMailboxServer
+                customMailboxServer,
+                pubkey,
+                rune
             });
         } else {
             this.setState({
@@ -288,7 +298,9 @@ export default class NodeConfiguration extends React.Component<
             index,
             pairingPhrase,
             mailboxServer,
-            customMailboxServer
+            customMailboxServer,
+            pubkey,
+            rune
         } = this.state;
         const { setConnectingStatus, updateSettings, settings } = SettingsStore;
 
@@ -315,7 +327,9 @@ export default class NodeConfiguration extends React.Component<
             enableTor,
             pairingPhrase,
             mailboxServer,
-            customMailboxServer
+            customMailboxServer,
+            pubkey,
+            rune
         };
 
         let nodes: any;
@@ -332,7 +346,10 @@ export default class NodeConfiguration extends React.Component<
             });
 
             if (nodes.length === 1) {
-                if (implementation === 'lightning-node-connect') {
+                if (
+                    implementation === 'lightning-node-connect' ||
+                    implementation == 'lnsocket'
+                ) {
                     BackendUtils.disconnect();
                 }
                 setConnectingStatus(true);
@@ -362,7 +379,9 @@ export default class NodeConfiguration extends React.Component<
             certVerification,
             pairingPhrase,
             mailboxServer,
-            customMailboxServer
+            customMailboxServer,
+            pubkey,
+            rune
         } = this.state;
         const { nodes } = settings;
 
@@ -382,7 +401,9 @@ export default class NodeConfiguration extends React.Component<
             enableTor,
             pairingPhrase,
             mailboxServer,
-            customMailboxServer
+            customMailboxServer,
+            pubkey,
+            rune
         };
 
         navigation.navigate('NodeConfiguration', {
@@ -458,7 +479,9 @@ export default class NodeConfiguration extends React.Component<
             mailboxServer,
             customMailboxServer,
             localKey,
-            remoteKey
+            remoteKey,
+            pubkey,
+            rune
         } = this.state;
         const {
             loading,
@@ -866,6 +889,35 @@ export default class NodeConfiguration extends React.Component<
 
                         <NodeInterface />
 
+                        {implementation === 'lnsocket' && (
+                            <>
+                                <Text
+                                    style={{
+                                        ...styles.text,
+                                        color: themeColor('text')
+                                    }}
+                                >
+                                    {localeString(
+                                        'views.OpenChannel.nodePubkey'
+                                    )}
+                                </Text>
+                                <TextInput
+                                    placeholder={
+                                        '02cdfbc50a09e40d0adbe54a275eca9bcf4685bd67d697558bcb22c6c0ebcd0be2'
+                                    }
+                                    value={pubkey}
+                                    onChangeText={(text: string) =>
+                                        this.setState({
+                                            pubkey: text.trim(),
+                                            saved: false
+                                        })
+                                    }
+                                    locked={loading}
+                                    autoCorrect={false}
+                                />
+                            </>
+                        )}
+
                         {(implementation === 'spark' ||
                             implementation == 'eclair') && (
                             <>
@@ -880,7 +932,7 @@ export default class NodeConfiguration extends React.Component<
                                     )}
                                 </Text>
                                 <TextInput
-                                    placeholder={'http://192.168.1.2:9737'}
+                                    placeholder="http://192.168.1.2:9737"
                                     value={url}
                                     onChangeText={(text: string) =>
                                         this.setState({
@@ -946,6 +998,36 @@ export default class NodeConfiguration extends React.Component<
                                 )}
                             </>
                         )}
+
+                        {implementation === 'lnsocket' && (
+                            <>
+                                <Text
+                                    style={{
+                                        ...styles.text,
+                                        color: themeColor('text')
+                                    }}
+                                >
+                                    {localeString(
+                                        'views.Settings.NodeConfiguration.rune'
+                                    )}
+                                </Text>
+                                <TextInput
+                                    placeholder={
+                                        'uQux-hID66AX5rFUpkt1p9CU_7DsTMyUC4G5yq7-dcw9MTMmbWV0aG9kPWdldGluZm8='
+                                    }
+                                    value={rune}
+                                    onChangeText={(text: string) =>
+                                        this.setState({
+                                            rune: text.trim(),
+                                            saved: false
+                                        })
+                                    }
+                                    locked={loading}
+                                    autoCorrect={false}
+                                />
+                            </>
+                        )}
+
                         {implementation === 'lndhub' && (
                             <>
                                 <Text
@@ -1072,7 +1154,11 @@ export default class NodeConfiguration extends React.Component<
                                     )}
                                 </Text>
                                 <TextInput
-                                    placeholder={'localhost'}
+                                    placeholder={
+                                        implementation === 'lnsocket'
+                                            ? '192.168.1.2:9735'
+                                            : 'localhost'
+                                    }
                                     value={host}
                                     onChangeText={(text: string) =>
                                         this.setState({
@@ -1120,6 +1206,31 @@ export default class NodeConfiguration extends React.Component<
                                     onChangeText={(text: string) =>
                                         this.setState({
                                             macaroonHex: text.trim(),
+                                            saved: false
+                                        })
+                                    }
+                                    locked={loading}
+                                />
+                            </>
+                        )}
+
+                        {implementation === 'lnsocket' && (
+                            <>
+                                <Text
+                                    style={{
+                                        color: themeColor('secondaryText')
+                                    }}
+                                >
+                                    {localeString(
+                                        'views.Settings.AddEditNode.host'
+                                    )}
+                                </Text>
+                                <TextInput
+                                    placeholder={'192.168.1.2:9735'}
+                                    value={host}
+                                    onChangeText={(text: string) =>
+                                        this.setState({
+                                            host: text.trim(),
                                             saved: false
                                         })
                                     }
@@ -1226,31 +1337,33 @@ export default class NodeConfiguration extends React.Component<
                             </>
                         )}
 
-                        {implementation !== 'lightning-node-connect' && (
-                            <>
-                                <Text
-                                    style={{
-                                        top: 20,
-                                        color: themeColor('secondaryText')
-                                    }}
-                                >
-                                    {localeString(
-                                        'views.Settings.AddEditNode.useTor'
-                                    )}
-                                </Text>
-                                <Switch
-                                    value={enableTor}
-                                    onValueChange={() =>
-                                        this.setState({
-                                            enableTor: !enableTor,
-                                            saved: false
-                                        })
-                                    }
-                                />
-                            </>
-                        )}
+                        {implementation !== 'lightning-node-connect' &&
+                            implementation !== 'lnsocket' && (
+                                <>
+                                    <Text
+                                        style={{
+                                            top: 20,
+                                            color: themeColor('secondaryText')
+                                        }}
+                                    >
+                                        {localeString(
+                                            'views.Settings.AddEditNode.useTor'
+                                        )}
+                                    </Text>
+                                    <Switch
+                                        value={enableTor}
+                                        onValueChange={() =>
+                                            this.setState({
+                                                enableTor: !enableTor,
+                                                saved: false
+                                            })
+                                        }
+                                    />
+                                </>
+                            )}
 
                         {implementation !== 'lightning-node-connect' &&
+                            implementation !== 'lnsocket' &&
                             !enableTor && (
                                 <>
                                     <Text
@@ -1324,7 +1437,9 @@ export default class NodeConfiguration extends React.Component<
                                     !saved &&
                                     !certVerification &&
                                     !enableTor &&
-                                    implementation !== 'lightning-node-connect'
+                                    implementation !==
+                                        'lightning-node-connect' &&
+                                    implementation !== 'lnsocket'
                                 ) {
                                     this.setState({ showCertModal: true });
                                 } else {

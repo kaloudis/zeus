@@ -122,7 +122,10 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             loginRequired &&
             loginBackground
         ) {
-            if (implementation === 'lightning-node-connect') {
+            if (
+                implementation === 'lightning-node-connect' ||
+                implementation === 'lnsocket'
+            ) {
                 BackendUtils.disconnect();
             }
 
@@ -212,11 +215,20 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             }
             if (!error) {
                 NodeInfoStore.getNodeInfo();
-                UTXOsStore.listAccounts();
+                // UTXOsStore.listAccounts();
+                // await BalanceStore.getCombinedBalance();
+                // ChannelsStore.getChannels();
+                // FeeStore.getFees();
+                // FeeStore.getForwardingHistory();
+            }
+        } else if (implementation === 'lnsocket') {
+            await BackendUtils.init();
+            const connected = await BackendUtils.connect();
+            // TODO pull connect call into store to display error on connection failure
+            if (connected) {
+                NodeInfoStore.getNodeInfo();
                 await BalanceStore.getCombinedBalance();
                 ChannelsStore.getChannels();
-                FeeStore.getFees();
-                FeeStore.getForwardingHistory();
             }
         } else {
             NodeInfoStore.getNodeInfo();

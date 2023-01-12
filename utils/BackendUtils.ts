@@ -5,6 +5,7 @@ import LightningNodeConnect from '../backends/LightningNodeConnect';
 // Core Lightning
 import CLightningREST from '../backends/CLightningREST';
 import Spark from '../backends/Spark';
+import LNSocket from '../backends/LNSocket';
 // Eclair
 import Eclair from '../backends/Eclair';
 // Custodial
@@ -15,6 +16,7 @@ class BackendUtils {
     lightningNodeConnect: LightningNodeConnect;
     clightningREST: CLightningREST;
     spark: Spark;
+    lnSocket: LNSocket;
     eclair: Eclair;
     lndHub: LndHub;
     constructor() {
@@ -22,6 +24,7 @@ class BackendUtils {
         this.lightningNodeConnect = new LightningNodeConnect();
         this.clightningREST = new CLightningREST();
         this.spark = new Spark();
+        this.lnSocket = new LNSocket();
         this.eclair = new Eclair();
         this.lndHub = new LndHub();
     }
@@ -37,6 +40,8 @@ class BackendUtils {
                 return this.clightningREST;
             case 'spark':
                 return this.spark;
+            case 'lnsocket':
+                return this.lnSocket;
             case 'eclair':
                 return this.eclair;
             case 'lndhub':
@@ -128,6 +133,9 @@ class BackendUtils {
     connect = (...args: any[]) => this.call('connect', args);
     isConnected = (...args: any[]) => this.call('isConnected', args);
     disconnect = (...args: any[]) => this.call('disconnect', args);
+
+    // Commando
+    init = (...args: any[]) => this.call('init', args);
 }
 
 const backendUtils = new BackendUtils();

@@ -23,6 +23,9 @@ interface Node {
     pairingPhrase?: string;
     mailboxServer?: string;
     customMailboxServer?: string;
+    // LNsocket
+    pubkey?: string;
+    rune?: string;
 }
 
 interface PrivacySettings {
@@ -65,6 +68,7 @@ export const INTERFACE_KEYS = [
     { key: 'LND (REST)', value: 'lnd' },
     { key: 'LND (Lightning Node Connect)', value: 'lightning-node-connect' },
     { key: 'Core Lightning (c-lightning-REST)', value: 'c-lightning-REST' },
+    { key: 'Core Lightning (lnsocket)', value: 'lnsocket' },
     { key: 'Core Lightning (Sparko)', value: 'spark' },
     { key: 'Eclair', value: 'eclair' },
     { key: 'LNDHub', value: 'lndhub' }
@@ -221,6 +225,9 @@ export default class SettingsStore {
     @observable public customMailboxServer: string;
     @observable public error = false;
     @observable public errorMsg: string;
+    // LNSocket
+    @observable public pubkey: string;
+    @observable public rune: string;
 
     @action
     public changeLocale = (locale: string) => {
@@ -378,6 +385,9 @@ export default class SettingsStore {
                     this.pairingPhrase = node.pairingPhrase;
                     this.mailboxServer = node.mailboxServer;
                     this.customMailboxServer = node.customMailboxServer;
+                    // LNSocket
+                    this.pubkey = node.pubkey;
+                    this.rune = node.rune;
                 }
             } else {
                 console.log('No credentials stored');
