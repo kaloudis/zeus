@@ -1,0 +1,48 @@
+import ReactNativeBiometrics, { BiometryType } from 'react-native-biometrics';
+
+const rnBiometrics = new ReactNativeBiometrics({
+    allowDeviceCredentials: true
+});
+
+export const getSupportedBiometryType = async (): Promise<
+    BiometryType | undefined
+> => {
+    try {
+        console.log('isBiometricSupport', rnBiometrics);
+
+        let { available, biometryType } =
+            await rnBiometrics.isSensorAvailable();
+
+        console.log({ available, biometryType });
+
+        if (available) {
+            return biometryType;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const verifyBiometry = async (
+    promptMessage: string
+): Promise<boolean> => {
+    try {
+        const { success, error } = await rnBiometrics.simplePrompt({
+            promptMessage
+        });
+
+        if (error) {
+            console.error(error);
+
+            return false;
+        }
+
+        return success;
+    } catch (error) {
+        console.error(error);
+    }
+
+    return false;
+};
+
+export default rnBiometrics;

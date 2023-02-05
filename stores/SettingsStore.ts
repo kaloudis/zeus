@@ -1,10 +1,11 @@
-import EncryptedStorage from 'react-native-encrypted-storage';
 import { action, observable } from 'mobx';
+import { BiometryType } from 'react-native-biometrics';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 import BackendUtils from '../utils/BackendUtils';
-import { doTorRequest, RequestMethod } from '../utils/TorUtils';
 import { localeString } from '../utils/LocaleUtils';
+import { doTorRequest, RequestMethod } from '../utils/TorUtils';
 
 // lndhub
 import LoginRequest from './../models/LoginRequest';
@@ -71,6 +72,8 @@ interface Settings {
     display: DisplaySettings;
     pos: PosSettings;
     payments: PaymentSettings;
+    isBiometryEnabled?: boolean;
+    supportedBiometryType?: BiometryType;
 }
 
 export const BLOCK_EXPLORER_KEYS = [
@@ -400,6 +403,8 @@ export default class SettingsStore {
             );
             if (credentials) {
                 this.settings = JSON.parse(credentials);
+                console.log(this.settings);
+
                 const node: any =
                     this.settings.nodes &&
                     this.settings.nodes[this.settings.selectedNode || 0];

@@ -1,12 +1,17 @@
 import { inject, observer } from 'mobx-react';
 import * as React from 'react';
-import { FlatList, View, ScrollView } from 'react-native';
+import { FlatList, ScrollView, View } from 'react-native';
+import { BiometryType } from 'react-native-biometrics';
 import { Header, Icon, ListItem } from 'react-native-elements';
 
 import Switch from './../../components/Switch';
 
 import SettingsStore from '../../stores/SettingsStore';
 
+import {
+    getSupportedBiometryType,
+    verifyBiometry
+} from './../../utils/BiometricUtils';
 import { localeString } from './../../utils/LocaleUtils';
 import { themeColor } from './../../utils/ThemeUtils';
 
@@ -21,6 +26,8 @@ interface SecurityState {
     displaySecurityItems: Array<any>;
     pinExists: boolean;
     passphraseExists: boolean;
+    supportedBiometryType: BiometryType | undefined;
+    isBiometryEnabled: boolean | undefined;
 }
 
 const possibleSecurityItems = [
@@ -61,17 +68,23 @@ export default class Security extends React.Component<
         loginBackground: false,
         displaySecurityItems: [],
         pinExists: false,
-        passphraseExists: false
+        passphraseExists: false,
+        supportedBiometryType: undefined,
+        isBiometryEnabled: undefined
     };
 
     async componentDidMount() {
         const { SettingsStore } = this.props;
         const { getSettings } = SettingsStore;
         const settings = await getSettings();
+        console.log({ settings });
+        const biometryType = await getSupportedBiometryType();
 
         this.setState({
             scramblePin: settings.scramblePin ?? true,
-            loginBackground: settings.loginBackground ?? false
+            loginBackground: settings.loginBackground ?? false,
+            isBiometryEnabled: settings.isBiometryEnabled,
+            supportedBiometryType: biometryType
         });
 
         if (settings.pin) {
@@ -116,6 +129,50 @@ export default class Security extends React.Component<
             this.setState({
                 displaySecurityItems: minPinItems
             });
+        }
+    }
+
+    async handleIsBiometryEnabledChange(
+        prevValue: boolean,
+        currentValue: boolean
+    ): Promise<void> {
+        const { SettingsStore } = this.props;
+        const { updateSettings }: any = SettingsStore;
+
+        const isVerified = await verifyBiometry(
+            localeString(
+                `views.Settings.Security.${this.state.supportedBiometryType}.prompt`
+            )
+        );
+
+        if (isVerified) {
+            updateSettings({
+                isBiometryEnabled: currentValue
+            });
+        } else {
+            this.setState({
+                isBiometryEnabled: prevValue
+            });
+        }
+    }
+
+    async componentDidUpdate(
+        prevProps: Readonly<SecurityProps>,
+        prevState: Readonly<SecurityState>
+    ): Promise<void> {
+        console.log(
+            prevState.supportedBiometryType,
+            this.state.supportedBiometryType
+        );
+        if (
+            (prevState.isBiometryEnabled === false &&
+                this.state.isBiometryEnabled) ||
+            (prevState.isBiometryEnabled && !this.state.isBiometryEnabled)
+        ) {
+            this.handleIsBiometryEnabledChange(
+                prevState.isBiometryEnabled,
+                !!this.state.isBiometryEnabled
+            );
         }
     }
 
@@ -184,7 +241,8 @@ export default class Security extends React.Component<
             displaySecurityItems,
             pinExists,
             passphraseExists,
-            loginBackground
+            loginBackground,
+            isBiometryEnabled = false
         } = this.state;
         const { updateSettings } = SettingsStore;
 
@@ -224,6 +282,35 @@ export default class Security extends React.Component<
                     keyExtractor={(item, index) => `${item.label}-${index}`}
                     ItemSeparatorComponent={this.renderSeparator}
                 />
+                {this.state.supportedBiometryType !== undefined && (
+                    <ListItem
+                        containerStyle={{
+                            backgroundColor: themeColor('background')
+                        }}
+                    >
+                        <ListItem.Content>
+                            <ListItem.Title
+                                style={{
+                                    color: themeColor('secondaryText'),
+                                    fontFamily: 'Lato-Regular'
+                                }}
+                            >
+                                {localeString(
+                                    `views.Settings.Security.${this.state.supportedBiometryType}.title`
+                                )}
+                            </ListItem.Title>
+                        </ListItem.Content>
+
+                        <Switch
+                            value={isBiometryEnabled}
+                            onValueChange={async () => {
+                                this.setState({
+                                    isBiometryEnabled: !isBiometryEnabled
+                                });
+                            }}
+                        />
+                    </ListItem>
+                )}
                 {pinExists && (
                     <ListItem
                         containerStyle={{
