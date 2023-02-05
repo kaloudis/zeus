@@ -2,7 +2,11 @@ import * as React from 'react';
 import { Text, View } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
+
+import Screen from '../../components/Screen';
+
 import SettingsStore from '../../stores/SettingsStore';
+
 import { localeString } from '../../utils/LocaleUtils';
 import { themeColor } from '../../utils/ThemeUtils';
 
@@ -86,12 +90,7 @@ export default class PaymentsSettings extends React.Component<
         );
 
         return (
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: themeColor('background')
-                }}
-            >
+            <Screen>
                 <Header
                     leftComponent={<BackButton />}
                     centerComponent={{
@@ -101,7 +100,7 @@ export default class PaymentsSettings extends React.Component<
                             fontFamily: 'Lato-Regular'
                         }
                     }}
-                    backgroundColor={themeColor('background')}
+                    backgroundColor="transparent"
                     containerStyle={{
                         borderBottomWidth: 0
                     }}
@@ -207,7 +206,7 @@ export default class PaymentsSettings extends React.Component<
                         </View>
                     </View>
                 )}
-            </View>
+            </Screen>
         );
     }
 }

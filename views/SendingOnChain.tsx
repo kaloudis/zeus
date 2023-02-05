@@ -2,19 +2,20 @@ import * as React from 'react';
 import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { inject, observer } from 'mobx-react';
 
-import Button from './../components/Button';
-import CopyButton from './../components/CopyButton';
-import LoadingIndicator from './../components/LoadingIndicator';
+import Button from '../components/Button';
+import CopyButton from '../components/CopyButton';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Screen from '../components/Screen';
 
-import { localeString } from './../utils/LocaleUtils';
-import { themeColor } from './../utils/ThemeUtils';
-import UrlUtils from './../utils/UrlUtils';
+import { localeString } from '../utils/LocaleUtils';
+import { themeColor } from '../utils/ThemeUtils';
+import UrlUtils from '../utils/UrlUtils';
 
-import NodeInfoStore from './../stores/NodeInfoStore';
-import TransactionsStore from './../stores/TransactionsStore';
+import NodeInfoStore from '../stores/NodeInfoStore';
+import TransactionsStore from '../stores/TransactionsStore';
 
-import Success from './../assets/images/GIF/Success.gif';
-import WordLogo from './../assets/images/SVG/Word Logo.svg';
+import Success from '../assets/images/GIF/Success.gif';
+import WordLogo from '../assets/images/SVG/Word Logo.svg';
 
 interface SendingOnChainProps {
     navigation: any;
@@ -46,12 +47,7 @@ export default class SendingOnChain extends React.Component<
         const { testnet } = NodeInfoStore;
 
         return (
-            <View
-                style={{
-                    ...styles.container,
-                    backgroundColor: this.getBackgroundColor()
-                }}
-            >
+            <Screen>
                 <View
                     style={{
                         ...styles.content
@@ -192,7 +188,7 @@ export default class SendingOnChain extends React.Component<
                         )}
                     </View>
                 </View>
-            </View>
+            </Screen>
         );
     }
 }
@@ -200,9 +196,6 @@ export default class SendingOnChain extends React.Component<
 const styles = StyleSheet.create({
     text: {
         fontFamily: 'Lato-Regular'
-    },
-    container: {
-        flex: 1
     },
     content: {
         flex: 1,

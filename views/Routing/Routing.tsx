@@ -3,6 +3,7 @@ import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { ButtonGroup, Header, Icon } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 
+import Screen from '../../components/Screen';
 import { ErrorMessage } from '../../components/SuccessErrorMessage';
 import { Spacer } from '../../components/layout/Spacer';
 import LoadingIndicator from '../../components/LoadingIndicator';
@@ -200,13 +201,7 @@ export default class Routing extends React.PureComponent<
         ];
 
         return (
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: themeColor('background'),
-                    color: themeColor('text')
-                }}
-            >
+            <Screen>
                 <Header
                     leftComponent={<BackButton />}
                     centerComponent={{
@@ -214,7 +209,7 @@ export default class Routing extends React.PureComponent<
                         style: { color: themeColor('text') }
                     }}
                     rightComponent={<FeeBadge navigation={navigation} />}
-                    backgroundColor={themeColor('background')}
+                    backgroundColor="transparent"
                     containerStyle={{
                         borderBottomWidth: 0
                     }}
@@ -285,7 +280,7 @@ export default class Routing extends React.PureComponent<
                         )}
                     </View>
                 )}
-            </View>
+            </Screen>
         );
     }
 }

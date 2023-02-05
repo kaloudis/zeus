@@ -4,6 +4,7 @@ import { Header, Icon } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import CollapsedQR from './../components/CollapsedQR';
 import KeyValue from './../components/KeyValue';
+import Screen from '../components/Screen';
 
 import { version } from './../package.json';
 import { localeString } from './../utils/LocaleUtils';
@@ -118,12 +119,7 @@ export default class NodeInfo extends React.Component<NodeInfoProps, {}> {
         );
 
         return (
-            <ScrollView
-                style={{
-                    flex: 1,
-                    backgroundColor: themeColor('background')
-                }}
-            >
+            <Screen>
                 <Header
                     leftComponent={<BackButton />}
                     centerComponent={{
@@ -133,16 +129,21 @@ export default class NodeInfo extends React.Component<NodeInfoProps, {}> {
                             fontFamily: 'Lato-Regular'
                         }
                     }}
-                    backgroundColor={themeColor('background')}
+                    backgroundColor="transparent"
                     containerStyle={{
                         borderBottomWidth: 0
                     }}
                 />
-
-                <View style={styles.content}>
-                    <NodeInfoView />
-                </View>
-            </ScrollView>
+                <ScrollView
+                    style={{
+                        flex: 1
+                    }}
+                >
+                    <View style={styles.content}>
+                        <NodeInfoView />
+                    </View>
+                </ScrollView>
+            </Screen>
         );
     }
 }

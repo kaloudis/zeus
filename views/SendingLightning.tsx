@@ -3,18 +3,19 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import LnurlPaySuccess from './LnurlPay/Success';
 
-import Button from './../components/Button';
-import CopyButton from './../components/CopyButton';
-import LoadingIndicator from './../components/LoadingIndicator';
+import Button from '../components/Button';
+import CopyButton from '../components/CopyButton';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Screen from '../components/Screen';
 
-import TransactionsStore from './../stores/TransactionsStore';
-import LnurlPayStore from './../stores/LnurlPayStore';
+import TransactionsStore from '../stores/TransactionsStore';
+import LnurlPayStore from '../stores/LnurlPayStore';
 
-import { localeString } from './../utils/LocaleUtils';
-import { themeColor } from './../utils/ThemeUtils';
+import { localeString } from '../utils/LocaleUtils';
+import { themeColor } from '../utils/ThemeUtils';
 
-import Success from './../assets/images/GIF/Success.gif';
-import WordLogo from './../assets/images/SVG/Word Logo.svg';
+import Success from '../assets/images/GIF/Success.gif';
+import WordLogo from '../assets/images/SVG/Word Logo.svg';
 
 interface SendingLightningProps {
     navigation: any;
@@ -65,13 +66,8 @@ export default class SendingLightning extends React.Component<
             payment_route || status === 'complete' || status === 'SUCCEEDED';
 
         return (
-            <ScrollView
-                style={{
-                    ...styles.container,
-                    backgroundColor
-                }}
-            >
-                <View
+            <Screen>
+                <ScrollView
                     style={{
                         ...styles.content
                     }}
@@ -261,8 +257,8 @@ export default class SendingLightning extends React.Component<
                             </>
                         )}
                     </View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </Screen>
         );
     }
 }

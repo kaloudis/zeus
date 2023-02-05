@@ -14,6 +14,7 @@ import Channel from './../../models/Channel';
 import BalanceSlider from './../../components/BalanceSlider';
 import Button from './../../components/Button';
 import KeyValue from './../../components/KeyValue';
+import Screen from '../../components/Screen';
 import Amount from './../../components/Amount';
 import FeeBreakdown from './../../components/FeeBreakdown';
 import SetFeesForm from './../../components/SetFeesForm';
@@ -190,13 +191,7 @@ export default class ChannelView extends React.Component<
         );
 
         return (
-            <ScrollView
-                style={{
-                    flex: 1,
-                    backgroundColor: themeColor('background'),
-                    color: themeColor('text')
-                }}
-            >
+            <Screen>
                 <Header
                     leftComponent={<BackButton />}
                     centerComponent={{
@@ -206,61 +201,47 @@ export default class ChannelView extends React.Component<
                             fontFamily: 'Lato-Regular'
                         }
                     }}
-                    backgroundColor={themeColor('background')}
+                    backgroundColor="transparent"
                     containerStyle={{
                         borderBottomWidth: 0
                     }}
                 />
-                <View style={styles.content}>
-                    <View style={styles.center}>
-                        <Text
-                            style={{
-                                color: themeColor('text'),
-                                fontFamily: 'Lato-Regular',
-                                ...styles.alias
-                            }}
-                        >
-                            {peerDisplay}
-                        </Text>
-                        {remote_pubkey && (
+                <ScrollView
+                    style={{
+                        flex: 1
+                    }}
+                >
+                    <View style={styles.content}>
+                        <View style={styles.center}>
                             <Text
                                 style={{
                                     color: themeColor('text'),
                                     fontFamily: 'Lato-Regular',
-                                    ...styles.pubkey
+                                    ...styles.alias
                                 }}
                             >
-                                {PrivacyUtils.sensitiveValue(remote_pubkey)}
+                                {peerDisplay}
                             </Text>
-                        )}
-                    </View>
+                            {remote_pubkey && (
+                                <Text
+                                    style={{
+                                        color: themeColor('text'),
+                                        fontFamily: 'Lato-Regular',
+                                        ...styles.pubkey
+                                    }}
+                                >
+                                    {PrivacyUtils.sensitiveValue(remote_pubkey)}
+                                </Text>
+                            )}
+                        </View>
 
-                    <BalanceSlider
-                        localBalance={lurkerMode ? 50 : localBalance}
-                        remoteBalance={lurkerMode ? 50 : remoteBalance}
-                    />
+                        <BalanceSlider
+                            localBalance={lurkerMode ? 50 : localBalance}
+                            remoteBalance={lurkerMode ? 50 : remoteBalance}
+                        />
 
-                    <View style={styles.balances}>
-                        <TouchableOpacity onPress={() => changeUnits()}>
-                            <Text
-                                style={{
-                                    color: themeColor('text'),
-                                    fontFamily: 'Lato-Regular',
-                                    ...styles.balance
-                                }}
-                            >{`${localeString('views.Channel.localBalance')}: ${
-                                units && channelBalanceLocal
-                            }`}</Text>
-                            <Text
-                                style={{
-                                    color: themeColor('text'),
-                                    fontFamily: 'Lato-Regular',
-                                    ...styles.balance
-                                }}
-                            >{`${localeString(
-                                'views.Channel.remoteBalance'
-                            )}: ${units && channelBalanceRemote}`}</Text>
-                            {unsettled_balance && (
+                        <View style={styles.balances}>
+                            <TouchableOpacity onPress={() => changeUnits()}>
                                 <Text
                                     style={{
                                         color: themeColor('text'),
@@ -268,278 +249,331 @@ export default class ChannelView extends React.Component<
                                         ...styles.balance
                                     }}
                                 >{`${localeString(
-                                    'views.Channel.unsettledBalance'
-                                )}: ${units && unsettledBalance}`}</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
+                                    'views.Channel.localBalance'
+                                )}: ${units && channelBalanceLocal}`}</Text>
+                                <Text
+                                    style={{
+                                        color: themeColor('text'),
+                                        fontFamily: 'Lato-Regular',
+                                        ...styles.balance
+                                    }}
+                                >{`${localeString(
+                                    'views.Channel.remoteBalance'
+                                )}: ${units && channelBalanceRemote}`}</Text>
+                                {unsettled_balance && (
+                                    <Text
+                                        style={{
+                                            color: themeColor('text'),
+                                            fontFamily: 'Lato-Regular',
+                                            ...styles.balance
+                                        }}
+                                    >{`${localeString(
+                                        'views.Channel.unsettledBalance'
+                                    )}: ${units && unsettledBalance}`}</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
 
-                    <KeyValue
-                        keyValue={localeString('views.Channel.status')}
-                        value={
-                            isActive
-                                ? localeString('views.Channel.active')
-                                : localeString('views.Channel.inactive')
-                        }
-                        color={isActive ? 'green' : 'red'}
-                    />
-
-                    <KeyValue
-                        keyValue={localeString('views.Channel.private')}
-                        value={privateChannel ? 'True' : 'False'}
-                        color={privateChannel ? 'green' : '#808000'}
-                    />
-
-                    {!!alias_scids && alias_scids.length > 0 && (
                         <KeyValue
-                            keyValue={
-                                alias_scids.length > 1
-                                    ? localeString('views.Channel.aliasScids')
-                                    : localeString('views.Channel.aliasScid')
-                            }
-                            value={PrivacyUtils.sensitiveValue(
-                                alias_scids.join(', ')
-                            )}
-                        />
-                    )}
-
-                    {total_satoshis_received && (
-                        <KeyValue
-                            keyValue={localeString(
-                                'views.Channel.totalReceived'
-                            )}
+                            keyValue={localeString('views.Channel.status')}
                             value={
-                                <Amount
-                                    sats={total_satoshis_received}
-                                    sensitive
-                                    toggleable
-                                />
+                                isActive
+                                    ? localeString('views.Channel.active')
+                                    : localeString('views.Channel.inactive')
                             }
+                            color={isActive ? 'green' : 'red'}
                         />
-                    )}
 
-                    {total_satoshis_sent && (
                         <KeyValue
-                            keyValue={localeString('views.Channel.totalSent')}
-                            value={
-                                <Amount
-                                    sats={total_satoshis_sent}
-                                    sensitive
-                                    toggleable
-                                />
-                            }
+                            keyValue={localeString('views.Channel.private')}
+                            value={privateChannel ? 'True' : 'False'}
+                            color={privateChannel ? 'green' : '#808000'}
                         />
-                    )}
 
-                    {capacity && (
-                        <KeyValue
-                            keyValue={localeString('views.Channel.capacity')}
-                            value={
-                                <Amount sats={capacity} sensitive toggleable />
-                            }
-                        />
-                    )}
+                        {!!alias_scids && alias_scids.length > 0 && (
+                            <KeyValue
+                                keyValue={
+                                    alias_scids.length > 1
+                                        ? localeString(
+                                              'views.Channel.aliasScids'
+                                          )
+                                        : localeString(
+                                              'views.Channel.aliasScid'
+                                          )
+                                }
+                                value={PrivacyUtils.sensitiveValue(
+                                    alias_scids.join(', ')
+                                )}
+                            />
+                        )}
 
-                    {commit_weight && (
-                        <KeyValue
-                            keyValue={localeString(
-                                'views.Channel.commitWeight'
-                            )}
-                            value={commit_weight}
-                        />
-                    )}
-
-                    {commit_fee && (
-                        <KeyValue
-                            keyValue={localeString('views.Channel.commitFee')}
-                            value={commit_fee}
-                            sensitive
-                        />
-                    )}
-
-                    {csv_delay && (
-                        <KeyValue
-                            keyValue={localeString('views.Channel.csvDelay')}
-                            value={csv_delay}
-                        />
-                    )}
-
-                    {fee_per_kw && (
-                        <KeyValue
-                            keyValue={localeString('views.Channel.feePerKw')}
-                            value={fee_per_kw}
-                            sensitive
-                        />
-                    )}
-
-                    <Divider orientation="horizontal" style={{ margin: 20 }} />
-
-                    {BackendUtils.isLNDBased() && (
-                        <FeeBreakdown
-                            channelId={channelId}
-                            peerDisplay={peerDisplay}
-                            channelPoint={channel_point}
-                            initiator={initiator}
-                        />
-                    )}
-
-                    {!BackendUtils.isLNDBased() && (
-                        <SetFeesForm
-                            baseFee={
-                                channelFee &&
-                                channelFee.base_fee_msat &&
-                                `${Number(channelFee.base_fee_msat) / 1000}`
-                            }
-                            feeRate={
-                                channelFee &&
-                                channelFee.fee_rate &&
-                                `${Number(channelFee.fee_rate) / 10000}`
-                            }
-                            channelPoint={channel_point}
-                            channelId={channelId}
-                            peerDisplay={peerDisplay}
-                            FeeStore={FeeStore}
-                        />
-                    )}
-
-                    {BackendUtils.isLNDBased() && (
-                        <View style={styles.button}>
-                            <Button
-                                title={localeString('views.Channel.keysend')}
-                                icon={{
-                                    name: 'send'
-                                }}
-                                onPress={() =>
-                                    navigation.navigate('Send', {
-                                        destination: remote_pubkey,
-                                        transactionType: 'Keysend',
-                                        isValid: true
-                                    })
+                        {total_satoshis_received && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.totalReceived'
+                                )}
+                                value={
+                                    <Amount
+                                        sats={total_satoshis_received}
+                                        sensitive
+                                        toggleable
+                                    />
                                 }
                             />
-                        </View>
-                    )}
+                        )}
 
-                    <View style={styles.button}>
-                        <Button
-                            title={
-                                confirmCloseChannel
-                                    ? localeString('views.Channel.cancelClose')
-                                    : localeString('views.Channel.close')
-                            }
-                            icon={{
-                                name: confirmCloseChannel ? 'cancel' : 'delete'
-                            }}
-                            onPress={() =>
-                                this.setState({
-                                    confirmCloseChannel: !confirmCloseChannel
-                                })
-                            }
-                            secondary
+                        {total_satoshis_sent && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.totalSent'
+                                )}
+                                value={
+                                    <Amount
+                                        sats={total_satoshis_sent}
+                                        sensitive
+                                        toggleable
+                                    />
+                                }
+                            />
+                        )}
+
+                        {capacity && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.capacity'
+                                )}
+                                value={
+                                    <Amount
+                                        sats={capacity}
+                                        sensitive
+                                        toggleable
+                                    />
+                                }
+                            />
+                        )}
+
+                        {commit_weight && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.commitWeight'
+                                )}
+                                value={commit_weight}
+                            />
+                        )}
+
+                        {commit_fee && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.commitFee'
+                                )}
+                                value={commit_fee}
+                                sensitive
+                            />
+                        )}
+
+                        {csv_delay && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.csvDelay'
+                                )}
+                                value={csv_delay}
+                            />
+                        )}
+
+                        {fee_per_kw && (
+                            <KeyValue
+                                keyValue={localeString(
+                                    'views.Channel.feePerKw'
+                                )}
+                                value={fee_per_kw}
+                                sensitive
+                            />
+                        )}
+
+                        <Divider
+                            orientation="horizontal"
+                            style={{ margin: 20 }}
                         />
-                    </View>
 
-                    {confirmCloseChannel && (
-                        <React.Fragment>
-                            {(BackendUtils.isLNDBased() || !implementation) && (
-                                <React.Fragment>
-                                    <Text style={styles.text}>
-                                        {localeString(
-                                            'views.Channel.closingRate'
-                                        )}
-                                    </Text>
-                                    {enableMempoolRates ? (
-                                        <TouchableWithoutFeedback
-                                            onPress={() =>
-                                                navigation.navigate('EditFee', {
-                                                    onNavigateBack:
-                                                        this
-                                                            .handleOnNavigateBack
-                                                })
-                                            }
-                                        >
-                                            <View
-                                                style={{
-                                                    ...styles.editFeeBox,
-                                                    borderColor:
-                                                        'rgba(255, 217, 63, .6)',
-                                                    borderWidth: 3
-                                                }}
-                                            >
-                                                <Text
-                                                    style={{
-                                                        ...styles.text,
-                                                        color: themeColor(
-                                                            'text'
-                                                        ),
-                                                        fontSize: 18
-                                                    }}
-                                                >
-                                                    {satPerByte}
-                                                </Text>
-                                            </View>
-                                        </TouchableWithoutFeedback>
-                                    ) : (
-                                        <TextInput
-                                            keyboardType="numeric"
-                                            placeholder={'2'}
-                                            value={satPerByte}
-                                            onChangeText={(text: string) =>
-                                                this.setState({
-                                                    satPerByte: text
-                                                })
-                                            }
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                        />
-                                    )}
-                                    {BackendUtils.isLNDBased() && (
-                                        <>
-                                            <Text
-                                                style={{
-                                                    ...styles.secondaryText,
-                                                    top: 20
-                                                }}
-                                            >
-                                                {localeString(
-                                                    'views.Channel.forceClose'
-                                                )}
-                                            </Text>
-                                            <Switch
-                                                value={forceClose}
-                                                onValueChange={() =>
-                                                    this.setState({
-                                                        forceClose: !forceClose
-                                                    })
-                                                }
-                                            />
-                                        </>
-                                    )}
-                                </React.Fragment>
-                            )}
+                        {BackendUtils.isLNDBased() && (
+                            <FeeBreakdown
+                                channelId={channelId}
+                                peerDisplay={peerDisplay}
+                                channelPoint={channel_point}
+                                initiator={initiator}
+                            />
+                        )}
+
+                        {!BackendUtils.isLNDBased() && (
+                            <SetFeesForm
+                                baseFee={
+                                    channelFee &&
+                                    channelFee.base_fee_msat &&
+                                    `${Number(channelFee.base_fee_msat) / 1000}`
+                                }
+                                feeRate={
+                                    channelFee &&
+                                    channelFee.fee_rate &&
+                                    `${Number(channelFee.fee_rate) / 10000}`
+                                }
+                                channelPoint={channel_point}
+                                channelId={channelId}
+                                peerDisplay={peerDisplay}
+                                FeeStore={FeeStore}
+                            />
+                        )}
+
+                        {BackendUtils.isLNDBased() && (
                             <View style={styles.button}>
                                 <Button
                                     title={localeString(
-                                        'views.Channel.confirmClose'
+                                        'views.Channel.keysend'
                                     )}
                                     icon={{
-                                        name: 'delete-forever'
+                                        name: 'send'
                                     }}
                                     onPress={() =>
-                                        this.closeChannel(
-                                            channel_point,
-                                            channelId,
-                                            satPerByte,
-                                            forceClose
-                                        )
+                                        navigation.navigate('Send', {
+                                            destination: remote_pubkey,
+                                            transactionType: 'Keysend',
+                                            isValid: true
+                                        })
                                     }
-                                    tertiary
                                 />
                             </View>
-                        </React.Fragment>
-                    )}
-                </View>
-            </ScrollView>
+                        )}
+
+                        <View style={styles.button}>
+                            <Button
+                                title={
+                                    confirmCloseChannel
+                                        ? localeString(
+                                              'views.Channel.cancelClose'
+                                          )
+                                        : localeString('views.Channel.close')
+                                }
+                                icon={{
+                                    name: confirmCloseChannel
+                                        ? 'cancel'
+                                        : 'delete'
+                                }}
+                                onPress={() =>
+                                    this.setState({
+                                        confirmCloseChannel:
+                                            !confirmCloseChannel
+                                    })
+                                }
+                                secondary
+                            />
+                        </View>
+
+                        {confirmCloseChannel && (
+                            <React.Fragment>
+                                {(BackendUtils.isLNDBased() ||
+                                    !implementation) && (
+                                    <React.Fragment>
+                                        <Text style={styles.text}>
+                                            {localeString(
+                                                'views.Channel.closingRate'
+                                            )}
+                                        </Text>
+                                        {enableMempoolRates ? (
+                                            <TouchableWithoutFeedback
+                                                onPress={() =>
+                                                    navigation.navigate(
+                                                        'EditFee',
+                                                        {
+                                                            onNavigateBack:
+                                                                this
+                                                                    .handleOnNavigateBack
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <View
+                                                    style={{
+                                                        ...styles.editFeeBox,
+                                                        borderColor:
+                                                            'rgba(255, 217, 63, .6)',
+                                                        borderWidth: 3
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            ...styles.text,
+                                                            color: themeColor(
+                                                                'text'
+                                                            ),
+                                                            fontSize: 18
+                                                        }}
+                                                    >
+                                                        {satPerByte}
+                                                    </Text>
+                                                </View>
+                                            </TouchableWithoutFeedback>
+                                        ) : (
+                                            <TextInput
+                                                keyboardType="numeric"
+                                                placeholder={'2'}
+                                                value={satPerByte}
+                                                onChangeText={(text: string) =>
+                                                    this.setState({
+                                                        satPerByte: text
+                                                    })
+                                                }
+                                                autoCapitalize="none"
+                                                autoCorrect={false}
+                                            />
+                                        )}
+                                        {BackendUtils.isLNDBased() && (
+                                            <>
+                                                <Text
+                                                    style={{
+                                                        ...styles.secondaryText,
+                                                        top: 20
+                                                    }}
+                                                >
+                                                    {localeString(
+                                                        'views.Channel.forceClose'
+                                                    )}
+                                                </Text>
+                                                <Switch
+                                                    value={forceClose}
+                                                    onValueChange={() =>
+                                                        this.setState({
+                                                            forceClose:
+                                                                !forceClose
+                                                        })
+                                                    }
+                                                />
+                                            </>
+                                        )}
+                                    </React.Fragment>
+                                )}
+                                <View style={styles.button}>
+                                    <Button
+                                        title={localeString(
+                                            'views.Channel.confirmClose'
+                                        )}
+                                        icon={{
+                                            name: 'delete-forever'
+                                        }}
+                                        onPress={() =>
+                                            this.closeChannel(
+                                                channel_point,
+                                                channelId,
+                                                satPerByte,
+                                                forceClose
+                                            )
+                                        }
+                                        tertiary
+                                    />
+                                </View>
+                            </React.Fragment>
+                        )}
+                    </View>
+                </ScrollView>
+            </Screen>
         );
     }
 }
