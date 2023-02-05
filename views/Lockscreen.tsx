@@ -81,22 +81,15 @@ export default class Lockscreen extends React.Component<
         if (settings && settings.isBiometryEnabled) {
             const supportedBiometryType = await getSupportedBiometryType();
 
-            console.log('Lockscreen', settings.isBiometryEnabled);
-
             const isVerified = await verifyBiometry(
                 localeString(`views.Lockscreen.${supportedBiometryType}.prompt`)
             );
 
-            console.log({ isVerified });
-
             if (isVerified) {
-                console.log('Lockscreen isVerified -> Wallet');
                 SettingsStore.setLoginStatus(true);
                 navigation.navigate('Wallet');
                 return;
             }
-
-            console.log('something after is verified');
         }
 
         if (

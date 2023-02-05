@@ -77,7 +77,6 @@ export default class Security extends React.Component<
         const { SettingsStore } = this.props;
         const { getSettings } = SettingsStore;
         const settings = await getSettings();
-        console.log({ settings });
         const biometryType = await getSupportedBiometryType();
 
         this.setState({
@@ -160,10 +159,6 @@ export default class Security extends React.Component<
         prevProps: Readonly<SecurityProps>,
         prevState: Readonly<SecurityState>
     ): Promise<void> {
-        console.log(
-            prevState.supportedBiometryType,
-            this.state.supportedBiometryType
-        );
         if (
             (prevState.isBiometryEnabled === false &&
                 this.state.isBiometryEnabled) ||

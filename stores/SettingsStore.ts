@@ -72,7 +72,7 @@ interface Settings {
     display: DisplaySettings;
     pos: PosSettings;
     payments: PaymentSettings;
-    isBiometryEnabled?: boolean;
+    isBiometryEnabled: boolean;
     supportedBiometryType?: BiometryType;
 }
 
@@ -228,6 +228,7 @@ export default class SettingsStore {
             defaultFeePercentage: '0.5',
             defaultFeeFixed: '100'
         },
+        isBiometryEnabled: false,
         scramblePin: true,
         loginBackground: false,
         fiat: DEFAULT_FIAT
@@ -403,7 +404,6 @@ export default class SettingsStore {
             );
             if (credentials) {
                 this.settings = JSON.parse(credentials);
-                console.log(this.settings);
 
                 const node: any =
                     this.settings.nodes &&
