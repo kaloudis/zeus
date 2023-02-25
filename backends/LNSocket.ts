@@ -14,10 +14,17 @@ export default class LnSocket {
             ip: host,
             // TODO parse out port from host (19735 is for testnet)
             port: 19735,
+            // TODO make proxy configurable or create our own
+            wsProxy: 'wss://lnproxy.getalby.com',
             // TODO genHex func
             // Hex encoded private key string to use for the node local secret. Use this to persist the node public key across connections
             privateKey:
-               '31e9739c0d6a2eba36168dd364841cc01d3f4fde221d256e6a781a4dd46715ea'
+                '31e9739c0d6a2eba36168dd364841cc01d3f4fde221d256e6a781a4dd46715ea',
+            logger: {
+                info: console.log,
+                warn: console.warn,
+                error: console.error
+            }
         });
 
         return this.ln;
