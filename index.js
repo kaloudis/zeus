@@ -4,6 +4,7 @@
  */
 
 import {AppRegistry} from 'react-native';
+import 'react-native-url-polyfill/auto';
 import 'react-native-gesture-handler';
 import './shim.js'
 import App from './App.tsx';
