@@ -240,16 +240,18 @@ export default class Invoice extends BaseModel {
     }
 
     private getMillisecondsUntilExpiry(): number {
+        const creationDate = this.creation_date
+            ? Number(this.creation_date)
+            : Number(this.timestamp);
         if (this.expiry) {
             return (
-                (Number(this.creation_date) + Number(this.expiry)) * 1000 -
+                (creationDate + Number(this.expiry)) * 1000 -
                 new Date().getTime()
             );
         }
         if (this.expire_time) {
             return (
-                (Number(this.creation_date) + this.expire_time) * 1000 -
-                new Date().getTime()
+                (creationDate + this.expire_time) * 1000 - new Date().getTime()
             );
         }
         return this.expires_at * 1000 - new Date().getTime();
