@@ -18,10 +18,20 @@ interface RouteHint {
     hop_hints: Array<HopHint>;
 }
 
+interface HTLC {
+    custom_records?: CustomRecords;
+}
+
+interface CustomRecords {
+    [key: number]: string;
+}
+
+const keySendMessageType = '34349334';
+
 export default class Invoice extends BaseModel {
     public route_hints: Array<RouteHint>;
     public fallback_addr: string;
-    public r_hash: string;
+    public r_hash: any;
     public settle_date: string;
     public expiry: string;
     public memo: string;
@@ -39,6 +49,7 @@ export default class Invoice extends BaseModel {
     public description_hash: string;
     public r_preimage: string;
     public cltv_expiry: string;
+    public htlcs: Array<HTLC>;
     // c-lightning, eclair
     public bolt11: string;
     public label: string;
@@ -69,7 +80,9 @@ export default class Invoice extends BaseModel {
 
     @computed public get getRPreimage(): string {
         const preimage = this.r_preimage;
-        return typeof preimage === 'string'
+        return typeof preimage === 'object'
+            ? Base64Utils.bytesToHexString(preimage)
+            : typeof preimage === 'string'
             ? preimage.includes('=')
                 ? Base64Utils.base64ToHex(preimage)
                 : preimage
@@ -78,7 +91,9 @@ export default class Invoice extends BaseModel {
 
     @computed public get getRHash(): string {
         const hash = this.r_hash;
-        return typeof hash === 'string'
+        return typeof hash === 'object'
+            ? Base64Utils.bytesToHexString(hash)
+            : typeof hash === 'string'
             ? hash.includes('=')
                 ? Base64Utils.base64ToHex(hash)
                 : hash
@@ -184,6 +199,14 @@ export default class Invoice extends BaseModel {
               );
     }
 
+    @computed public get getFormattedRhash(): string {
+        return typeof this.r_hash === 'string'
+            ? this.r_hash.replace(/\+/g, '-').replace(/\//g, '_')
+            : this.r_hash.data
+            ? Base64Utils.bytesToHexString(this.r_hash.data)
+            : Base64Utils.bytesToHexString(this.r_hash);
+    }
+
     @computed public get getDate(): string | number | Date {
         return this.isPaid
             ? this.settleDate
@@ -211,6 +234,26 @@ export default class Invoice extends BaseModel {
         }
 
         return false;
+    }
+
+    @computed public get getKeysendMessage(): string {
+        if (
+            this.htlcs &&
+            this.htlcs[0] &&
+            this.htlcs[0].custom_records &&
+            this.htlcs[0].custom_records[keySendMessageType]
+        ) {
+            const encodedMessage =
+                this.htlcs[0].custom_records[keySendMessageType];
+            try {
+                const decoded = Base64Utils.atob(encodedMessage);
+                return decoded;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        return '';
     }
 
     public determineFormattedExpiryTime(locale: string | undefined): void {

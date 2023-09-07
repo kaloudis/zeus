@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Keyboard, View } from 'react-native';
+import { Keyboard, TouchableOpacity, View } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { inject, observer } from 'mobx-react';
 
@@ -13,6 +13,8 @@ import { themeColor } from '../utils/ThemeUtils';
 import NotesStore from '../stores/NotesStore';
 import TextInput from '../components/TextInput';
 
+import SaveIcon from '../assets/images/SVG/Save.svg';
+
 interface AddNotesProps {
     navigation: any;
     NotesStore: NotesStore;
@@ -21,7 +23,7 @@ interface AddNotesState {
     notes?: string;
     payment_hash?: string;
     txid?: string;
-    RPreimage?: string;
+    getRPreimage?: string;
     isNoteStored?: boolean;
 }
 
@@ -38,7 +40,7 @@ export default class AddNotes extends React.Component<
             null
         );
         const txid: string = this.props.navigation.getParam('txid', null);
-        const RPreimage: string = this.props.navigation.getParam(
+        const getRPreimage: string = this.props.navigation.getParam(
             'getRPreimage',
             null
         );
@@ -47,7 +49,7 @@ export default class AddNotes extends React.Component<
             notes: '',
             payment_hash,
             txid,
-            RPreimage,
+            getRPreimage,
             isNoteStored: false
         };
     }
@@ -56,7 +58,7 @@ export default class AddNotes extends React.Component<
             'note-' +
             (this.state.txid ||
                 this.state.payment_hash ||
-                this.state.RPreimage);
+                this.state.getRPreimage);
         const storedNotes = await EncryptedStorage.getItem(key);
         if (storedNotes) {
             this.setState({ notes: storedNotes, isNoteStored: true });
@@ -66,8 +68,25 @@ export default class AddNotes extends React.Component<
     render() {
         const { navigation, NotesStore } = this.props;
         const { storeNoteKeys, removeNoteKeys } = NotesStore;
-        const { payment_hash, txid, RPreimage, isNoteStored } = this.state;
+        const { payment_hash, txid, getRPreimage, isNoteStored } = this.state;
         const { notes } = this.state;
+
+        const saveNote = async () => {
+            const key: string =
+                'note-' + (payment_hash || txid || getRPreimage);
+            EncryptedStorage.setItem(key, notes);
+            await storeNoteKeys(key, notes);
+            navigation.goBack();
+        };
+
+        const SaveButton = () => (
+            <TouchableOpacity onPress={() => saveNote()}>
+                <SaveIcon
+                    stroke={themeColor('text')}
+                    fill={themeColor('secondary')}
+                />
+            </TouchableOpacity>
+        );
         return (
             <Screen>
                 <View
@@ -92,6 +111,7 @@ export default class AddNotes extends React.Component<
                                 fontSize: 20
                             }
                         }}
+                        rightComponent={SaveButton}
                         navigation={navigation}
                     />
                     <TextInput
@@ -100,7 +120,7 @@ export default class AddNotes extends React.Component<
                             if (!text) {
                                 const key: string =
                                     'note-' +
-                                    (payment_hash || txid || RPreimage);
+                                    (payment_hash || txid || getRPreimage);
                                 removeNoteKeys(key);
                             }
                         }}
@@ -137,14 +157,7 @@ export default class AddNotes extends React.Component<
                                           'views.SendingLightning.AddANote'
                                       )
                             }
-                            onPress={async () => {
-                                const key: string =
-                                    'note-' +
-                                    (payment_hash || txid || RPreimage);
-                                EncryptedStorage.setItem(key, notes);
-                                await storeNoteKeys(key, notes);
-                                navigation.goBack();
-                            }}
+                            onPress={() => saveNote()}
                             buttonStyle={{
                                 padding: 15
                             }}

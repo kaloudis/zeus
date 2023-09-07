@@ -1,5 +1,4 @@
 import { action, observable, reaction } from 'mobx';
-import { randomBytes } from 'react-native-randombytes';
 import BigNumber from 'bignumber.js';
 
 import Channel from './../models/Channel';
@@ -11,7 +10,6 @@ import CloseChannelRequest from './../models/CloseChannelRequest';
 
 import SettingsStore from './SettingsStore';
 
-import Base64Utils from './../utils/Base64Utils';
 import BackendUtils from './../utils/BackendUtils';
 
 interface ChannelInfoIndex {
@@ -60,6 +58,7 @@ export default class ChannelsStore {
     @observable public filteredChannels: Array<Channel> = [];
     @observable public filteredPendingChannels: Array<Channel> = [];
     @observable public filteredClosedChannels: Array<Channel> = [];
+    @observable public filterOptions: Array<string> = [];
     @observable public sort = {
         param: 'channelCapacity',
         dir: 'DESC',
@@ -141,6 +140,14 @@ export default class ChannelsStore {
         this.resetOpenChannel();
         this.nodes = {};
         this.channels = [];
+        this.pendingChannels = [];
+        this.closedChannels = [];
+        this.enrichedChannels = [];
+        this.enrichedPendingChannels = [];
+        this.enrichedClosedChannels = [];
+        this.filteredChannels = [];
+        this.filteredPendingChannels = [];
+        this.filteredClosedChannels = [];
         this.largestChannelSats = 0;
         this.totalOutbound = 0;
         this.totalInbound = 0;
@@ -165,21 +172,36 @@ export default class ChannelsStore {
     };
 
     @action
+    setFilterOptions = (options: string[]) => {
+        this.filterOptions = options;
+        this.filterChannels();
+        this.filterPendingChannels();
+        this.filterClosedChannels();
+    };
+
+    @action
     filter = (channels: Array<Channel>) => {
         const query = this.search;
-        const filtered = channels.filter(
-            (channel: Channel) =>
-                channel.alias
-                    ?.toLocaleLowerCase()
-                    .includes(query.toLocaleLowerCase()) ||
-                channel.remotePubkey
-                    .toLocaleLowerCase()
-                    .includes(query.toLocaleLowerCase()) ||
-                channel.channelId
-                    .toLocaleLowerCase()
-                    .includes(query.toLocaleLowerCase())
-        );
-
+        const filtered = channels
+            .filter(
+                (channel: Channel) =>
+                    channel.alias
+                        ?.toLocaleLowerCase()
+                        .includes(query.toLocaleLowerCase()) ||
+                    channel.remotePubkey
+                        .toLocaleLowerCase()
+                        .includes(query.toLocaleLowerCase()) ||
+                    channel.channelId
+                        .toLocaleLowerCase()
+                        .includes(query.toLocaleLowerCase())
+            )
+            .filter(
+                (channel: Channel) =>
+                    this.filterOptions?.length === 0 ||
+                    this.filterOptions?.includes(
+                        channel.private ? 'unannounced' : 'announced'
+                    )
+            );
         const sorted = filtered.sort((a: any, b: any) => {
             if (this.sort.type === 'numeric') {
                 return Number(a[this.sort.param]) < Number(b[this.sort.param])
@@ -403,141 +425,61 @@ export default class ChannelsStore {
     };
 
     @action
-    public connectPeer = (request: OpenChannelRequest) => {
+    public connectPeer = async (
+        request: OpenChannelRequest,
+        perm?: boolean,
+        connectPeerOnly?: boolean
+    ) => {
+        this.resetOpenChannel();
+        this.channelRequest = undefined;
         this.connectingToPeer = true;
 
-        BackendUtils.connectPeer({
-            addr: {
-                pubkey: request.node_pubkey_string,
-                host: request.host
-            }
-        })
-            .then(() => {
-                this.errorPeerConnect = false;
-                this.connectingToPeer = false;
-                this.errorMsgPeer = null;
+        if (!request.host) {
+            return await new Promise((resolve) => {
                 this.channelRequest = request;
-                this.peerSuccess = true;
-            })
-            .catch((error: any) => {
-                // handle error
-                this.errorMsgPeer = error.toString();
-                this.errorPeerConnect = true;
-                this.connectingToPeer = false;
-                this.peerSuccess = false;
-                this.channelSuccess = false;
-
-                if (
-                    this.errorMsgPeer &&
-                    this.errorMsgPeer.includes('already')
-                ) {
-                    this.channelRequest = request;
-                }
-            });
-    };
-
-    openChannelLNDCoinControl = (request: OpenChannelRequest) => {
-        const { utxos } = request;
-        const inputs: any = [];
-        const outputs: any = {};
-        const sat_per_byte = request.sat_per_byte;
-
-        if (utxos) {
-            utxos.forEach((input) => {
-                const [txid_str, output_index] = input.split(':');
-                inputs.push({ txid_str, output_index: Number(output_index) });
+                resolve(true);
             });
         }
 
-        delete request.utxos;
-
-        const node_pubkey = Base64Utils.hexToBase64(request.node_pubkey_string);
-
-        delete request.node_pubkey_string;
-        delete request.sat_per_byte;
-
-        const pending_chan_id = randomBytes(32).toString('base64');
-
-        const openChanRequest = {
-            funding_shim: {
-                psbt_shim: {
-                    no_publish: true,
-                    pending_chan_id
-                }
-            },
-            node_pubkey,
-            ...request
-        };
-
-        BackendUtils.openChannelStream(openChanRequest)
-            .then((data: any) => {
-                const psbt_fund = data.psbt_fund;
-                const { funding_address, funding_amount } = psbt_fund;
-
-                if (funding_address) {
-                    outputs[funding_address] = Number(funding_amount);
-                }
-
-                const fundPsbtRequest = {
-                    raw: {
-                        inputs,
-                        outputs
-                    },
-                    sat_per_vbyte: Number(sat_per_byte),
-                    spend_unconfirmed:
-                        openChanRequest.min_confs &&
-                        openChanRequest.min_confs === 0
-                };
-
-                BackendUtils.fundPsbt(fundPsbtRequest)
-                    .then((data: any) => {
-                        const funded_psbt = data.funded_psbt;
-
-                        const openChanRequest = {
-                            funding_shim: {
-                                psbt_shim: {
-                                    base_psbt: funded_psbt
-                                }
-                            },
-                            ...request
-                        };
-
-                        BackendUtils.openChannel(openChanRequest)
-                            .then(() => {
-                                // TODO
-                            })
-                            .catch((error: any) => {
-                                this.errorMsgChannel = error.toString();
-                                this.output_index = null;
-                                this.funding_txid_str = null;
-                                this.errorOpenChannel = true;
-                                this.openingChannel = false;
-                                this.channelRequest = null;
-                                this.peerSuccess = false;
-                                this.channelSuccess = false;
-                            });
-                    })
-                    .catch((error: any) => {
-                        this.errorMsgChannel = error.toString();
-                        this.output_index = null;
-                        this.funding_txid_str = null;
-                        this.errorOpenChannel = true;
-                        this.openingChannel = false;
-                        this.channelRequest = null;
-                        this.peerSuccess = false;
-                        this.channelSuccess = false;
-                    });
+        return await new Promise((resolve, reject) => {
+            BackendUtils.connectPeer({
+                addr: {
+                    pubkey: request.node_pubkey_string,
+                    host: request.host
+                },
+                perm
             })
-            .catch((error: any) => {
-                this.errorMsgChannel = error.toString();
-                this.output_index = null;
-                this.funding_txid_str = null;
-                this.errorOpenChannel = true;
-                this.openingChannel = false;
-                this.channelRequest = null;
-                this.peerSuccess = false;
-                this.channelSuccess = false;
-            });
+                .then(() => {
+                    this.errorPeerConnect = false;
+                    this.connectingToPeer = false;
+                    this.errorMsgPeer = null;
+                    if (!connectPeerOnly) this.channelRequest = request;
+                    this.peerSuccess = true;
+                    resolve(true);
+                })
+                .catch((error: any) => {
+                    this.connectingToPeer = false;
+                    this.peerSuccess = false;
+                    this.channelSuccess = false;
+                    // handle error
+                    if (
+                        error.toString() &&
+                        error.toString().includes('already')
+                    ) {
+                        if (!connectPeerOnly) {
+                            this.channelRequest = request;
+                        } else {
+                            this.errorMsgPeer = error.toString();
+                            this.errorPeerConnect = true;
+                        }
+                        resolve(true);
+                    } else {
+                        this.errorMsgPeer = error.toString();
+                        this.errorPeerConnect = true;
+                        reject(this.errorMsgPeer);
+                    }
+                });
+        });
     };
 
     openChannel = (request: OpenChannelRequest) => {
@@ -546,14 +488,6 @@ export default class ChannelsStore {
         this.peerSuccess = false;
         this.channelSuccess = false;
         this.openingChannel = true;
-
-        if (
-            BackendUtils.isLNDBased() &&
-            request.utxos &&
-            request.utxos.length > 0
-        ) {
-            return this.openChannelLNDCoinControl(request);
-        }
 
         BackendUtils.openChannel(request)
             .then((data: any) => {

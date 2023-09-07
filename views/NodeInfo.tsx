@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, ScrollView, Text } from 'react-native';
+import { RefreshControl, StyleSheet, ScrollView } from 'react-native';
 import { inject, observer } from 'mobx-react';
 
 import CollapsedQR from '../components/CollapsedQR';
@@ -88,8 +88,32 @@ export default class NodeInfo extends React.Component<NodeInfoProps, {}> {
                 {nodeInfo.synced_to_chain != null && (
                     <KeyValue
                         keyValue={localeString('views.NodeInfo.synced')}
-                        value={nodeInfo.synced_to_chain ? 'True' : 'False'}
-                        color={nodeInfo.synced_to_chain ? 'green' : 'red'}
+                        value={
+                            nodeInfo.synced_to_chain
+                                ? localeString('general.true')
+                                : localeString('general.false')
+                        }
+                        color={
+                            nodeInfo.synced_to_chain
+                                ? themeColor('success')
+                                : themeColor('error')
+                        }
+                    />
+                )}
+
+                {nodeInfo.synced_to_graph != null && (
+                    <KeyValue
+                        keyValue={localeString('views.NodeInfo.syncedToGraph')}
+                        value={
+                            nodeInfo.synced_to_graph
+                                ? localeString('general.true')
+                                : localeString('general.false')
+                        }
+                        color={
+                            nodeInfo.synced_to_graph
+                                ? themeColor('success')
+                                : themeColor('error')
+                        }
                     />
                 )}
 
@@ -105,16 +129,16 @@ export default class NodeInfo extends React.Component<NodeInfoProps, {}> {
                     />
                 )}
 
-                <KeyValue keyValue={localeString('views.NodeInfo.uris')} />
                 {nodeInfo.getURIs &&
-                nodeInfo.getURIs.length > 0 &&
-                !lurkerMode ? (
-                    <URIs uris={nodeInfo.getURIs} />
-                ) : (
-                    <Text style={styles.error}>
-                        {localeString('views.NodeInfo.noUris')}
-                    </Text>
-                )}
+                    nodeInfo.getURIs.length > 0 &&
+                    !lurkerMode && (
+                        <>
+                            <KeyValue
+                                keyValue={localeString('views.NodeInfo.uris')}
+                            />
+                            <URIs uris={nodeInfo.getURIs} />
+                        </>
+                    )}
             </React.Fragment>
         );
 
@@ -135,6 +159,12 @@ export default class NodeInfo extends React.Component<NodeInfoProps, {}> {
                 <ScrollView
                     style={styles.content}
                     keyboardShouldPersistTaps="handled"
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={NodeInfoStore.loading}
+                            onRefresh={() => NodeInfoStore.getNodeInfo()}
+                        />
+                    }
                 >
                     <NodeInfoView />
                 </ScrollView>
@@ -147,10 +177,5 @@ const styles = StyleSheet.create({
     content: {
         paddingLeft: 20,
         paddingRight: 20
-    },
-    error: {
-        paddingBottom: 5,
-        color: 'red',
-        fontFamily: 'Lato-Regular'
     }
 });

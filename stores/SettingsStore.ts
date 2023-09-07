@@ -56,6 +56,8 @@ interface PaymentsSettings {
     defaultFeeMethod?: string;
     defaultFeePercentage?: string;
     defaultFeeFixed?: string;
+    timeoutSeconds?: string;
+    preferredMempoolRate?: string;
 }
 
 interface InvoicesSettings {
@@ -88,6 +90,20 @@ export interface Settings {
     isBiometryEnabled: boolean;
     supportedBiometryType?: BiometryType;
     lndHubLnAuthMode?: string;
+    // Embedded node
+    automaticDisasterRecoveryBackup: boolean;
+    expressGraphSync: boolean;
+    expressGraphSyncMobile: boolean;
+    resetExpressGraphSyncOnStartup: boolean;
+    bimodalPathfinding: boolean;
+    waitForGraphSync: boolean;
+    rescan: boolean;
+    recovery: boolean;
+    // LSP
+    enableLSP: boolean;
+    lspMainnet: string;
+    lspTestnet: string;
+    lspAccessKey: string;
 }
 
 export const FIAT_RATES_SOURCE_KEYS = [
@@ -105,13 +121,37 @@ export const BLOCK_EXPLORER_KEYS = [
     }
 ];
 
+export const MEMPOOL_RATES_KEYS = [
+    {
+        key: 'Fastest fee',
+        value: 'fastestFee',
+        translateKey: 'views.EditFee.fastestFee'
+    },
+    {
+        key: 'Half hour fee',
+        value: 'halfHourFee',
+        translateKey: 'views.EditFee.halfHourFee'
+    },
+    {
+        key: 'Hour fee',
+        value: 'hourFee',
+        translateKey: 'views.EditFee.hourFee'
+    },
+    {
+        key: 'Minimum fee',
+        value: 'minimumFee',
+        translateKey: 'views.EditFee.minimumFee'
+    }
+];
+
 export const INTERFACE_KEYS = [
+    { key: 'Embedded LND', value: 'embedded-lnd' },
     { key: 'LND (REST)', value: 'lnd' },
     { key: 'LND (Lightning Node Connect)', value: 'lightning-node-connect' },
     { key: 'Core Lightning (c-lightning-REST)', value: 'c-lightning-REST' },
-    { key: 'Eclair', value: 'eclair' },
     { key: 'LNDHub', value: 'lndhub' },
-    { key: '[DEPRECATED] Core Lightning (Sparko)', value: 'spark' }
+    { key: '[DEPRECATED] Core Lightning (Sparko)', value: 'spark' },
+    { key: '[DEPRECATED] Eclair', value: 'eclair' }
 ];
 
 export const LNC_MAILBOX_KEYS = [
@@ -156,6 +196,7 @@ export const LOCALE_KEYS = [
     { key: 'hr', value: 'Hrvatski' }
 ];
 
+// this mapping is only for migration and does not need to be updated when new languages are added
 const localeMigrationMapping: { [oldLocale: string]: string } = {
     English: 'en',
     Español: 'es',
@@ -476,6 +517,11 @@ export const CURRENCY_KEYS = [
         key: '🇺🇾 Uruguayan Peso (UYU)',
         value: 'UYU',
         supportedSources: ['Zeus', 'Yadio']
+    },
+    {
+        key: '🇲🇷 Mauritanian Ouguiya (MRU)',
+        value: 'MRU',
+        supportedSources: ['Zeus', 'Yadio']
     }
 ];
 
@@ -600,6 +646,9 @@ export const LNDHUB_AUTH_MODES = [
     { key: 'Alby', value: 'Alby' }
 ];
 
+const DEFAULT_LSP_MAINNET = 'https://0conf.lnolymp.us';
+const DEFAULT_LSP_TESTNET = 'https://testnet-0conf.lnolymp.us';
+
 const STORAGE_KEY = 'zeus-settings';
 
 export default class SettingsStore {
@@ -630,10 +679,12 @@ export default class SettingsStore {
         payments: {
             defaultFeeMethod: 'fixed',
             defaultFeePercentage: '0.5',
-            defaultFeeFixed: '100'
+            defaultFeeFixed: '100',
+            timeoutSeconds: '60',
+            preferredMempoolRate: 'fastestFee'
         },
         invoices: {
-            addressType: '1',
+            addressType: '0',
             memo: '',
             expiry: '3600',
             routeHints: false,
@@ -643,8 +694,23 @@ export default class SettingsStore {
         isBiometryEnabled: false,
         scramblePin: true,
         loginBackground: false,
+        fiatEnabled: false,
         fiat: DEFAULT_FIAT,
-        fiatRatesSource: DEFAULT_FIAT_RATES_SOURCE
+        fiatRatesSource: DEFAULT_FIAT_RATES_SOURCE,
+        // embedded node
+        automaticDisasterRecoveryBackup: true,
+        expressGraphSync: false,
+        expressGraphSyncMobile: false,
+        resetExpressGraphSyncOnStartup: false,
+        bimodalPathfinding: false,
+        waitForGraphSync: false,
+        rescan: false,
+        recovery: false,
+        // LSP
+        enableLSP: true,
+        lspMainnet: DEFAULT_LSP_MAINNET,
+        lspTestnet: DEFAULT_LSP_TESTNET,
+        lspAccessKey: ''
     };
     @observable public posStatus: string = 'unselected';
     @observable public loading = false;
@@ -679,6 +745,11 @@ export default class SettingsStore {
     @observable public customMailboxServer: string;
     @observable public error = false;
     @observable public errorMsg: string;
+    // Embedded lnd
+    @observable public seedPhrase: Array<string>;
+    @observable public walletPassword: string;
+    @observable public adminMacaroon: string;
+    @observable public embeddedLndNetwork: string;
 
     @action
     public changeLocale = (locale: string) => {
@@ -808,8 +879,8 @@ export default class SettingsStore {
     }
 
     @action
-    public async getSettings() {
-        this.loading = true;
+    public async getSettings(silentUpdate: boolean = false) {
+        if (!silentUpdate) this.loading = true;
         try {
             // Retrieve the settings
             const settings = await EncryptedStorage.getItem(STORAGE_KEY);
@@ -825,6 +896,19 @@ export default class SettingsStore {
                     this.settings.fiatEnabled = false;
                 } else if (this.settings.fiatEnabled == null) {
                     this.settings.fiatEnabled = true;
+                }
+
+                // set default LSPs if not defined
+                if (!this.settings.lspMainnet) {
+                    this.settings.lspMainnet = DEFAULT_LSP_MAINNET;
+                }
+                if (!this.settings.lspTestnet) {
+                    this.settings.lspTestnet = DEFAULT_LSP_TESTNET;
+                }
+
+                // default automatic channel backups to on
+                if (this.settings.automaticDisasterRecoveryBackup !== false) {
+                    this.settings.automaticDisasterRecoveryBackup = true;
                 }
 
                 // migrate locale to ISO 639-1
@@ -855,6 +939,11 @@ export default class SettingsStore {
                     this.pairingPhrase = node.pairingPhrase;
                     this.mailboxServer = node.mailboxServer;
                     this.customMailboxServer = node.customMailboxServer;
+                    // Embeded lnd
+                    this.seedPhrase = node.seedPhrase;
+                    this.walletPassword = node.walletPassword;
+                    this.adminMacaroon = node.adminMacaroon;
+                    this.embeddedLndNetwork = node.embeddedLndNetwork;
                 }
             } else {
                 console.log('No settings stored');
@@ -862,7 +951,7 @@ export default class SettingsStore {
         } catch (error) {
             console.error('Could not load settings', error);
         } finally {
-            this.loading = false;
+            if (!silentUpdate) this.loading = false;
         }
 
         return this.settings;
@@ -886,8 +975,9 @@ export default class SettingsStore {
         };
 
         await this.setSettings(JSON.stringify(newSettings));
-        this.settings = newSettings;
-        return this.settings;
+        // ensure we get the enhanced settings set
+        const settings = await this.getSettings(true);
+        return settings;
     };
 
     // LNDHub
@@ -1064,6 +1154,7 @@ export default class SettingsStore {
         if (status) {
             this.error = false;
             this.errorMsg = '';
+            BackendUtils.clearCachedCalls();
         }
         this.connecting = status;
         return this.connecting;

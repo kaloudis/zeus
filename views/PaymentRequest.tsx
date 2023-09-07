@@ -21,16 +21,20 @@ import LoadingIndicator from '../components/LoadingIndicator';
 import Screen from '../components/Screen';
 import Switch from '../components/Switch';
 import TextInput from '../components/TextInput';
+import { WarningMessage } from '../components/SuccessErrorMessage';
 
+import BalanceStore from '../stores/BalanceStore';
 import ChannelsStore from '../stores/ChannelsStore';
 import InvoicesStore from '../stores/InvoicesStore';
 import TransactionsStore, { SendPaymentReq } from '../stores/TransactionsStore';
 import UnitsStore from '../stores/UnitsStore';
+import NodeInfoStore from '../stores/NodeInfoStore';
 import SettingsStore from '../stores/SettingsStore';
 
 import FeeUtils from '../utils/FeeUtils';
 import { localeString } from '../utils/LocaleUtils';
 import BackendUtils from '../utils/BackendUtils';
+import { sleep } from '../utils/SleepUtils';
 import { themeColor } from '../utils/ThemeUtils';
 
 import { Row } from '../components/layout/Row';
@@ -42,10 +46,12 @@ import Conversion from '../components/Conversion';
 interface InvoiceProps {
     exitSetup: any;
     navigation: any;
+    BalanceStore: BalanceStore;
     InvoicesStore: InvoicesStore;
     TransactionsStore: TransactionsStore;
     UnitsStore: UnitsStore;
     ChannelsStore: ChannelsStore;
+    NodeInfoStore: NodeInfoStore;
     SettingsStore: SettingsStore;
 }
 
@@ -59,16 +65,20 @@ interface InvoiceState {
     feeLimitSat: string;
     feeOption: string;
     maxFeePercent: string;
+    timeoutSeconds: string;
     outgoingChanId: string | null;
     lastHopPubkey: string | null;
     settingsToggle: boolean;
+    lightningReadyToSend: boolean;
 }
 
 @inject(
+    'BalanceStore',
     'InvoicesStore',
     'TransactionsStore',
     'UnitsStore',
     'ChannelsStore',
+    'NodeInfoStore',
     'SettingsStore'
 )
 @observer
@@ -77,6 +87,7 @@ export default class PaymentRequest extends React.Component<
     InvoiceState
 > {
     listener: any;
+    isComponentMounted: boolean = false;
     state = {
         customAmount: '',
         satAmount: '',
@@ -87,22 +98,57 @@ export default class PaymentRequest extends React.Component<
         feeLimitSat: '100',
         feeOption: 'fixed',
         maxFeePercent: '0.5',
+        timeoutSeconds: '60',
         outgoingChanId: null,
         lastHopPubkey: null,
-        settingsToggle: false
+        settingsToggle: false,
+        lightningReadyToSend: false
     };
 
     async UNSAFE_componentWillMount() {
+        this.isComponentMounted = true;
         const { SettingsStore } = this.props;
-        const { getSettings } = SettingsStore;
+        const { getSettings, implementation } = SettingsStore;
         const settings = await getSettings();
 
         this.setState({
             feeOption: settings?.payments?.defaultFeeMethod || 'fixed',
             feeLimitSat: settings?.payments?.defaultFeeFixed || '100',
-            maxFeePercent: settings?.payments?.defaultFeePercentage || '0.5'
+            maxFeePercent: settings?.payments?.defaultFeePercentage || '0.5',
+            timeoutSeconds: settings?.payments?.timeoutSeconds || '60'
         });
+
+        if (implementation === 'embedded-lnd') {
+            this.checkIfLndReady();
+        } else {
+            this.setState({
+                lightningReadyToSend: true
+            });
+        }
     }
+
+    componentWillUnmount(): void {
+        this.isComponentMounted = false;
+    }
+
+    checkIfLndReady = async () => {
+        const { BalanceStore, NodeInfoStore } = this.props;
+        const noBalance = BalanceStore.lightningBalance === 0;
+        const { isLightningReadyToSend } = NodeInfoStore;
+        while (
+            !this.state.lightningReadyToSend &&
+            this.isComponentMounted &&
+            !noBalance
+        ) {
+            sleep(7000);
+            const isReady = await isLightningReadyToSend();
+            if (isReady) {
+                this.setState({
+                    lightningReadyToSend: true
+                });
+            }
+        }
+    };
 
     subscribePayment = (streamingCall: string) => {
         const { handlePayment, handlePaymentError } =
@@ -165,7 +211,8 @@ export default class PaymentRequest extends React.Component<
             max_fee_percent,
             outgoing_chan_id,
             last_hop_pubkey,
-            amp
+            amp,
+            timeout_seconds
         }: SendPaymentReq
     ) => {
         const { InvoicesStore, TransactionsStore, SettingsStore, navigation } =
@@ -195,7 +242,8 @@ export default class PaymentRequest extends React.Component<
             max_fee_percent,
             outgoing_chan_id,
             last_hop_pubkey,
-            amp
+            amp,
+            timeout_seconds
         });
 
         if (SettingsStore.implementation === 'lightning-node-connect') {
@@ -225,7 +273,9 @@ export default class PaymentRequest extends React.Component<
             lastHopPubkey,
             customAmount,
             satAmount,
-            settingsToggle
+            settingsToggle,
+            timeoutSeconds,
+            lightningReadyToSend
         } = this.state;
         const {
             pay_req,
@@ -284,6 +334,8 @@ export default class PaymentRequest extends React.Component<
         const isNoAmountInvoice: boolean =
             !requestAmount || requestAmount === 0;
 
+        const noBalance = this.props.BalanceStore.lightningBalance === 0;
+
         const QRButton = () => (
             <Icon
                 name="qr-code"
@@ -337,6 +389,20 @@ export default class PaymentRequest extends React.Component<
                     {!loading && !loadingFeeEstimate && !!pay_req && (
                         <View style={styles.content}>
                             <>
+                                {noBalance && (
+                                    <View
+                                        style={{
+                                            paddingTop: 10,
+                                            paddingBottom: 10
+                                        }}
+                                    >
+                                        <WarningMessage
+                                            message={localeString(
+                                                'views.Send.noLightningBalance'
+                                            )}
+                                        />
+                                    </View>
+                                )}
                                 {isNoAmountInvoice ? (
                                     <AmountInput
                                         amount={customAmount}
@@ -569,9 +635,9 @@ export default class PaymentRequest extends React.Component<
                                                                 : 0.25
                                                     }}
                                                 >
-                                                    {`${localeString(
+                                                    {localeString(
                                                         'general.sats'
-                                                    )}`}
+                                                    )}
                                                 </Text>
                                                 <TextInput
                                                     style={{
@@ -843,6 +909,50 @@ export default class PaymentRequest extends React.Component<
                                             />
                                         </React.Fragment>
                                     )}
+
+                                    {isLnd && (
+                                        <>
+                                            <Text
+                                                style={{
+                                                    ...styles.label,
+                                                    color: themeColor('text')
+                                                }}
+                                            >
+                                                {localeString(
+                                                    'views.Settings.Payments.timeoutSeconds'
+                                                )}
+                                            </Text>
+                                            <TextInput
+                                                keyboardType="numeric"
+                                                value={timeoutSeconds}
+                                                onChangeText={(text: string) =>
+                                                    this.setState({
+                                                        timeoutSeconds: text
+                                                    })
+                                                }
+                                            />
+                                        </>
+                                    )}
+                                </>
+                            )}
+
+                            {!!pay_req && !lightningReadyToSend && !noBalance && (
+                                <>
+                                    <Text
+                                        style={{
+                                            fontFamily: 'Lato-Bold',
+                                            color: themeColor('highlight'),
+                                            margin: 5,
+                                            alignSelf: 'center',
+                                            marginTop: 10,
+                                            marginBottom: 10
+                                        }}
+                                    >
+                                        {localeString(
+                                            'views.PaymentRequest.lndGettingReady'
+                                        )}
+                                    </Text>
+                                    <LoadingIndicator size={30} />
                                 </>
                             )}
 
@@ -885,10 +995,13 @@ export default class PaymentRequest extends React.Component<
                                                         outgoingChanId,
                                                     last_hop_pubkey:
                                                         lastHopPubkey,
-                                                    amp: enableAmp
+                                                    amp: enableAmp,
+                                                    timeout_seconds:
+                                                        timeoutSeconds
                                                 }
                                             );
                                         }}
+                                        disabled={!lightningReadyToSend}
                                     />
                                 </View>
                             )}

@@ -7,8 +7,7 @@ import {
     Text,
     View,
     ScrollView,
-    TouchableOpacity,
-    TouchableWithoutFeedback
+    TouchableOpacity
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { inject, observer } from 'mobx-react';
@@ -33,8 +32,12 @@ import Amount from '../components/Amount';
 import AmountInput from '../components/AmountInput';
 import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
-import { ErrorMessage } from '../components/SuccessErrorMessage';
+import {
+    WarningMessage,
+    ErrorMessage
+} from '../components/SuccessErrorMessage';
 import Header from '../components/Header';
+import OnchainFeeInput from '../components/OnchainFeeInput';
 import Screen from '../components/Screen';
 import Switch from '../components/Switch';
 import TextInput from '../components/TextInput';
@@ -77,6 +80,7 @@ interface SendState {
     enableAtomicMultiPathPayment: boolean;
     clipboard: string;
     loading: boolean;
+    preventUnitReset: boolean;
 }
 
 @inject(
@@ -98,6 +102,7 @@ export default class Send extends React.Component<SendProps, SendState> {
         const amount = navigation.getParam('amount', null);
         const transactionType = navigation.getParam('transactionType', null);
         const isValid = navigation.getParam('isValid', false);
+        const preventUnitReset = navigation.getParam('preventUnitReset', false);
 
         if (transactionType === 'Lightning') {
             this.props.InvoicesStore.getPayReq(destination);
@@ -120,7 +125,8 @@ export default class Send extends React.Component<SendProps, SendState> {
             message: '',
             enableAtomicMultiPathPayment: false,
             clipboard: '',
-            loading: false
+            loading: false,
+            preventUnitReset
         };
     }
 
@@ -305,7 +311,7 @@ export default class Send extends React.Component<SendProps, SendState> {
         if (utxos && utxos.length > 0) {
             request = {
                 addr: destination,
-                sat_per_byte: fee,
+                sat_per_vbyte: fee,
                 amount: satAmount.toString(),
                 target_conf: Number(confirmationTarget),
                 utxos,
@@ -314,7 +320,7 @@ export default class Send extends React.Component<SendProps, SendState> {
         } else {
             request = {
                 addr: destination,
-                sat_per_byte: fee,
+                sat_per_vbyte: fee,
                 amount: satAmount.toString(),
                 target_conf: Number(confirmationTarget),
                 spend_unconfirmed: true
@@ -362,10 +368,6 @@ export default class Send extends React.Component<SendProps, SendState> {
         navigation.navigate('SendingLightning');
     };
 
-    setFee = (text: string) => {
-        this.setState({ fee: text });
-    };
-
     handleOnNavigateBack = (fee: string) => {
         this.setState({
             fee
@@ -391,12 +393,15 @@ export default class Send extends React.Component<SendProps, SendState> {
             message,
             enableAtomicMultiPathPayment,
             clipboard,
-            loading
+            loading,
+            preventUnitReset
         } = this.state;
-        const { confirmedBlockchainBalance } = BalanceStore;
-        const { implementation, settings } = SettingsStore;
-        const { privacy } = settings;
-        const enableMempoolRates = privacy && privacy.enableMempoolRates;
+        const {
+            confirmedBlockchainBalance,
+            unconfirmedBlockchainBalance,
+            lightningBalance
+        } = BalanceStore;
+        const { implementation } = SettingsStore;
 
         const paymentOptions = [localeString('views.Send.lnPayment')];
 
@@ -443,9 +448,34 @@ export default class Send extends React.Component<SendProps, SendState> {
                     style={styles.content}
                     keyboardShouldPersistTaps="handled"
                 >
+                    {!!destination &&
+                        transactionType === 'On-chain' &&
+                        BackendUtils.supportsOnchainSends() &&
+                        confirmedBlockchainBalance === 0 &&
+                        unconfirmedBlockchainBalance === 0 && (
+                            <View style={{ paddingTop: 10, paddingBottom: 10 }}>
+                                <WarningMessage
+                                    message={localeString(
+                                        'views.Send.noOnchainBalance'
+                                    )}
+                                />
+                            </View>
+                        )}
+                    {!!destination &&
+                        (transactionType === 'Lightning' ||
+                            transactionType === 'Keysend') &&
+                        lightningBalance === 0 && (
+                            <View style={{ paddingTop: 10, paddingBottom: 10 }}>
+                                <WarningMessage
+                                    message={localeString(
+                                        'views.Send.noLightningBalance'
+                                    )}
+                                />
+                            </View>
+                        )}
                     <Text
                         style={{
-                            ...styles.secondaryText,
+                            ...styles.text,
                             color: themeColor('secondaryText')
                         }}
                     >
@@ -495,7 +525,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                         !BackendUtils.supportsOnchainSends() && (
                             <Text
                                 style={{
-                                    ...styles.secondaryText,
+                                    ...styles.text,
                                     color: themeColor('secondaryText')
                                 }}
                             >
@@ -546,58 +576,27 @@ export default class Send extends React.Component<SendProps, SendState> {
 
                                 <Text
                                     style={{
-                                        ...styles.secondaryText,
+                                        ...styles.text,
                                         color: themeColor('secondaryText')
                                     }}
                                 >
-                                    {localeString('views.Send.feeSats')}:
+                                    {localeString('views.Send.feeSatsVbyte')}:
                                 </Text>
-                                {enableMempoolRates ? (
-                                    <TouchableWithoutFeedback
-                                        onPress={() =>
-                                            navigation.navigate('EditFee', {
-                                                onNavigateBack:
-                                                    this.handleOnNavigateBack
-                                            })
-                                        }
-                                    >
-                                        <View
-                                            style={{
-                                                ...styles.editFeeBox,
-                                                borderColor:
-                                                    'rgba(255, 217, 63, .6)',
-                                                borderWidth: 3
-                                            }}
-                                        >
-                                            <Text
-                                                style={{
-                                                    ...styles.text,
-                                                    color: themeColor('text'),
-                                                    paddingBottom: 5,
-                                                    fontSize: 18
-                                                }}
-                                            >
-                                                {fee}
-                                            </Text>
-                                        </View>
-                                    </TouchableWithoutFeedback>
-                                ) : (
-                                    <TextInput
-                                        keyboardType="numeric"
-                                        value={fee}
-                                        onChangeText={(text: string) =>
-                                            this.setState({ fee: text })
-                                        }
-                                        style={styles.textInput}
-                                    />
-                                )}
 
-                                {BackendUtils.supportsCoinControl() && (
-                                    <UTXOPicker
-                                        onValueChange={this.selectUTXOs}
-                                        UTXOsStore={UTXOsStore}
-                                    />
-                                )}
+                                <OnchainFeeInput
+                                    fee={fee}
+                                    onChangeFee={(text: string) =>
+                                        this.setState({ fee: text })
+                                    }
+                                />
+
+                                {BackendUtils.supportsCoinControl() &&
+                                    !BackendUtils.isLNDBased && (
+                                        <UTXOPicker
+                                            onValueChange={this.selectUTXOs}
+                                            UTXOsStore={UTXOsStore}
+                                        />
+                                    )}
                                 <View style={styles.button}>
                                     <Button
                                         title={localeString(
@@ -619,6 +618,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                             <React.Fragment>
                                 <AmountInput
                                     amount={amount}
+                                    preventUnitReset={preventUnitReset}
                                     title={localeString('views.Send.amount')}
                                     onAmountChange={(
                                         amount: string,
@@ -635,7 +635,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                                     <React.Fragment>
                                         <Text
                                             style={{
-                                                ...styles.secondaryText,
+                                                ...styles.text,
                                                 marginTop: 10,
                                                 color: themeColor(
                                                     'secondaryText'
@@ -704,7 +704,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                                         <React.Fragment>
                                             <Text
                                                 style={{
-                                                    ...styles.secondaryText,
+                                                    ...styles.text,
                                                     color: themeColor(
                                                         'secondaryText'
                                                     )
@@ -740,7 +740,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                                             </Text>
                                             <Text
                                                 style={{
-                                                    ...styles.secondaryText,
+                                                    ...styles.text,
                                                     color: themeColor(
                                                         'secondaryText'
                                                     )
@@ -768,7 +768,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                                             />
                                             <Text
                                                 style={{
-                                                    ...styles.secondaryText,
+                                                    ...styles.text,
                                                     color: themeColor(
                                                         'secondaryText'
                                                     )
@@ -814,7 +814,7 @@ export default class Send extends React.Component<SendProps, SendState> {
                             <React.Fragment>
                                 <Text
                                     style={{
-                                        ...styles.secondaryText,
+                                        ...styles.text,
                                         color: themeColor('secondaryText')
                                     }}
                                 >
@@ -885,19 +885,7 @@ export default class Send extends React.Component<SendProps, SendState> {
 }
 
 const styles = StyleSheet.create({
-    editFeeBox: {
-        height: 65,
-        padding: 15,
-        marginTop: 15,
-        borderRadius: 4,
-        borderColor: '#FFD93F',
-        borderWidth: 2,
-        marginBottom: 20
-    },
     text: {
-        fontFamily: 'Lato-Regular'
-    },
-    secondaryText: {
         fontFamily: 'Lato-Regular'
     },
     textInput: {

@@ -3,6 +3,7 @@ import {
     FlatList,
     NativeModules,
     NativeEventEmitter,
+    Text,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -13,6 +14,7 @@ import BigNumber from 'bignumber.js';
 import Amount from '../../components/Amount';
 import Header from '../../components/Header';
 import LoadingIndicator from '../../components/LoadingIndicator';
+import { Row } from '../../components/layout/Row';
 import Screen from '../../components/Screen';
 
 import { localeString } from '../../utils/LocaleUtils';
@@ -23,6 +25,7 @@ import ActivityStore from '../../stores/ActivityStore';
 import FiatStore from '../../stores/FiatStore';
 import PosStore from '../../stores/PosStore';
 import SettingsStore from '../../stores/SettingsStore';
+import SyncStore from '../../stores/SyncStore';
 import { SATS_PER_BTC } from '../../stores/UnitsStore';
 
 import Filter from '../../assets/images/SVG/Filter On.svg';
@@ -33,13 +36,14 @@ interface ActivityProps {
     FiatStore: FiatStore;
     PosStore: PosStore;
     SettingsStore: SettingsStore;
+    SyncStore: SyncStore;
 }
 
 interface ActivityState {
     selectedPaymentForOrder: any;
 }
 
-@inject('ActivityStore', 'FiatStore', 'PosStore', 'SettingsStore')
+@inject('ActivityStore', 'FiatStore', 'PosStore', 'SettingsStore', 'SyncStore')
 @observer
 export default class Activity extends React.PureComponent<
     ActivityProps,
@@ -53,12 +57,19 @@ export default class Activity extends React.PureComponent<
     };
 
     async UNSAFE_componentWillMount() {
-        const { ActivityStore, SettingsStore } = this.props;
+        const { ActivityStore, SettingsStore, SyncStore } = this.props;
         const { getActivityAndFilter, getFilters } = ActivityStore;
         const filters = await getFilters();
         await getActivityAndFilter(SettingsStore.settings.locale, filters);
         if (SettingsStore.implementation === 'lightning-node-connect') {
             this.subscribeEvents();
+        }
+
+        // pause syncing updates if necessary
+        const { isSyncing, syncStatusUpdatesPaused, pauseSyncingUpates } =
+            SyncStore;
+        if (isSyncing && !syncStatusUpdatesPaused) {
+            pauseSyncingUpates();
         }
     }
 
@@ -433,13 +444,40 @@ export default class Activity extends React.PureComponent<
                                         <ListItem.Content
                                             style={{ alignItems: 'flex-end' }}
                                         >
-                                            <Amount
-                                                sats={item.getAmount}
-                                                sensitive
-                                                color={this.getRightTitleTheme(
-                                                    item
-                                                )}
-                                            />
+                                            <Row>
+                                                <Amount
+                                                    sats={item.getAmount}
+                                                    sensitive
+                                                    color={this.getRightTitleTheme(
+                                                        item
+                                                    )}
+                                                />
+                                                {!!item.getFee &&
+                                                    item.getFee != 0 && (
+                                                        <>
+                                                            <Text
+                                                                style={{
+                                                                    color: themeColor(
+                                                                        'text'
+                                                                    )
+                                                                }}
+                                                            >
+                                                                {' '}
+                                                                +{' '}
+                                                            </Text>
+                                                            <Amount
+                                                                sats={
+                                                                    item.getFee
+                                                                }
+                                                                sensitive
+                                                                color={this.getRightTitleTheme(
+                                                                    item
+                                                                )}
+                                                                fee
+                                                            />
+                                                        </>
+                                                    )}
+                                            </Row>
                                             <ListItem.Subtitle
                                                 right
                                                 style={{

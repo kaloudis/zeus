@@ -1,4 +1,4 @@
-import LNC, { lnrpc, walletrpc } from '@lightninglabs/lnc-rn';
+import LNC, { lnrpc, walletrpc } from '../zeus_modules/@lightninglabs/lnc-rn';
 
 import stores from '../stores/Stores';
 import CredentialStore from './LNC/credentialStore';
@@ -107,7 +107,7 @@ export default class LightningNodeConnect {
         await this.lnc.lnd.lightning
             .sendCoins({
                 addr: data.addr,
-                sat_per_byte: data.sat_per_byte,
+                sat_per_vbyte: data.sat_per_vbyte,
                 amount: data.amount,
                 spend_unconfirmed: data.spend_unconfirmed
             })
@@ -141,15 +141,53 @@ export default class LightningNodeConnect {
 
     openChannel = async (data: OpenChannelRequest) =>
         await this.lnc.lnd.lightning
-            .openChannelSync({
-                private: data.privateChannel,
-                scid_alias: data.scidAlias,
-                local_funding_amount: data.local_funding_amount,
-                min_confs: data.min_confs,
-                node_pubkey_string: data.node_pubkey_string,
-                sat_per_byte: data.sat_per_byte,
-                spend_unconfirmed: data.spend_unconfirmed
-            })
+            .openChannelSync(
+                data.simpleTaprootChannel
+                    ? {
+                          private: data.privateChannel,
+                          scid_alias: data.scidAlias,
+                          local_funding_amount: data.local_funding_amount,
+                          min_confs: data.min_confs,
+                          node_pubkey_string: data.node_pubkey_string,
+                          sat_per_vbyte: data.sat_per_vbyte,
+                          spend_unconfirmed: data.spend_unconfirmed,
+                          fund_max: data.fundMax,
+                          outpoints:
+                              data.utxos && data.utxos.length > 0
+                                  ? data.utxos.map((utxo: string) => {
+                                        const [txid_str, output_index] =
+                                            utxo.split(':');
+                                        return {
+                                            txid_str,
+                                            output_index: Number(output_index)
+                                        };
+                                    })
+                                  : undefined,
+                          commitment_type:
+                              lnrpc.CommitmentType['SIMPLE_TAPROOT']
+                      }
+                    : {
+                          private: data.privateChannel,
+                          scid_alias: data.scidAlias,
+                          local_funding_amount: data.local_funding_amount,
+                          min_confs: data.min_confs,
+                          node_pubkey_string: data.node_pubkey_string,
+                          sat_per_vbyte: data.sat_per_vbyte,
+                          spend_unconfirmed: data.spend_unconfirmed,
+                          fund_max: data.fundMax,
+                          outpoints:
+                              data.utxos && data.utxos.length > 0
+                                  ? data.utxos.map((utxo: string) => {
+                                        const [txid_str, output_index] =
+                                            utxo.split(':');
+                                        return {
+                                            txid_str,
+                                            output_index: Number(output_index)
+                                        };
+                                    })
+                                  : undefined
+                      }
+            )
             .then((data: lnrpc.ChannelPoint) => snakeize(data));
     // TODO add with external accounts
     // openChannelStream = (data: OpenChannelRequest) =>
@@ -166,8 +204,7 @@ export default class LightningNodeConnect {
         if (data.pubkey) delete data.pubkey;
         return this.lnc.lnd.router.sendPaymentV2({
             ...data,
-            allow_self_payment: true,
-            timeout_seconds: 60
+            allow_self_payment: true
         });
     };
     closeChannel = async (urlParams?: Array<string>) => {
@@ -180,7 +217,7 @@ export default class LightningNodeConnect {
                         urlParams && urlParams[1] && Number(urlParams[1])
                 },
                 force: urlParams && urlParams[2],
-                sat_per_byte: urlParams && urlParams[3] && Number(urlParams[3])
+                sat_per_vbyte: urlParams && urlParams[3] && Number(urlParams[3])
             };
         }
         params = {
@@ -346,5 +383,8 @@ export default class LightningNodeConnect {
     supportsAddressTypeSelection = () => true;
     supportsTaproot = () => this.supports('v0.15.0');
     supportsBumpFee = () => true;
+    supportsLSPs = () => false;
+    supportsNetworkInfo = () => false;
+    supportsSimpleTaprootChannels = () => this.supports('v0.17.0');
     isLNDBased = () => true;
 }
