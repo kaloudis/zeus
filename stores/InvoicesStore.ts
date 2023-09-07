@@ -104,7 +104,7 @@ export default class InvoicesStore {
                     (invoice) => new Invoice(invoice)
                 );
                 this.invoices.forEach((invoice) =>
-                    invoice.determineFormattedExpiryTime(locale)
+                    invoice.determineFormattedTimeUntilExpiry(locale)
                 );
                 this.invoices = this.invoices.slice().reverse();
                 this.invoicesCount =

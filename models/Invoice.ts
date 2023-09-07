@@ -72,7 +72,7 @@ export default class Invoice extends BaseModel {
     public millisatoshis?: string;
     public pay_req?: string;
 
-    public formattedExpiryTime: string;
+    public formattedTimeUntilExpiry: string;
 
     @computed public get model(): string {
         return localeString('views.Invoice.title');
@@ -256,20 +256,22 @@ export default class Invoice extends BaseModel {
         return '';
     }
 
-    public determineFormattedExpiryTime(locale: string | undefined): void {
+    public determineFormattedTimeUntilExpiry(locale: string | undefined): void {
         if (
             this.expiry === '0' ||
             (this.expiry == null &&
                 this.expire_time == null &&
                 this.expires_at == null)
         ) {
-            this.formattedExpiryTime = localeString('models.Invoice.never');
+            this.formattedTimeUntilExpiry = localeString(
+                'models.Invoice.never'
+            );
             return;
         }
 
         const millisecondsUntilExpiry = this.getMillisecondsUntilExpiry();
 
-        this.formattedExpiryTime =
+        this.formattedTimeUntilExpiry =
             millisecondsUntilExpiry <= 0
                 ? localeString('views.Activity.expired')
                 : humanizeDuration(millisecondsUntilExpiry, {

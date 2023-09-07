@@ -418,7 +418,7 @@ export default class Activity extends React.PureComponent<
                                                 {subTitle}
                                             </ListItem.Subtitle>
                                             {!item.isPaid &&
-                                                item.formattedExpiryTime && (
+                                                item.formattedTimeUntilExpiry && (
                                                     <ListItem.Subtitle
                                                         right
                                                         style={{
@@ -492,7 +492,7 @@ export default class Activity extends React.PureComponent<
                                                     : item.getDisplayTimeShort}
                                             </ListItem.Subtitle>
                                             {!item.isPaid &&
-                                                item.formattedExpiryTime && (
+                                                item.formattedTimeUntilExpiry && (
                                                     <ListItem.Subtitle
                                                         right
                                                         style={{
@@ -504,7 +504,7 @@ export default class Activity extends React.PureComponent<
                                                         }}
                                                     >
                                                         {
-                                                            item.formattedExpiryTime
+                                                            item.formattedTimeUntilExpiry
                                                         }
                                                     </ListItem.Subtitle>
                                                 )}
