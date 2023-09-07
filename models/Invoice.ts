@@ -1,5 +1,6 @@
 import { observable, computed } from 'mobx';
 import humanizeDuration from 'humanize-duration';
+import BigNumber from 'bignumber.js';
 
 import BaseModel from './BaseModel';
 import Base64Utils from './../utils/Base64Utils';
@@ -47,7 +48,7 @@ export default class Invoice extends BaseModel {
     public private: boolean;
     public creation_date: string;
     public description_hash: string;
-    public r_preimage: string;
+    public r_preimage: any;
     public cltv_expiry: string;
     public htlcs: Array<HTLC>;
     // c-lightning, eclair
@@ -79,7 +80,8 @@ export default class Invoice extends BaseModel {
     }
 
     @computed public get getRPreimage(): string {
-        const preimage = this.r_preimage;
+        if (!this.r_preimage) return '';
+        const preimage = this.r_preimage.data || this.r_preimage;
         return typeof preimage === 'object'
             ? Base64Utils.bytesToHexString(preimage)
             : typeof preimage === 'string'
@@ -90,7 +92,8 @@ export default class Invoice extends BaseModel {
     }
 
     @computed public get getRHash(): string {
-        const hash = this.r_hash;
+        if (!this.r_hash) return '';
+        const hash = this.r_hash.data || this.r_hash;
         return typeof hash === 'object'
             ? Base64Utils.bytesToHexString(hash)
             : typeof hash === 'string'
@@ -200,11 +203,13 @@ export default class Invoice extends BaseModel {
     }
 
     @computed public get getFormattedRhash(): string {
-        return typeof this.r_hash === 'string'
-            ? this.r_hash.replace(/\+/g, '-').replace(/\//g, '_')
-            : this.r_hash.data
-            ? Base64Utils.bytesToHexString(this.r_hash.data)
-            : Base64Utils.bytesToHexString(this.r_hash);
+        return this.r_hash
+            ? typeof this.r_hash === 'string'
+                ? this.r_hash.replace(/\+/g, '-').replace(/\//g, '_')
+                : this.r_hash.data
+                ? Base64Utils.bytesToHexString(this.r_hash.data)
+                : Base64Utils.bytesToHexString(this.r_hash)
+            : '';
     }
 
     @computed public get getDate(): string | number | Date {
@@ -225,11 +230,38 @@ export default class Invoice extends BaseModel {
         return DateTimeUtils.listFormattedDate(this.creation_date);
     }
 
+    @computed public get expirationDate(): Date | string {
+        const expiry = this.expiry || this.expire_time;
+
+        // handle LNDHub
+        if (expiry && new BigNumber(expiry).gte(1600000000)) {
+            return DateTimeUtils.listFormattedDate(expiry);
+        }
+
+        if (expiry) {
+            if (expiry == '0') return localeString('models.Invoice.never');
+            return `${expiry} ${localeString('models.Invoice.seconds')}`;
+        }
+
+        return this.expires_at
+            ? DateTimeUtils.listFormattedDate(this.expires_at)
+            : localeString('models.Invoice.never');
+    }
+
     @computed public get isExpired(): boolean {
-        if (this.expiry) {
+        const expiry = this.expiry || this.expire_time;
+
+        if (expiry && new BigNumber(expiry).gte(1600000000)) {
             return (
                 new Date().getTime() / 1000 >
-                Number(this.creation_date) + Number(this.expiry)
+                DateTimeUtils.listFormattedDate(expiry)
+            );
+        }
+
+        if (expiry) {
+            return (
+                new Date().getTime() / 1000 >
+                Number(this.creation_date) + Number(expiry)
             );
         }
 
