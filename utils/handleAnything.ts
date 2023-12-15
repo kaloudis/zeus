@@ -56,6 +56,7 @@ const handleAnything = async (
         AddressUtils.isValidBitcoinAddress(value, isTestNet || isRegTest)
     ) {
         if (isClipboardValue) return true;
+        if (amount) stores.unitsStore.resetUnits();
         return [
             'Send',
             {
