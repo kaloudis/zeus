@@ -126,6 +126,8 @@ import RestoreChannelBackups from './views/Settings/EmbeddedNode/RestoreChannelB
 
 import RawTxHex from './views/RawTxHex';
 
+import TaprootPOC from './views/TaprootPOC';
+
 const AppScenes = {
     Wallet: {
         screen: Wallet
@@ -441,6 +443,9 @@ const AppScenes = {
     },
     RestoreChannelBackups: {
         screen: RestoreChannelBackups
+    },
+    TaprootPOC: {
+        screen: TaprootPOC
     }
 };
 

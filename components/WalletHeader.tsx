@@ -33,6 +33,7 @@ import PrivacyUtils from '../utils/PrivacyUtils';
 import { themeColor } from '../utils/ThemeUtils';
 
 import Add from '../assets/images/SVG/Add.svg';
+import CarrotSVG from '../assets/images/SVG/Carrot.svg';
 import ClipboardSVG from '../assets/images/SVG/Clipboard.svg';
 import Scan from '../assets/images/SVG/Scan.svg';
 import POS from '../assets/images/SVG/POS.svg';
@@ -49,6 +50,15 @@ import { Row } from '../components/layout/Row';
 const Contact = require('../assets/images/Mascot.png');
 
 const TorIcon = require('../assets/images/tor.png');
+
+const Carrot = ({ navigation }: { navigation: any }) => (
+    <TouchableOpacity
+        style={{ marginLeft: 14 }}
+        onPress={() => navigation.navigate('TaprootPOC')}
+    >
+        <CarrotSVG fill={themeColor('text')} width={30} height={30} />
+    </TouchableOpacity>
+);
 
 const Mailbox = () => (
     <MailboxFlagUp fill={themeColor('highlight')} width={34.29} height={30} />
@@ -222,7 +232,8 @@ export default class WalletHeader extends React.Component<
             SyncStore
         } = this.props;
         const { filteredPendingChannels } = ChannelsStore!;
-        const { settings, posStatus, setPosStatus } = SettingsStore!;
+        const { settings, posStatus, setPosStatus, implementation } =
+            SettingsStore!;
         const { paid, redeemingAll } = LightningAddressStore!;
         const laLoading = LightningAddressStore?.loading;
         const { isSyncing } = SyncStore!;
@@ -395,6 +406,9 @@ export default class WalletHeader extends React.Component<
                     loading ? undefined : (
                         <Row>
                             <SettingsButton />
+                            {implementation === 'embedded-lnd' && (
+                                <Carrot navigation={navigation} />
+                            )}
                             {paid && paid.length > 0 && (
                                 <TouchableOpacity
                                     onPress={() =>
