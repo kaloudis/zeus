@@ -1,10 +1,10 @@
 import Foundation
 
-@objc(LndMobileScheduledSync)
-class LndMobileScheduledSync: NSObject, RCTBridgeModule {
+@objc(LitdMobileScheduledSync)
+class LitdMobileScheduledSync: NSObject, RCTBridgeModule {
   @objc
   static func moduleName() -> String! {
-    "LndMobileScheduledSync"
+    "LitdMobileScheduledSync"
   }
 
   @objc

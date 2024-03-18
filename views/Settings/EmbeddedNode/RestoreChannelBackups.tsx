@@ -13,7 +13,7 @@ import { localeString } from '../../../utils/LocaleUtils';
 
 import SettingsStore from '../../../stores/SettingsStore';
 
-import { restoreChannelBackups } from '../../../lndmobile/channel';
+import { restoreChannelBackups } from '../../../litdmobile/channel';
 
 interface RestoreChannelBackupsProps {
     navigation: any;

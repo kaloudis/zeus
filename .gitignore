@@ -71,6 +71,6 @@ ios/Pods
 **.swp
 
 # Lnd binaries
-android/lndmobile/Lndmobile.aar
-ios/LncMobile/Lndmobile.xcframework
-ios/LndMobileLibZipFile
+android/litdmobile/Litdmobile.aar
+ios/LncMobile/Litdmobile.xcframework
+ios/LitdMobileLibZipFile

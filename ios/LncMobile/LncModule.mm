@@ -1,7 +1,7 @@
 #import "LncModule.h"
 #import "Callback.h"
 #import "StreamingCallback.h"
-#import "Lndmobile.xcframework/ios-arm64/Lndmobile.framework/Headers/Lndmobile.h"
+#import "Litdmobile.xcframework/ios-arm64/Litdmobile.framework/Headers/Litdmobile.h"
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import "RNLncRnSpec.h"
@@ -13,7 +13,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initLNC:(NSString *)nameSpace)
 {
     NSError *error;
-    LndmobileInitLNC(nameSpace, @"info", &error);
+    LitdmobileInitLNC(nameSpace, @"info", &error);
     if (error) {
         NSLog(@"Init error   %@",   error);
     }
@@ -25,7 +25,7 @@ RCT_EXPORT_METHOD(registerLocalPrivCreateCallback:(NSString *)nameSpace
     Callback *lpccb = [[Callback alloc] init];
     [lpccb setCallback:onLocalPrivCreate];
     NSError *error;
-    LndmobileRegisterLocalPrivCreateCallback(nameSpace, lpccb, &error);
+    LitdmobileRegisterLocalPrivCreateCallback(nameSpace, lpccb, &error);
     if (error) {
         NSLog(@"registerLocalPrivCreateCallback error   %@",   error);
     }
@@ -37,7 +37,7 @@ RCT_EXPORT_METHOD(registerRemoteKeyReceiveCallback:(NSString *)nameSpace
     Callback * rkrcb = [[Callback alloc] init];
     [rkrcb setCallback:onRemoteKeyReceive];
     NSError *error;
-    LndmobileRegisterRemoteKeyReceiveCallback(nameSpace, rkrcb, &error);
+    LitdmobileRegisterRemoteKeyReceiveCallback(nameSpace, rkrcb, &error);
     if (error) {
         NSLog(@"registerRemoteKeyReceiveCallback error   %@",   error);
     }
@@ -49,7 +49,7 @@ RCT_EXPORT_METHOD(registerAuthDataCallback:(NSString *)nameSpace
     Callback * oacb = [[Callback alloc] init];
     [oacb setCallback:onAuthData];
     NSError *error;
-    LndmobileRegisterAuthDataCallback(nameSpace, oacb, &error);
+    LitdmobileRegisterAuthDataCallback(nameSpace, oacb, &error);
     if (error) {
         NSLog(@"registerAuthDataCallback error   %@",   error);
     }
@@ -61,7 +61,7 @@ RCT_EXPORT_METHOD(isConnected:(NSString *)nameSpace
 {
     BOOL isConnected;
     NSError *error;
-    LndmobileIsConnected(nameSpace, &isConnected, &error);
+    LitdmobileIsConnected(nameSpace, &isConnected, &error);
     if (error) {
         reject(@"isConnected_failure", @"error thrown", error);
     } else {
@@ -74,7 +74,7 @@ RCT_EXPORT_METHOD(status:(NSString *)nameSpace
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    NSString *status = LndmobileStatus(nameSpace, &error);
+    NSString *status = LitdmobileStatus(nameSpace, &error);
     if (status) {
         resolve(status);
     } else if (error) {
@@ -87,7 +87,7 @@ RCT_EXPORT_METHOD(expiry:(NSString *)nameSpace
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    NSString *expiry = LndmobileGetExpiry(nameSpace, &error);
+    NSString *expiry = LitdmobileGetExpiry(nameSpace, &error);
     if (expiry) {
         resolve(expiry);
     } else if (error) {
@@ -101,7 +101,7 @@ RCT_EXPORT_METHOD(isReadOnly:(NSString *)nameSpace
 {
     BOOL readOnly;
     NSError *error;
-    LndmobileIsReadOnly(nameSpace, &readOnly, &error);
+    LitdmobileIsReadOnly(nameSpace, &readOnly, &error);
     if (error) {
         reject(@"isReadOnly_error", @"error thrown", error);
     } else {
@@ -116,7 +116,7 @@ RCT_EXPORT_METHOD(hasPerms:(NSString *)nameSpace
 {
     BOOL hasPermissions;
     NSError *error;
-    LndmobileHasPermissions(nameSpace, permission, &hasPermissions, &error);
+    LitdmobileHasPermissions(nameSpace, permission, &hasPermissions, &error);
     if (error) {
         reject(@"hasPermissions_error", @"error thrown", error);
     } else {
@@ -134,7 +134,7 @@ RCT_EXPORT_METHOD(connectServer:(NSString *)nameSpace
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    LndmobileConnectServer(nameSpace, mailboxServerAddr, isDevServer, connectPhrase, localStatic, remoteStatic, &error);
+    LitdmobileConnectServer(nameSpace, mailboxServerAddr, isDevServer, connectPhrase, localStatic, remoteStatic, &error);
     if (error) {
         resolve(error.localizedDescription);
     } else {
@@ -145,7 +145,7 @@ RCT_EXPORT_METHOD(connectServer:(NSString *)nameSpace
 RCT_EXPORT_METHOD(disconnect:(NSString *)nameSpace)
 {
     NSError *error;
-    LndmobileDisconnect(nameSpace, &error);
+    LitdmobileDisconnect(nameSpace, &error);
     if (error) {
         NSLog(@"disconnect error   %@",   error);
     }
@@ -159,7 +159,7 @@ RCT_EXPORT_METHOD(invokeRPC:(NSString *)nameSpace
     Callback * gocb = [[Callback alloc] init];
     [gocb setCallback:resolve];
     NSError *error;
-    LndmobileInvokeRPC(nameSpace, route, requestData, gocb, &error);
+    LitdmobileInvokeRPC(nameSpace, route, requestData, gocb, &error);
     if (error) {
         NSLog(@"connectServer error   %@",   error);
     }
@@ -178,7 +178,7 @@ RCT_EXPORT_METHOD(initListener:(NSString *)nameSpace
     gocb.delegate = self;
     [gocb setEventName:eventName];
     NSError *error;
-    LndmobileInvokeRPC(nameSpace, eventName, request, gocb, &error);
+    LitdmobileInvokeRPC(nameSpace, eventName, request, gocb, &error);
     if (error) {
         NSLog(@"%@ error   %@", eventName, error);
     }

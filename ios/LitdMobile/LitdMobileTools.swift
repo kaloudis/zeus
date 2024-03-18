@@ -1,20 +1,20 @@
 import Foundation
 
-public struct LndMobileToolsError: Error {
+public struct LitdMobileToolsError: Error {
   let msg: String
 }
 
-extension LndMobileToolsError: LocalizedError {
+extension LitdMobileToolsError: LocalizedError {
   public var errorDescription: String? {
     return NSLocalizedString(msg, comment: "")
   }
 }
 
-@objc(LndMobileTools)
-class LndMobileTools: RCTEventEmitter {
+@objc(LitdMobileTools)
+class LitdMobileTools: RCTEventEmitter {
   @objc
   override static func moduleName() -> String! {
-    "LndMobileTools"
+    "LitdMobileTools"
   }
 
   override func supportedEvents() -> [String]! {
@@ -291,7 +291,7 @@ class LndMobileTools: RCTEventEmitter {
         try lndFolder.setResourceValues(resourceValues)
         resolve(true)
       } else {
-        let error = LndMobileToolsError(msg: "lnd path " + lndFolder.path + " doesn't exist")
+        let error = LitdMobileToolsError(msg: "lnd path " + lndFolder.path + " doesn't exist")
         reject("error", error.localizedDescription, error)
       }
     } catch let error {
@@ -322,7 +322,7 @@ class LndMobileTools: RCTEventEmitter {
         try FileManager.default.moveItem(at: lndConfig, to: newLndConfigPath)
         resolve(true)
       } else {
-        let error = LndMobileToolsError(msg: "lnd path \(newLndFolder.path) doesn't exist")
+        let error = LitdMobileToolsError(msg: "lnd path \(newLndFolder.path) doesn't exist")
         reject("error", error.localizedDescription, error)
       }
     } catch let error {
@@ -437,7 +437,7 @@ class LndMobileTools: RCTEventEmitter {
   @objc(macosOpenFileDialog:rejecter:)
   func macosOpenFileDialog(resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
   #if os(iOS)
-    let error = LndMobileToolsError(msg: "Not supported iOS")
+    let error = LitdMobileToolsError(msg: "Not supported iOS")
     reject("error", error.localizedDescription, error)
   #else
     DispatchQueue.main.async {
@@ -449,7 +449,7 @@ class LndMobileTools: RCTEventEmitter {
           if let u = panel.url {
             resolve(try Data(contentsOf: u).base64EncodedString())
           } else {
-            let error = LndMobileToolsError(msg: "Could not open file")
+            let error = LitdMobileToolsError(msg: "Could not open file")
             reject("error", error.localizedDescription, error)
           }
         } else {

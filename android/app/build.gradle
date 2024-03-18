@@ -192,8 +192,8 @@ dependencies {
     implementation 'com.facebook.fresco:animated-gif:2.6.0'
 
     // Pegasus
-    // implementation(name:"Lndmobile", ext:"aar")
-    implementation project(":lndmobile")
+    // implementation(name:"Litdmobile", ext:"aar")
+    implementation project(":litdmobile")
     implementation "androidx.concurrent:concurrent-futures:1.1.0"
     implementation "androidx.work:work-runtime:2.8.1"
     implementation "androidx.concurrent:concurrent-futures:1.1.0"

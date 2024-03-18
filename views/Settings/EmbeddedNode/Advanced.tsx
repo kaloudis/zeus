@@ -16,7 +16,7 @@ import { restartNeeded } from '../../../utils/RestartUtils';
 import { sleep } from '../../../utils/SleepUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
 
-import { stopLnd } from '../../../utils/LndMobileUtils';
+import { stopLnd } from '../../../utils/LitdMobileUtils';
 
 interface EmbeddedNodeAdvancedSettingsProps {
     navigation: any;
@@ -362,7 +362,7 @@ export default class EmbeddedNodeAdvancedSettings extends React.Component<
                                     )}
                                     onPress={async () => {
                                         try {
-                                            await NativeModules.LndMobile.stopLnd();
+                                            await NativeModules.LitdMobile.stopLnd();
                                             await sleep(5000); // Let lnd close down
                                         } catch (e: any) {
                                             // If lnd was closed down already
@@ -377,7 +377,7 @@ export default class EmbeddedNodeAdvancedSettings extends React.Component<
                                         }
 
                                         console.log(
-                                            await NativeModules.LndMobileTools.DEBUG_deleteNeutrinoFiles(
+                                            await NativeModules.LitdMobileTools.DEBUG_deleteNeutrinoFiles(
                                                 embeddedLndNetwork === 'Mainnet'
                                                     ? 'mainnet'
                                                     : 'testnet'

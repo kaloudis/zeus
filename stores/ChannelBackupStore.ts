@@ -6,15 +6,15 @@ import * as CryptoJS from 'crypto-js';
 import NodeInfoStore from './NodeInfoStore';
 import SettingsStore from './SettingsStore';
 
-import lndMobile from '../lndmobile/LndMobileInjection';
-const { channel } = lndMobile;
+import litdMobile from '../litdmobile/LitdMobileInjection';
+const { channel } = litdMobile;
 import {
     exportAllChannelBackups,
     restoreChannelBackups
-} from '../lndmobile/channel';
+} from '../litdmobile/channel';
 
 import BackendUtils from '../utils/BackendUtils';
-import { LndMobileEventEmitter } from '../utils/LndMobileUtils';
+import { LitdMobileEventEmitter } from '../utils/LitdMobileUtils';
 import Base64Utils from '../utils/Base64Utils';
 
 const BACKUPS_HOST = 'https://backups.lnolymp.us';
@@ -309,7 +309,7 @@ export default class ChannelBackupStore {
         if (!time && !status) this.backupChannels();
         if (this.channelEventsSubscription?.remove)
             this.channelEventsSubscription.remove();
-        this.channelEventsSubscription = LndMobileEventEmitter.addListener(
+        this.channelEventsSubscription = LitdMobileEventEmitter.addListener(
             'SubscribeChannelEvents',
             async (event: any) => {
                 try {

@@ -8,12 +8,12 @@ import Base64Utils from '../utils/Base64Utils';
 import { localeString } from '../utils/LocaleUtils';
 import {
     checkLndStreamErrorResponse,
-    LndMobileEventEmitter
-} from '../utils/LndMobileUtils';
+    LitdMobileEventEmitter
+} from '../utils/LitdMobileUtils';
 
 import { getChanInfo, listPrivateChannels } from './channel';
 
-const { LndMobile, LndMobileTools } = NativeModules;
+const { LitdMobile, LitdMobileTools } = NativeModules;
 
 // const TLV_KEYSEND = 5482373484;
 const TLV_RECORD_NAME = 128101;
@@ -23,17 +23,17 @@ const TLV_RECORD_NAME = 128101;
  * @throws
  */
 export const initialize = async (): Promise<{ data: string } | number> => {
-    return await LndMobile.initialize();
+    return await LitdMobile.initialize();
 };
 
-export enum ELndMobileStatusCodes {
+export enum ELitdMobileStatusCodes {
     STATUS_SERVICE_BOUND = 1,
     STATUS_PROCESS_STARTED = 2,
     STATUS_WALLET_UNLOCKED = 4
 }
 
-export const checkStatus = async (): Promise<ELndMobileStatusCodes> => {
-    return await LndMobile.checkStatus();
+export const checkStatus = async (): Promise<ELitdMobileStatusCodes> => {
+    return await LitdMobile.checkStatus();
 };
 
 /**
@@ -41,7 +41,7 @@ export const checkStatus = async (): Promise<ELndMobileStatusCodes> => {
  * @return string
  */
 export const writeConfig = async (data: string) => {
-    return await LndMobileTools.writeConfig(data);
+    return await LitdMobileTools.writeConfig(data);
 };
 
 export const subscribeState = async () => {
@@ -69,7 +69,7 @@ export const decodeState = (data: string): lnrpc.SubscribeStateResponse => {
  * @throws
  */
 export const stopLnd = async (): Promise<{ data: string }> => {
-    return await LndMobile.stopLnd();
+    return await LitdMobile.stopLnd();
 };
 
 /**
@@ -80,7 +80,7 @@ export const startLnd = async (
     isTorEnabled: boolean = false,
     isTestnet: boolean = false
 ): Promise<{ data: string }> => {
-    return await LndMobile.startLnd(args || '', isTorEnabled, isTestnet);
+    return await LitdMobile.startLnd(args || '', isTorEnabled, isTestnet);
 };
 
 /**
@@ -89,46 +89,46 @@ export const startLnd = async (
 export const gossipSync = async (
     networkType: string
 ): Promise<{ data: string }> => {
-    return await LndMobile.gossipSync(networkType);
+    return await LitdMobile.gossipSync(networkType);
 };
 
 export const checkICloudEnabled = async (): Promise<boolean> => {
-    return await LndMobileTools.checkICloudEnabled();
+    return await LitdMobileTools.checkICloudEnabled();
 };
 
 /**
  * @throws
  */
 export const checkApplicationSupportExists = async () => {
-    return await LndMobileTools.checkApplicationSupportExists();
+    return await LitdMobileTools.checkApplicationSupportExists();
 };
 
 /**
  * @throws
  */
 export const checkLndFolderExists = async () => {
-    return await LndMobileTools.checkLndFolderExists();
+    return await LitdMobileTools.checkLndFolderExists();
 };
 
 /**
  * @throws
  */
 export const createIOSApplicationSupportAndLndDirectories = async () => {
-    return await LndMobileTools.createIOSApplicationSupportAndLndDirectories();
+    return await LitdMobileTools.createIOSApplicationSupportAndLndDirectories();
 };
 
 /**
  * @throws
  */
 export const TEMP_moveLndToApplicationSupport = async () => {
-    return await LndMobileTools.TEMP_moveLndToApplicationSupport();
+    return await LitdMobileTools.TEMP_moveLndToApplicationSupport();
 };
 
 /**
  * @throws
  */
 export const excludeLndICloudBackup = async () => {
-    return await LndMobileTools.excludeLndICloudBackup();
+    return await LitdMobileTools.excludeLndICloudBackup();
 };
 
 /**
@@ -301,7 +301,7 @@ export const sendPaymentV2Sync = async (
 
     const call = () =>
         new Promise(async (resolve, reject) => {
-            const listener = LndMobileEventEmitter.addListener(
+            const listener = LitdMobileEventEmitter.addListener(
                 'RouterSendPaymentV2',
                 (e) => {
                     try {
@@ -392,7 +392,7 @@ export const sendKeysendPaymentV2 = (request: any): Promise<lnrpc.Payment> => {
     };
 
     return new Promise(async (resolve, reject) => {
-        const listener = LndMobileEventEmitter.addListener(
+        const listener = LitdMobileEventEmitter.addListener(
             'RouterSendPaymentV2',
             (e) => {
                 console.log(e);

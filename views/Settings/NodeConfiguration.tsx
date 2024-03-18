@@ -44,7 +44,7 @@ import SettingsStore, {
 
 import Scan from '../../assets/images/SVG/Scan.svg';
 
-import { createLndWallet } from '../../utils/LndMobileUtils';
+import { createLndWallet } from '../../utils/LitdMobileUtils';
 
 interface NodeConfigurationProps {
     navigation: any;

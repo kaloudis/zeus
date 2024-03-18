@@ -1,7 +1,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface RCT_EXTERN_MODULE(LndMobileScheduledSync, NSObject)
+@interface RCT_EXTERN_MODULE(LitdMobileScheduledSync, NSObject)
 
 RCT_EXTERN_METHOD(
   setupScheduledSyncWork: (RCTPromiseResolveBlock)resolve

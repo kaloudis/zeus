@@ -1,10 +1,10 @@
-export enum ELndMobileStatusCodes {
+export enum ELitdMobileStatusCodes {
     STATUS_SERVICE_BOUND = 1,
     STATUS_PROCESS_STARTED = 2,
     STATUS_WALLET_UNLOCKED = 4
 }
 
-export interface ILndMobile {
+export interface ILitdMobile {
     // General
     initialize(): Promise<{ data: string }>;
     startLnd(
@@ -21,7 +21,7 @@ export interface ILndMobile {
     ): Promise<{ data: string }>;
     unlockWallet(password: string): Promise<{ data: string }>;
 
-    checkStatus(): Promise<ELndMobileStatusCodes>;
+    checkStatus(): Promise<ELitdMobileStatusCodes>;
 
     // Send gRPC LND API request
     sendCommand(
@@ -40,13 +40,13 @@ export interface ILndMobile {
     writeToStream(method: string, payload: string): Promise<boolean>;
 
     // Android-specific
-    unbindLndMobileService(): Promise<void>; // TODO(hsjoberg): function looks broken
-    sendPongToLndMobileservice(): Promise<{ data: string }>;
-    checkLndMobileServiceConnected(): Promise<boolean>;
+    unbindLitdMobileService(): Promise<void>; // TODO(hsjoberg): function looks broken
+    sendPongToLitdMobileservice(): Promise<{ data: string }>;
+    checkLitdMobileServiceConnected(): Promise<boolean>;
     gossipSync(networkType: string): Promise<{ data: string }>;
 }
 
-export interface ILndMobileTools {
+export interface ILitdMobileTools {
     writeConfig(data: string): Promise<string>;
     killLnd(): Promise<boolean>;
     copyLndLog(network: string): Promise<boolean>;
@@ -90,7 +90,7 @@ export type WorkInfo =
     | 'SUCCEEDED'
     | 'WORK_NOT_EXIST';
 
-export interface ILndMobileScheduledSync {
+export interface ILitdMobileScheduledSync {
     setupScheduledSyncWork: () => Promise<boolean>;
     removeScheduledSyncWork: () => Promise<boolean>;
     checkScheduledSyncWorkStatus: () => Promise<WorkInfo>;
@@ -104,9 +104,9 @@ export interface IGossipFileScheduledSync {
 
 declare module 'react-native' {
     interface NativeModulesStatic {
-        LndMobile: ILndMobile;
-        LndMobileTools: ILndMobileTools;
-        LndMobileScheduledSync: ILndMobileScheduledSync;
+        LitdMobile: ILitdMobile;
+        LitdMobileTools: ILitdMobileTools;
+        LitdMobileScheduledSync: ILitdMobileScheduledSync;
         GossipFileScheduledSync: IGossipFileScheduledSync;
     }
 }

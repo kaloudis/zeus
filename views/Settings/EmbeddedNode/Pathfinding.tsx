@@ -14,7 +14,7 @@ import { localeString } from '../../../utils/LocaleUtils';
 import { restartNeeded } from '../../../utils/RestartUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
 
-import { resetMissionControl } from '../../../lndmobile';
+import { resetMissionControl } from '../../../litdmobile';
 
 interface PathfindingProps {
     navigation: any;

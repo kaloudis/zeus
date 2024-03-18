@@ -5,12 +5,12 @@ import {
     Platform
 } from 'react-native';
 
-export const LndMobileEventEmitter =
+export const LitdMobileEventEmitter =
     Platform.OS == 'android'
         ? DeviceEventEmitter
-        : new NativeEventEmitter(NativeModules.LndMobile);
+        : new NativeEventEmitter(NativeModules.LitdMobile);
 
-export const LndMobileToolsEventEmitter =
+export const LitdMobileToolsEventEmitter =
     Platform.OS == 'android'
         ? DeviceEventEmitter
-        : new NativeEventEmitter(NativeModules.LndMobileTools);
+        : new NativeEventEmitter(NativeModules.LitdMobileTools);

@@ -22,10 +22,10 @@ import android.util.Log;
 import android.content.pm.ServiceInfo;
 import static android.app.Notification.FOREGROUND_SERVICE_IMMEDIATE;
 
-import lndmobile.Callback;
-import lndmobile.Lndmobile;
-import lndmobile.RecvStream;
-import lndmobile.SendStream;
+import litdmobile.Callback;
+import litdmobile.Litdmobile;
+import litdmobile.RecvStream;
+import litdmobile.SendStream;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,8 +39,8 @@ import com.reactnativecommunity.asyncstorage.ReactDatabaseSupplier;
 
 import com.google.protobuf.ByteString;
 
-public class LndMobileService extends Service {
-  private static final String TAG = "LndMobileService";
+public class LitdMobileService extends Service {
+  private static final String TAG = "LitdMobileService";
   private final int ONGOING_NOTIFICATION_ID = 1;
   boolean lndStarted = false;
   boolean subscribeInvoicesStreamActive = false;
@@ -76,7 +76,7 @@ public class LndMobileService extends Service {
 
   private Map<String, Method> syncMethods = new HashMap<>();
   private Map<String, Method> streamMethods = new HashMap<>();
-  private Map<String, lndmobile.SendStream> writeStreams = new HashMap<>();
+  private Map<String, litdmobile.SendStream> writeStreams = new HashMap<>();
 
   private NotificationManager notificationManager;
 
@@ -144,7 +144,7 @@ public class LndMobileService extends Service {
 
             try {
               if (msg.what == MSG_GRPC_BIDI_STREAM_COMMAND) {
-                lndmobile.SendStream writeStream = (lndmobile.SendStream)m.invoke(
+                litdmobile.SendStream writeStream = (litdmobile.SendStream)m.invoke(
                   null,
                   new LndStreamCallback(msg.replyTo, method)
                 );
@@ -168,10 +168,10 @@ public class LndMobileService extends Service {
               }
 
             } catch (IllegalAccessException e) {
-              Log.e(TAG, "Could not invoke lndmobile method " + method, e);
+              Log.e(TAG, "Could not invoke litdmobile method " + method, e);
               // TODO(hsjoberg) send error response to client?
             } catch (InvocationTargetException e) {
-              Log.e(TAG, "Could not invoke lndmobile method " + method, e);
+              Log.e(TAG, "Could not invoke litdmobile method " + method, e);
               // TODO(hsjoberg) send error response to client?
             }
 
@@ -181,10 +181,10 @@ public class LndMobileService extends Service {
           case MSG_CHECKSTATUS:
             int flags = 0;
 
-            flags += LndMobile.LndStatus.SERVICE_BOUND.flag;
+            flags += LitdMobile.LndStatus.SERVICE_BOUND.flag;
 
             if (lndStarted) {
-              flags += LndMobile.LndStatus.PROCESS_STARTED.flag;
+              flags += LitdMobile.LndStatus.PROCESS_STARTED.flag;
             }
 
             sendToClient(msg.replyTo, Message.obtain(null, MSG_CHECKSTATUS_RESPONSE, request, flags));
@@ -196,7 +196,7 @@ public class LndMobileService extends Service {
             lnrpc.Walletunlocker.UnlockWalletRequest.Builder unlockWallet = lnrpc.Walletunlocker.UnlockWalletRequest.newBuilder();
             unlockWallet.setWalletPassword(ByteString.copyFromUtf8(password));
 
-            Lndmobile.unlockWallet(
+            Litdmobile.unlockWallet(
               unlockWallet.build().toByteArray(),
               new LndCallback(msg.replyTo, "UnlockWallet", request)
             );
@@ -225,7 +225,7 @@ public class LndMobileService extends Service {
               );
             }
 
-            Lndmobile.initWallet(
+            Litdmobile.initWallet(
               initWallet.build().toByteArray(),
               new LndCallback(msg.replyTo, "InitWallet", request)
             );
@@ -248,7 +248,7 @@ public class LndMobileService extends Service {
             final String method = bundle.getString("method");
             final byte[] payload = bundle.getByteArray("payload");
 
-            lndmobile.SendStream s = writeStreams.get(method);
+            litdmobile.SendStream s = writeStreams.get(method);
 
             try {
               s.send(payload);
@@ -270,7 +270,7 @@ public class LndMobileService extends Service {
     }
   }
 
-  class LndCallback implements lndmobile.Callback {
+  class LndCallback implements litdmobile.Callback {
     private final Messenger recipient;
     private final String method;
     private final int request;
@@ -320,7 +320,7 @@ public class LndMobileService extends Service {
     }
   }
 
-  class LndStreamCallback implements lndmobile.RecvStream {
+  class LndStreamCallback implements litdmobile.RecvStream {
     private final Messenger recipient;
     private final String method;
 
@@ -370,11 +370,11 @@ public class LndMobileService extends Service {
   void gossipSync(Messenger recipient, String networkType, int request) {
     Runnable gossipSync = new Runnable() {
       public void run() {
-        Lndmobile.gossipSync(
+        Litdmobile.gossipSync(
           getApplicationContext().getCacheDir().getAbsolutePath(),
           getApplicationContext().getFilesDir().getAbsolutePath(),
           networkType,
-          new lndmobile.Callback() {
+          new litdmobile.Callback() {
 
           @Override
           public void onError(Exception e) {
@@ -412,7 +412,7 @@ public class LndMobileService extends Service {
 
       @Override
       public void run() {
-        Lndmobile.start(args, new lndmobile.Callback() {
+        Litdmobile.start(args, new litdmobile.Callback() {
 
           @Override
           public void onError(Exception e) {
@@ -553,8 +553,8 @@ public class LndMobileService extends Service {
     super.onRebind(intent);
   }
 
-  public LndMobileService() {
-    Method[] methods = Lndmobile.class.getDeclaredMethods();
+  public LitdMobileService() {
+    Method[] methods = Litdmobile.class.getDeclaredMethods();
 
     for (Method m : methods) {
       String name = m.getName();
@@ -572,7 +572,7 @@ public class LndMobileService extends Service {
     String packageName = getApplicationContext().getPackageName();
     ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
         return true;
       }
     }
@@ -583,7 +583,7 @@ public class LndMobileService extends Service {
     String packageName = getApplicationContext().getPackageName();
     ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
         Process.killProcess(p.pid);
         return true;
       }
@@ -595,7 +595,7 @@ public class LndMobileService extends Service {
     if (notificationManager != null) {
       notificationManager.cancelAll();
     }
-    Lndmobile.stopDaemon(
+    Litdmobile.stopDaemon(
       lnrpc.LightningOuterClass.StopRequest.newBuilder().build().toByteArray(),
       new Callback() {
         @Override

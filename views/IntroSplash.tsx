@@ -20,7 +20,7 @@ import { ErrorMessage } from '../components/SuccessErrorMessage';
 
 import SettingsStore, { LOCALE_KEYS } from '../stores/SettingsStore';
 
-import { createLndWallet } from '../utils/LndMobileUtils';
+import { createLndWallet } from '../utils/LitdMobileUtils';
 import { localeString } from '../utils/LocaleUtils';
 import { themeColor } from '../utils/ThemeUtils';
 
@@ -254,6 +254,7 @@ export default class IntroSplash extends React.Component<
                                                 undefined
                                             );
                                         } catch (e) {
+                                            console.log('!', e);
                                             this.setState({
                                                 error: true,
                                                 creatingWallet: false

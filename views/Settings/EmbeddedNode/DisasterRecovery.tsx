@@ -19,7 +19,7 @@ import { localeString } from '../../../utils/LocaleUtils';
 import { restartNeeded } from '../../../utils/RestartUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
 
-import { exportAllChannelBackups } from '../../../lndmobile/channel';
+import { exportAllChannelBackups } from '../../../litdmobile/channel';
 
 interface DisasterRecoveryProps {
     navigation: any;

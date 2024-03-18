@@ -78,7 +78,7 @@ import {
     bumpFee
 } from './wallet';
 import { status, modifyStatus, queryScores, setScores } from './autopilot';
-import { checkScheduledSyncWorkStatus } from './scheduled-sync'; // TODO(hsjoberg): This could be its own injection "LndMobileScheduledSync"
+import { checkScheduledSyncWorkStatus } from './scheduled-sync'; // TODO(hsjoberg): This could be its own injection "LitdMobileScheduledSync"
 import {
     lnrpc,
     signrpc,
@@ -87,9 +87,9 @@ import {
     routerrpc,
     walletrpc
 } from '../proto/lightning';
-import type { WorkInfo } from './LndMobile.d.ts';
+import type { WorkInfo } from './LitdMobile.d.ts';
 
-export interface ILndMobileInjections {
+export interface ILitdMobileInjections {
     index: {
         initialize: () => Promise<{ data: string } | number>;
         writeConfig: (config: string) => Promise<string>;
@@ -432,4 +432,4 @@ export default {
     scheduledSync: {
         checkScheduledSyncWorkStatus
     }
-} as ILndMobileInjections;
+} as ILitdMobileInjections;

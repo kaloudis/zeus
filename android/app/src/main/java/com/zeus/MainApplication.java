@@ -45,9 +45,9 @@ public class MainApplication extends Application implements ReactApplication {
 
           // ZEUS
           packages.add(new MobileToolsPackage());
-          packages.add(new LndMobilePackage());
-          packages.add(new LndMobileToolsPackage());
-          packages.add(new LndMobileScheduledSyncPackage());
+          packages.add(new LitdMobilePackage());
+          packages.add(new LitdMobileToolsPackage());
+          packages.add(new LitdMobileScheduledSyncPackage());
           packages.add(new LncPackage());
           // packages.add(new ZeusTorPackage());
 

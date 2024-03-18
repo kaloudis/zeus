@@ -8,28 +8,28 @@ import {
 import { generateSecureRandom } from 'react-native-securerandom';
 import NetInfo from '@react-native-community/netinfo';
 
-import Log from '../lndmobile/log';
-const log = Log('utils/LndMobileUtils.ts');
+import Log from '../litdmobile/log';
+const log = Log('utils/LitdMobileUtils.ts');
 
 import { sleep } from './SleepUtils';
 import Base64Utils from './Base64Utils';
 
-import lndMobile from '../lndmobile/LndMobileInjection';
-import { ELndMobileStatusCodes, gossipSync } from '../lndmobile/index';
+import litdMobile from '../litdmobile/LitdMobileInjection';
+import { ELitdMobileStatusCodes, gossipSync } from '../litdmobile/index';
 
 import stores from '../stores/Stores';
 
 import { lnrpc } from '../proto/lightning';
 
-export const LndMobileEventEmitter =
+export const LitdMobileEventEmitter =
     Platform.OS == 'android'
         ? DeviceEventEmitter
-        : new NativeEventEmitter(NativeModules.LndMobile);
+        : new NativeEventEmitter(NativeModules.LitdMobile);
 
-export const LndMobileToolsEventEmitter =
+export const LitdMobileToolsEventEmitter =
     Platform.OS == 'android'
         ? DeviceEventEmitter
-        : new NativeEventEmitter(NativeModules.LndMobileTools);
+        : new NativeEventEmitter(NativeModules.LitdMobileTools);
 
 export function checkLndStreamErrorResponse(
     name: string,
@@ -65,7 +65,7 @@ const writeLndConfig = async (
     rescan?: boolean,
     compactDb?: boolean
 ) => {
-    const { writeConfig } = lndMobile.index;
+    const { writeConfig } = litdMobile.index;
 
     const peerMode = stores.settingsStore?.settings?.dontAllowOtherPeers
         ? 'connect'
@@ -157,8 +157,8 @@ export async function expressGraphSync() {
         if (stores.settingsStore?.settings?.resetExpressGraphSyncOnStartup) {
             log.d('Clearing speedloader files');
             try {
-                await NativeModules.LndMobileTools.DEBUG_deleteSpeedloaderLastrunFile();
-                await NativeModules.LndMobileTools.DEBUG_deleteSpeedloaderDgraphDirectory();
+                await NativeModules.LitdMobileTools.DEBUG_deleteSpeedloaderLastrunFile();
+                await NativeModules.LitdMobileTools.DEBUG_deleteSpeedloaderDgraphDirectory();
             } catch (error) {
                 log.e('Gossip files deletion failed', [error]);
             }
@@ -184,14 +184,14 @@ export async function initializeLnd(
     rescan?: boolean,
     compactDb?: boolean
 ) {
-    const { initialize } = lndMobile.index;
+    const { initialize } = litdMobile.index;
 
     await writeLndConfig(isTestnet, rescan, compactDb);
     await initialize();
 }
 
 export async function stopLnd() {
-    const { stopLnd } = lndMobile.index;
+    const { stopLnd } = litdMobile.index;
     return await stopLnd();
 }
 
@@ -201,19 +201,19 @@ export async function startLnd(
     isTestnet: boolean = false
 ) {
     const { checkStatus, startLnd, decodeState, subscribeState } =
-        lndMobile.index;
-    const { unlockWallet } = lndMobile.wallet;
+        litdMobile.index;
+    const { unlockWallet } = litdMobile.wallet;
 
     const status = await checkStatus();
     if (
-        (status & ELndMobileStatusCodes.STATUS_PROCESS_STARTED) !==
-        ELndMobileStatusCodes.STATUS_PROCESS_STARTED
+        (status & ELitdMobileStatusCodes.STATUS_PROCESS_STARTED) !==
+        ELitdMobileStatusCodes.STATUS_PROCESS_STARTED
     ) {
         await startLnd('', isTorEnabled, isTestnet);
     }
 
     await new Promise(async (res) => {
-        LndMobileEventEmitter.addListener('SubscribeState', async (e: any) => {
+        LitdMobileEventEmitter.addListener('SubscribeState', async (e: any) => {
             try {
                 log.d('SubscribeState', [e]);
                 const error = checkLndStreamErrorResponse('SubscribeState', e);
@@ -264,8 +264,8 @@ export async function createLndWallet(
         createIOSApplicationSupportAndLndDirectories,
         excludeLndICloudBackup,
         checkStatus
-    } = lndMobile.index;
-    const { genSeed, initWallet } = lndMobile.wallet;
+    } = litdMobile.index;
+    const { genSeed, initWallet } = litdMobile.wallet;
 
     if (Platform.OS === 'ios') {
         await createIOSApplicationSupportAndLndDirectories();
@@ -277,8 +277,8 @@ export async function createLndWallet(
 
     const status = await checkStatus();
     if (
-        (status & ELndMobileStatusCodes.STATUS_PROCESS_STARTED) !==
-        ELndMobileStatusCodes.STATUS_PROCESS_STARTED
+        (status & ELitdMobileStatusCodes.STATUS_PROCESS_STARTED) !==
+        ELitdMobileStatusCodes.STATUS_PROCESS_STARTED
     ) {
         await startLnd('', isTorEnabled, isTestnet);
     }

@@ -70,22 +70,15 @@
 		7410AA132B35345600A5AA98 /* Marlide-Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7410AA102B35345500A5AA98 /* Marlide-Display-Bold.ttf */; };
 		7410AA142B35345600A5AA98 /* Marlide-Display.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7410AA112B35345500A5AA98 /* Marlide-Display.ttf */; };
 		7410AA152B35345600A5AA98 /* ppneuemontreal-medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7410AA122B35345600A5AA98 /* ppneuemontreal-medium.otf */; };
-		745388442A54C2B6000927CE /* lightning.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745388382A54C2B6000927CE /* lightning.pb.swift */; };
-		745388452A54C2B6000927CE /* LndMobileScheduledSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745388392A54C2B6000927CE /* LndMobileScheduledSync.swift */; };
-		745388462A54C2B6000927CE /* LndMobile.m in Sources */ = {isa = PBXBuildFile; fileRef = 7453883A2A54C2B6000927CE /* LndMobile.m */; };
-		745388472A54C2B6000927CE /* LndMobileScheduledSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 7453883B2A54C2B6000927CE /* LndMobileScheduledSync.m */; };
-		745388482A54C2B6000927CE /* LndMobile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7453883C2A54C2B6000927CE /* LndMobile.swift */; };
-		745388492A54C2B6000927CE /* walletunlocker.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7453883E2A54C2B6000927CE /* walletunlocker.pb.swift */; };
-		7453884A2A54C2B6000927CE /* LndMobileTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 7453883F2A54C2B6000927CE /* LndMobileTools.m */; };
-		7453884B2A54C2B6000927CE /* Lnd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745388402A54C2B6000927CE /* Lnd.swift */; };
-		7453884C2A54C2B6000927CE /* LndMobileTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745388412A54C2B6000927CE /* LndMobileTools.swift */; };
+		7411F8312BA8D14D0078D73C /* Litdmobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7411F82E2BA8D14D0078D73C /* Litdmobile.xcframework */; };
+		7411F8352BA8D1E70078D73C /* LitdMobile in Resources */ = {isa = PBXBuildFile; fileRef = 7411F8342BA8D1E70078D73C /* LitdMobile */; };
+		7411F8412BA8D4500078D73C /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74A116702A55DEE600F7078C /* libresolv.tbd */; };
 		745E06AA295CB0E500597EE8 /* Caret Down.svg in Resources */ = {isa = PBXBuildFile; fileRef = 745E06A9295CB0E500597EE8 /* Caret Down.svg */; };
 		74668A582AE3CBB90023695A /* Marlide-Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 74668A562AE3CBB90023695A /* Marlide-Display-Bold.ttf */; };
 		74668A592AE3CBB90023695A /* Marlide-Display.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 74668A572AE3CBB90023695A /* Marlide-Display.ttf */; };
 		74B637822A5A350B00750202 /* LncModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 74B637792A5A350A00750202 /* LncModule.mm */; };
 		74B637832A5A350B00750202 /* StreamingCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 74B6377A2A5A350A00750202 /* StreamingCallback.mm */; };
 		74B637842A5A350B00750202 /* Callback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 74B6377C2A5A350A00750202 /* Callback.mm */; };
-		74B637872A5A35B600750202 /* Lndmobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74B637862A5A35B600750202 /* Lndmobile.xcframework */; };
 		74F9D7F22AF33324007D44BF /* ppneuemontreal-medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 74F9D7EF2AF33324007D44BF /* ppneuemontreal-medium.otf */; };
 		7598B75F1F64426CAF420155 /* UnifiedSvg.tsx in Resources */ = {isa = PBXBuildFile; fileRef = C7FBAA85E56C4D5D92F74F11 /* UnifiedSvg.tsx */; };
 		7605A9F30F13492692B1AB4E /* Flash On.svg in Resources */ = {isa = PBXBuildFile; fileRef = DD1A9F0B9EF0475C81C53C8D /* Flash On.svg */; };
@@ -404,15 +397,9 @@
 		7410AA102B35345500A5AA98 /* Marlide-Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Marlide-Display-Bold.ttf"; path = "../../../assets/fonts/Marlide-Display-Bold.ttf"; sourceTree = "<group>"; };
 		7410AA112B35345500A5AA98 /* Marlide-Display.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Marlide-Display.ttf"; path = "../../../assets/fonts/Marlide-Display.ttf"; sourceTree = "<group>"; };
 		7410AA122B35345600A5AA98 /* ppneuemontreal-medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "ppneuemontreal-medium.otf"; path = "../../../assets/fonts/ppneuemontreal-medium.otf"; sourceTree = "<group>"; };
-		745388382A54C2B6000927CE /* lightning.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lightning.pb.swift; sourceTree = "<group>"; };
-		745388392A54C2B6000927CE /* LndMobileScheduledSync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LndMobileScheduledSync.swift; sourceTree = "<group>"; };
-		7453883A2A54C2B6000927CE /* LndMobile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LndMobile.m; sourceTree = "<group>"; };
-		7453883B2A54C2B6000927CE /* LndMobileScheduledSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LndMobileScheduledSync.m; sourceTree = "<group>"; };
-		7453883C2A54C2B6000927CE /* LndMobile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LndMobile.swift; sourceTree = "<group>"; };
-		7453883E2A54C2B6000927CE /* walletunlocker.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = walletunlocker.pb.swift; sourceTree = "<group>"; };
-		7453883F2A54C2B6000927CE /* LndMobileTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LndMobileTools.m; sourceTree = "<group>"; };
-		745388402A54C2B6000927CE /* Lnd.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lnd.swift; sourceTree = "<group>"; };
-		745388412A54C2B6000927CE /* LndMobileTools.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LndMobileTools.swift; sourceTree = "<group>"; };
+		7411F82E2BA8D14D0078D73C /* Litdmobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Litdmobile.xcframework; path = LncMobile/Litdmobile.xcframework; sourceTree = "<group>"; };
+		7411F8342BA8D1E70078D73C /* LitdMobile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = LitdMobile; sourceTree = "<group>"; };
+		7411F8442BA8D4500078D73C /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		745E06A9295CB0E500597EE8 /* Caret Down.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Caret Down.svg"; path = "../assets/images/SVG/Caret Down.svg"; sourceTree = "<group>"; };
 		74668A562AE3CBB90023695A /* Marlide-Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Marlide-Display-Bold.ttf"; path = "../assets/fonts/Marlide-Display-Bold.ttf"; sourceTree = "<group>"; };
 		74668A572AE3CBB90023695A /* Marlide-Display.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Marlide-Display.ttf"; path = "../assets/fonts/Marlide-Display.ttf"; sourceTree = "<group>"; };
@@ -423,7 +410,6 @@
 		74B6377C2A5A350A00750202 /* Callback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Callback.mm; sourceTree = "<group>"; };
 		74B6377E2A5A350A00750202 /* Callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Callback.h; sourceTree = "<group>"; };
 		74B6377F2A5A350A00750202 /* LncModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LncModule.h; sourceTree = "<group>"; };
-		74B637862A5A35B600750202 /* Lndmobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Lndmobile.xcframework; path = LncMobile/Lndmobile.xcframework; sourceTree = "<group>"; };
 		74F9D7EF2AF33324007D44BF /* ppneuemontreal-medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "ppneuemontreal-medium.otf"; path = "../assets/fonts/ppneuemontreal-medium.otf"; sourceTree = "<group>"; };
 		77EC666A91C04742A050DEF4 /* Help Icon.svg */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Help Icon.svg"; path = "../assets/images/SVG/Help Icon.svg"; sourceTree = "<group>"; };
 		788BB1C90868496CA6F03853 /* Network.svg */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Network.svg; path = ../assets/images/SVG/Network.svg; sourceTree = "<group>"; };
@@ -436,7 +422,6 @@
 		80E6686C049240CE9887FA2C /* QR.svg */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = QR.svg; path = ../assets/images/SVG/QR.svg; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		84817A27B5CC4C869EA8ABF3 /* LightningSvg.tsx */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = LightningSvg.tsx; path = ../assets/images/SVG/DynamicSVG/LightningSvg.tsx; sourceTree = "<group>"; };
-		85477FC3256D5D3400A4EAD1 /* zeus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "zeus-Bridging-Header.h"; sourceTree = "<group>"; };
 		85477FC5256D5D3400A4EAD1 /* dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dummy.swift; sourceTree = "<group>"; };
 		89366F98367041A3AD6768BD /* Caret Right.svg */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Caret Right.svg"; path = "../assets/images/SVG/Caret Right.svg"; sourceTree = "<group>"; };
 		8A37760CFE5741E3AD73A485 /* Flash Off.svg */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Flash Off.svg"; path = "../assets/images/SVG/Flash Off.svg"; sourceTree = "<group>"; };
@@ -531,8 +516,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
-				74B637872A5A35B600750202 /* Lndmobile.xcframework in Frameworks */,
+				7411F8312BA8D14D0078D73C /* Litdmobile.xcframework in Frameworks */,
 				120C1A21E0566E9107515C30 /* libPods-zeus.a in Frameworks */,
+				7411F8412BA8D4500078D73C /* libresolv.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -635,8 +621,8 @@
 		13B07FAE1A68108700A75B9A /* zeus */ = {
 			isa = PBXGroup;
 			children = (
+				7411F8342BA8D1E70078D73C /* LitdMobile */,
 				74B637782A5A350A00750202 /* LncMobile */,
-				745388372A54C2B6000927CE /* LndMobile */,
 				7407D2CE274E079100850BAB /* zeusRelease.entitlements */,
 				7407D2CD274E076D00850BAB /* zeus.entitlements */,
 				97D6EB5926C47CF5002ADC8C /* ioslauncher.png */,
@@ -656,8 +642,9 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7411F8442BA8D4500078D73C /* libresolv.9.tbd */,
 				74A116702A55DEE600F7078C /* libresolv.tbd */,
-				74B637862A5A35B600750202 /* Lndmobile.xcframework */,
+				7411F82E2BA8D14D0078D73C /* Litdmobile.xcframework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 				CB2C2DBF18852D2E65ABC434 /* libPods-zeus.a */,
@@ -673,23 +660,6 @@
 				5E9157351DD0AC6500FF2AA8 /* libRCTAnimation.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		745388372A54C2B6000927CE /* LndMobile */ = {
-			isa = PBXGroup;
-			children = (
-				85477FC3256D5D3400A4EAD1 /* zeus-Bridging-Header.h */,
-				745388382A54C2B6000927CE /* lightning.pb.swift */,
-				745388392A54C2B6000927CE /* LndMobileScheduledSync.swift */,
-				7453883A2A54C2B6000927CE /* LndMobile.m */,
-				7453883B2A54C2B6000927CE /* LndMobileScheduledSync.m */,
-				7453883C2A54C2B6000927CE /* LndMobile.swift */,
-				7453883E2A54C2B6000927CE /* walletunlocker.pb.swift */,
-				7453883F2A54C2B6000927CE /* LndMobileTools.m */,
-				745388402A54C2B6000927CE /* Lnd.swift */,
-				745388412A54C2B6000927CE /* LndMobileTools.swift */,
-			);
-			path = LndMobile;
 			sourceTree = "<group>";
 		};
 		74B637782A5A350A00750202 /* LncMobile */ = {
@@ -1367,6 +1337,7 @@
 				D66A263DF39F48088A0F8784 /* tor.png in Resources */,
 				2E994829C4BA49738466EA86 /* PinFilled.svg in Resources */,
 				E493C650358D49E193BC19D8 /* PinHollow.svg in Resources */,
+				7411F8352BA8D1E70078D73C /* LitdMobile in Resources */,
 				830A2C4CEE3F4349832AC893 /* Success.svg in Resources */,
 				2399885DFDAB4C90B7232496 /* lightning1.json in Resources */,
 				9A72311BC6F347239EB6AFAA /* lightning2.json in Resources */,
@@ -1676,17 +1647,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				745388482A54C2B6000927CE /* LndMobile.swift in Sources */,
 				74B637832A5A350B00750202 /* StreamingCallback.mm in Sources */,
-				745388492A54C2B6000927CE /* walletunlocker.pb.swift in Sources */,
-				7453884A2A54C2B6000927CE /* LndMobileTools.m in Sources */,
-				745388472A54C2B6000927CE /* LndMobileScheduledSync.m in Sources */,
-				745388462A54C2B6000927CE /* LndMobile.m in Sources */,
-				7453884B2A54C2B6000927CE /* Lnd.swift in Sources */,
-				7453884C2A54C2B6000927CE /* LndMobileTools.swift in Sources */,
-				745388452A54C2B6000927CE /* LndMobileScheduledSync.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
-				745388442A54C2B6000927CE /* lightning.pb.swift in Sources */,
 				74B637822A5A350B00750202 /* LncModule.mm in Sources */,
 				74B637842A5A350B00750202 /* Callback.mm in Sources */,
 				85477FC6256D5D3400A4EAD1 /* dummy.swift in Sources */,
@@ -1849,7 +1811,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "LndMobile/zeus-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "LitdMobile/zeus-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1903,7 +1865,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "LndMobile/zeus-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "LitdMobile/zeus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";

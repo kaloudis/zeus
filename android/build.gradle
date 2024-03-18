@@ -42,7 +42,7 @@ allprojects {
     repositories {
         jcenter()
         flatDir {
-            dirs("lndmobile")
+            dirs("litdmobile")
         }
     }
 }

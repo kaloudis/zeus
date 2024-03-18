@@ -11,7 +11,7 @@ import SettingsStore from '../../../stores/SettingsStore';
 
 import { localeString } from '../../../utils/LocaleUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
-import { LndMobileToolsEventEmitter } from '../../../utils/EventListenerUtils';
+import { LitdMobileToolsEventEmitter } from '../../../utils/EventListenerUtils';
 
 interface LNDLogsProps {
     navigation: any;
@@ -38,7 +38,7 @@ export default class LNDLogs extends React.Component<
         (async () => {
             const network =
                 embeddedLndNetwork === 'Testnet' ? 'testnet' : 'mainnet';
-            const tailLog = await NativeModules.LndMobileTools.tailLog(
+            const tailLog = await NativeModules.LitdMobileTools.tailLog(
                 100,
                 network
             );
@@ -47,14 +47,17 @@ export default class LNDLogs extends React.Component<
                 .map((row) => row.slice(11))
                 .join('\n');
 
-            LndMobileToolsEventEmitter.addListener('lndlog', (data: string) => {
-                log = log + data.slice(11);
-                this.setState({
-                    log
-                });
-            });
+            LitdMobileToolsEventEmitter.addListener(
+                'lndlog',
+                (data: string) => {
+                    log = log + data.slice(11);
+                    this.setState({
+                        log
+                    });
+                }
+            );
 
-            NativeModules.LndMobileTools.observeLndLogFile(network);
+            NativeModules.LitdMobileTools.observeLndLogFile(network);
             this.setState({
                 log
             });

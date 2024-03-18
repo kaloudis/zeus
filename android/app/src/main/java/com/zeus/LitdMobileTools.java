@@ -70,10 +70,10 @@ import com.reactnativecommunity.asyncstorage.ReactDatabaseSupplier;
 import com.reactnativecommunity.asyncstorage.AsyncLocalStorageUtil;
 
 // TODO break this class up
-class LndMobileTools extends ReactContextBaseJavaModule {
-  final String TAG = "LndMobileTools";
+class LitdMobileTools extends ReactContextBaseJavaModule {
+  final String TAG = "LitdMobileTools";
 
-  public LndMobileTools(ReactApplicationContext reactContext) {
+  public LitdMobileTools(ReactApplicationContext reactContext) {
     super(reactContext);
   }
 
@@ -90,7 +90,7 @@ class LndMobileTools extends ReactContextBaseJavaModule {
 
   @Override
   public String getName() {
-    return "LndMobileTools";
+    return "LitdMobileTools";
   }
 
   @ReactMethod
@@ -119,7 +119,7 @@ class LndMobileTools extends ReactContextBaseJavaModule {
     String packageName = getReactApplicationContext().getPackageName();
     ActivityManager am = (ActivityManager) getCurrentActivity().getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
         Process.killProcess(p.pid);
         return true;
       }
@@ -461,7 +461,7 @@ class LndMobileTools extends ReactContextBaseJavaModule {
     String packageName = getReactApplicationContext().getPackageName();
     ActivityManager am = (ActivityManager) getReactApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
         promise.resolve(true);
         return;
       }
@@ -487,7 +487,7 @@ class LndMobileTools extends ReactContextBaseJavaModule {
     // Intent stopTorIntent = new Intent(getReactApplicationContext(), TorService.class);
     // stopTorIntent.setAction("org.torproject.android.intent.action.STOP");
     // getReactApplicationContext().stopService(stopTorIntent);
-    Intent stopLndIntent = new Intent(getReactApplicationContext(), LndMobileService.class);
+    Intent stopLndIntent = new Intent(getReactApplicationContext(), LitdMobileService.class);
     stopLndIntent.setAction("app.zeusln.zeus.android.intent.action.STOP");
     getReactApplicationContext().startService(stopLndIntent);
     ProcessPhoenix.triggerRebirth(getReactApplicationContext());

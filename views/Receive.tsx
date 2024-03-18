@@ -67,12 +67,12 @@ import Base64Utils from '../utils/Base64Utils';
 import NFCUtils from '../utils/NFCUtils';
 import { themeColor } from '../utils/ThemeUtils';
 
-import lndMobile from '../lndmobile/LndMobileInjection';
-import { decodeSubscribeTransactionsResult } from '../lndmobile/onchain';
+import litdMobile from '../litdmobile/LitdMobileInjection';
+import { decodeSubscribeTransactionsResult } from '../litdmobile/onchain';
 import {
     checkLndStreamErrorResponse,
-    LndMobileEventEmitter
-} from '../utils/LndMobileUtils';
+    LitdMobileEventEmitter
+} from '../utils/LitdMobileUtils';
 
 import UnifiedSvg from '../assets/images/SVG/DynamicSVG/UnifiedSvg';
 import LightningSvg from '../assets/images/SVG/DynamicSVG/LightningSvg';
@@ -567,7 +567,7 @@ export default class Receive extends React.Component<
 
         if (implementation === 'embedded-lnd') {
             if (rHash) {
-                this.listener = LndMobileEventEmitter.addListener(
+                this.listener = LitdMobileEventEmitter.addListener(
                     'SubscribeInvoices',
                     (e: any) => {
                         try {
@@ -586,7 +586,7 @@ export default class Receive extends React.Component<
                             }
 
                             const invoice =
-                                lndMobile.wallet.decodeInvoiceResult(e.data);
+                                litdMobile.wallet.decodeInvoiceResult(e.data);
 
                             if (
                                 invoice.settled &&
@@ -618,7 +618,7 @@ export default class Receive extends React.Component<
             }
 
             if (onChainAddress) {
-                this.listenerSecondary = LndMobileEventEmitter.addListener(
+                this.listenerSecondary = LitdMobileEventEmitter.addListener(
                     'SubscribeTransactions',
                     (e: any) => {
                         try {
@@ -669,8 +669,8 @@ export default class Receive extends React.Component<
                 );
             }
 
-            await lndMobile.wallet.subscribeInvoices();
-            await lndMobile.onchain.subscribeTransactions();
+            await litdMobile.wallet.subscribeInvoices();
+            await litdMobile.onchain.subscribeTransactions();
         }
 
         if (implementation === 'lightning-node-connect') {

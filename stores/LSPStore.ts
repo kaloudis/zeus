@@ -5,12 +5,12 @@ import SettingsStore from './SettingsStore';
 import ChannelsStore from './ChannelsStore';
 import NodeInfoStore from './NodeInfoStore';
 
-import lndMobile from '../lndmobile/LndMobileInjection';
-const { channel } = lndMobile;
+import litdMobile from '../litdmobile/LitdMobileInjection';
+const { channel } = litdMobile;
 
 import BackendUtils from '../utils/BackendUtils';
 import Base64Utils from '../utils/Base64Utils';
-import { LndMobileEventEmitter } from '../utils/LndMobileUtils';
+import { LitdMobileEventEmitter } from '../utils/LitdMobileUtils';
 import { localeString } from '../utils/LocaleUtils';
 
 export default class LSPStore {
@@ -188,7 +188,7 @@ export default class LSPStore {
     public initChannelAcceptor = async () => {
         if (this.channelAcceptor) return;
         if (this.settingsStore.implementation === 'embedded-lnd') {
-            this.channelAcceptor = LndMobileEventEmitter.addListener(
+            this.channelAcceptor = LitdMobileEventEmitter.addListener(
                 'ChannelAcceptor',
                 async (event: any) => {
                     try {

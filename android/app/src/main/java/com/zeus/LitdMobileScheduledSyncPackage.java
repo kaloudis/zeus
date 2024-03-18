@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class LndMobileScheduledSyncPackage implements ReactPackage {
+public class LitdMobileScheduledSyncPackage implements ReactPackage {
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
     return Collections.emptyList();
@@ -17,6 +17,6 @@ public class LndMobileScheduledSyncPackage implements ReactPackage {
 
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    return Arrays.asList(new LndMobileScheduledSync(reactContext));
+    return Arrays.asList(new LitdMobileScheduledSync(reactContext));
   }
 }

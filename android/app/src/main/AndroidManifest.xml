@@ -148,7 +148,7 @@
             android:resource="@xml/aid_list" />
       </service>
       <service
-        android:name=".LndMobileService"
+        android:name=".LitdMobileService"
                 android:exported="false"
         android:foregroundServiceType="specialUse"
       >

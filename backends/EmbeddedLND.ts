@@ -2,7 +2,7 @@ import LND from './LND';
 import OpenChannelRequest from '../models/OpenChannelRequest';
 import Base64Utils from './../utils/Base64Utils';
 
-import lndMobile from '../lndmobile/LndMobileInjection';
+import litdMobile from '../litdmobile/LitdMobileInjection';
 
 const {
     addInvoice,
@@ -18,7 +18,7 @@ const {
     getNetworkInfo,
     queryRoutes,
     lookupInvoice
-} = lndMobile.index;
+} = litdMobile.index;
 const {
     channelBalance,
     getChanInfo,
@@ -27,11 +27,11 @@ const {
     closedChannels,
     closeChannel,
     openChannel
-} = lndMobile.channel;
+} = litdMobile.channel;
 const { signMessageNodePubkey, verifyMessageNodePubkey, bumpFee } =
-    lndMobile.wallet;
+    litdMobile.wallet;
 const { walletBalance, newAddress, getTransactions, sendCoins } =
-    lndMobile.onchain;
+    litdMobile.onchain;
 
 export default class EmbeddedLND extends LND {
     getTransactions = async () => await getTransactions();

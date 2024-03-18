@@ -16,12 +16,12 @@ const restartNeeded = () => {
                 onPress: async () => {
                     try {
                         // await NativeModules.ZeusTor.stopTor();
-                        await NativeModules.LndMobile.stopLnd();
-                        await NativeModules.LndMobileTools.killLnd();
+                        await NativeModules.LitdMobile.stopLnd();
+                        await NativeModules.LitdMobileTools.killLnd();
                     } catch (e) {
                         console.log(e);
                     }
-                    NativeModules.LndMobileTools.restartApp();
+                    NativeModules.LitdMobileTools.restartApp();
                 }
             }
         ]);

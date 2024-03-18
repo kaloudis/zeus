@@ -42,7 +42,7 @@ import {
     initializeLnd,
     startLnd,
     expressGraphSync
-} from '../../utils/LndMobileUtils';
+} from '../../utils/LitdMobileUtils';
 import { localeString } from '../../utils/LocaleUtils';
 import { protectedNavigation } from '../../utils/NavigationUtils';
 import { themeColor } from '../../utils/ThemeUtils';

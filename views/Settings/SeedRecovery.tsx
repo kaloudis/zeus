@@ -19,7 +19,7 @@ import TextInput from '../../components/TextInput';
 import { themeColor } from '../../utils/ThemeUtils';
 import { localeString } from '../../utils/LocaleUtils';
 
-import { createLndWallet } from '../../utils/LndMobileUtils';
+import { createLndWallet } from '../../utils/LitdMobileUtils';
 
 import { BIP39_WORD_LIST } from '../../utils/Bip39Utils';
 

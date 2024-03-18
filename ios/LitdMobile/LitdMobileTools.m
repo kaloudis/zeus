@@ -1,7 +1,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface RCT_EXTERN_MODULE(LndMobileTools, RCTEventEmitter)
+@interface RCT_EXTERN_MODULE(LitdMobileTools, RCTEventEmitter)
 
 RCT_EXTERN_METHOD(
   writeConfig: (NSString *)config

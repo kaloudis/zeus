@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class LndMobileToolsPackage implements ReactPackage {
+public class LitdMobileToolsPackage implements ReactPackage {
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
     return Collections.emptyList();
@@ -17,6 +17,6 @@ public class LndMobileToolsPackage implements ReactPackage {
 
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    return Arrays.asList(new LndMobileTools(reactContext));
+    return Arrays.asList(new LitdMobileTools(reactContext));
   }
 }

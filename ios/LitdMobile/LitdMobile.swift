@@ -1,5 +1,5 @@
 import Foundation
-import Lndmobile
+import Litdmobile
 
 // https://stackoverflow.com/a/32306142
 extension StringProtocol {
@@ -26,11 +26,11 @@ extension StringProtocol {
   }
 }
 
-@objc(LndMobile)
-class LndMobile: RCTEventEmitter {
+@objc(LitdMobile)
+class LitdMobile: RCTEventEmitter {
   @objc
   override static func moduleName() -> String! {
-    "LndMobile"
+    "LitdMobile"
   }
 
   override func supportedEvents() -> [String]! {

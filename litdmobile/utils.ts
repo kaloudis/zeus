@@ -2,7 +2,7 @@ import { NativeModules } from 'react-native';
 import * as $protobuf from 'protobufjs';
 import Base64Utils from '../utils/Base64Utils';
 
-const { LndMobile } = NativeModules;
+const { LitdMobile } = NativeModules;
 
 export interface ISendRequestClass<IReq, Req> {
     create: (options: IReq) => Req;
@@ -52,7 +52,7 @@ export const sendCommand = async <IReq, Req, Res>({
 }: ISyncCommandOptions<IReq, Req, Res>): Promise<Res> => {
     try {
         const instance = request.create(options);
-        const b64 = await LndMobile.sendCommand(
+        const b64 = await LitdMobile.sendCommand(
             method,
             Base64Utils.bytesToBase64(request.encode(instance).finish())
         );
@@ -67,7 +67,7 @@ export const sendStreamCommand = async <IReq, Req>(
     streamOnlyOnce: boolean = false
 ): Promise<string> => {
     const instance = request.create(options);
-    const response = await LndMobile.sendStreamCommand(
+    const response = await LitdMobile.sendStreamCommand(
         method,
         Base64Utils.bytesToBase64(request.encode(instance).finish()),
         streamOnlyOnce
@@ -79,7 +79,7 @@ export const sendBidiStreamCommand = async (
     method: string,
     streamOnlyOnce: boolean = false
 ): Promise<string> => {
-    const response = await LndMobile.sendBidiStreamCommand(
+    const response = await LitdMobile.sendBidiStreamCommand(
         method,
         streamOnlyOnce
     );
@@ -92,7 +92,7 @@ export const writeToStream = async <IReq, Req>({
     options
 }: IWriteStreamOptions<IReq, Req>) => {
     const instance = request.create(options);
-    await LndMobile.writeToStream(
+    await LitdMobile.writeToStream(
         method,
         Base64Utils.bytesToBase64(request.encode(instance).finish())
     );

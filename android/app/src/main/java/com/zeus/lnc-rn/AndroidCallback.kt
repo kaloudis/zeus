@@ -1,6 +1,6 @@
 package app.zeusln.zeus;
 
-import lndmobile.NativeCallback
+import litdmobile.NativeCallback
 import com.facebook.react.bridge.Callback
 
 class AndroidCallback: NativeCallback  {

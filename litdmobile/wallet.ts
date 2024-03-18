@@ -73,7 +73,7 @@ export const initWallet = async (
     channelBackupsBase64?: string,
     aezeedPassphrase?: string
 ): Promise<lnrpc.InitWalletResponse> => {
-    // await NativeModules.LndMobile.initWallet(seed, password, recoveryWindow ?? 0, channelBackupsBase64 ?? null);
+    // await NativeModules.LitdMobile.initWallet(seed, password, recoveryWindow ?? 0, channelBackupsBase64 ?? null);
     const options: lnrpc.IInitWalletRequest = {
         cipher_seed_mnemonic: seed,
         wallet_password: Base64Utils.stringToUint8Array(password),
@@ -113,7 +113,7 @@ export const unlockWallet = async (
     password: string
 ): Promise<lnrpc.UnlockWalletResponse> => {
     const start = new Date().getTime();
-    // await NativeModules.LndMobile.unlockWallet(password);
+    // await NativeModules.LitdMobile.unlockWallet(password);
     const response = await sendCommand<
         lnrpc.IUnlockWalletRequest,
         lnrpc.UnlockWalletRequest,

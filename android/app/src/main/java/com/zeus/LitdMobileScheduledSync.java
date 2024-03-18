@@ -16,28 +16,28 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-class LndMobileScheduledSync extends ReactContextBaseJavaModule {
-  private final String TAG = "LndMobileScheduledSync";
+class LitdMobileScheduledSync extends ReactContextBaseJavaModule {
+  private final String TAG = "LitdMobileScheduledSync";
   private final String LND_SCHEDULED_SYNC_WORK_NAME = "LND_SCHEDULED_SYNC_WORK";
   private WorkManager workManager;
   private PeriodicWorkRequest periodicWorkRequest;
 
-  public LndMobileScheduledSync(ReactApplicationContext reactContext) {
+  public LitdMobileScheduledSync(ReactApplicationContext reactContext) {
     super(reactContext);
 
     workManager = WorkManager.getInstance(getReactApplicationContext());
     periodicWorkRequest = BuildConfig.DEBUG
-      ? new PeriodicWorkRequest.Builder(LndMobileScheduledSyncWorker.class, 15, TimeUnit.MINUTES)
+      ? new PeriodicWorkRequest.Builder(LitdMobileScheduledSyncWorker.class, 15, TimeUnit.MINUTES)
           .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
           .build()
-      : new PeriodicWorkRequest.Builder(LndMobileScheduledSyncWorker.class, 2, TimeUnit.HOURS)
+      : new PeriodicWorkRequest.Builder(LitdMobileScheduledSyncWorker.class, 2, TimeUnit.HOURS)
           .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
           .build();
   }
 
   @Override
   public String getName() {
-    return "LndMobileScheduledSync";
+    return "LitdMobileScheduledSync";
   }
 
   @ReactMethod

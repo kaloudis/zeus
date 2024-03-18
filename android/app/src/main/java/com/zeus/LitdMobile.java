@@ -67,11 +67,11 @@ import com.reactnativecommunity.asyncstorage.AsyncLocalStorageUtil;
 // import org.torproject.jni.TorService;
 
 // TODO break this class up
-class LndMobile extends ReactContextBaseJavaModule {
-  private final String TAG = "LndMobile";
+class LitdMobile extends ReactContextBaseJavaModule {
+  private final String TAG = "LitdMobile";
   Messenger messenger;
-  private boolean lndMobileServiceBound = false;
-  private Messenger lndMobileServiceMessenger; // The service
+  private boolean litdMobileServiceBound = false;
+  private Messenger litdMobileServiceMessenger; // The service
   private HashMap<Integer, Promise> requests = new HashMap<>();
 
   public enum LndStatus {
@@ -100,11 +100,11 @@ class LndMobile extends ReactContextBaseJavaModule {
       Bundle bundle = msg.getData();
 
       switch (msg.what) {
-        case LndMobileService.MSG_GRPC_COMMAND_RESULT:
-        case LndMobileService.MSG_START_LND_RESULT:
-        case LndMobileService.MSG_REGISTER_CLIENT_ACK:
-        case LndMobileService.MSG_STOP_LND_RESULT:
-        case LndMobileService.MSG_PONG: {
+        case LitdMobileService.MSG_GRPC_COMMAND_RESULT:
+        case LitdMobileService.MSG_START_LND_RESULT:
+        case LitdMobileService.MSG_REGISTER_CLIENT_ACK:
+        case LitdMobileService.MSG_STOP_LND_RESULT:
+        case LitdMobileService.MSG_PONG: {
           final int request = msg.arg1;
 
           if (!requests.containsKey(request)) {
@@ -128,7 +128,7 @@ class LndMobile extends ReactContextBaseJavaModule {
 
           break;
         }
-        case LndMobileService.MSG_GOSSIP_SYNC_RESULT: {
+        case LitdMobileService.MSG_GOSSIP_SYNC_RESULT: {
           final int request = msg.arg1;
           final Promise promise = requests.remove(request);
           if (bundle.containsKey("response")) {
@@ -141,7 +141,7 @@ class LndMobile extends ReactContextBaseJavaModule {
           }
           break;
         }
-        case LndMobileService.MSG_GRPC_STREAM_RESULT: {
+        case LitdMobileService.MSG_GRPC_STREAM_RESULT: {
           // TODO EOF Stream error
           final String method = (String) bundle.get("method");
           WritableMap params = Arguments.createMap();
@@ -163,7 +163,7 @@ class LndMobile extends ReactContextBaseJavaModule {
             .emit(method, params);
           break;
         }
-        case LndMobileService.MSG_CHECKSTATUS_RESPONSE: {
+        case LitdMobileService.MSG_CHECKSTATUS_RESPONSE: {
           final int request = msg.arg1;
 
           if (!requests.containsKey(request)) {
@@ -175,8 +175,8 @@ class LndMobile extends ReactContextBaseJavaModule {
           promise.resolve(flags);
           break;
         }
-        case LndMobileService.MSG_GRPC_STREAM_STARTED:
-        case LndMobileService.MSG_GRPC_STREAM_WRITE: {
+        case LitdMobileService.MSG_GRPC_STREAM_STARTED:
+        case LitdMobileService.MSG_GRPC_STREAM_WRITE: {
           final int request = msg.arg1;
           final Promise promise = requests.remove(request);
           if (promise != null) {
@@ -188,28 +188,28 @@ class LndMobile extends ReactContextBaseJavaModule {
     }
   }
 
-  class LndMobileServiceConnection implements ServiceConnection {
+  class LitdMobileServiceConnection implements ServiceConnection {
     private int request;
 
-    LndMobileServiceConnection(int request) {
+    LitdMobileServiceConnection(int request) {
       this.request = request;
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-      lndMobileServiceBound = true;
-      lndMobileServiceMessenger = new Messenger(service);
+      litdMobileServiceBound = true;
+      litdMobileServiceMessenger = new Messenger(service);
 
       try {
-        Message msg = Message.obtain(null, LndMobileService.MSG_REGISTER_CLIENT, request, 0);
+        Message msg = Message.obtain(null, LitdMobileService.MSG_REGISTER_CLIENT, request, 0);
         msg.replyTo = messenger;
-        lndMobileServiceMessenger.send(msg);
+        litdMobileServiceMessenger.send(msg);
       } catch (RemoteException e) {
         // In this case the service has crashed before we could even
         // do anything with it; we can count on soon being
         // disconnected (and then reconnected if it can be restarted)
         // so there is no need to do anything here.
-        Log.e(TAG, "LndMobileServiceConnection:onServiceConnected exception");
+        Log.e(TAG, "LitdMobileServiceConnection:onServiceConnected exception");
         Log.e(TAG, e.getMessage());
       }
     }
@@ -218,12 +218,12 @@ class LndMobile extends ReactContextBaseJavaModule {
     public void onServiceDisconnected(ComponentName className) {
       // This is called when the connection with the service has been
       // unexpectedly disconnected -- that is, its process crashed.
-      lndMobileServiceMessenger = null;
-      lndMobileServiceBound = false;
+      litdMobileServiceMessenger = null;
+      litdMobileServiceBound = false;
     }
   }
 
-  private LndMobileServiceConnection lndMobileServiceConnection;
+  private LitdMobileServiceConnection litdMobileServiceConnection;
 
   private boolean getPersistentServicesEnabled(Context context) {
     ReactDatabaseSupplier dbSupplier = ReactDatabaseSupplier.getInstance(context);
@@ -236,18 +236,18 @@ class LndMobile extends ReactContextBaseJavaModule {
     return false;
   }
 
-  public LndMobile(ReactApplicationContext reactContext) {
+  public LitdMobile(ReactApplicationContext reactContext) {
     super(reactContext);
   }
 
   @Override
   public String getName() {
-    return "LndMobile";
+    return "LitdMobile";
   }
 
   @ReactMethod
-  public void checkLndMobileServiceConnected(Promise p) {
-    if (lndMobileServiceBound) {
+  public void checkLitdMobileServiceConnected(Promise p) {
+    if (litdMobileServiceBound) {
       p.resolve(true);
     }
     else {
@@ -256,82 +256,82 @@ class LndMobile extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void sendPongToLndMobileservice(Promise promise) {
+  public void sendPongToLitdMobileservice(Promise promise) {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_PING, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_PING, req, 0);
     message.replyTo = messenger;
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_PONG to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_PONG to LitdMobileService", e);
     }
   }
 
   @ReactMethod
   public void initialize(Promise promise) {
-    if (!lndMobileServiceBound) {
+    if (!litdMobileServiceBound) {
       int req = new Random().nextInt();
       requests.put(req, promise);
 
-      lndMobileServiceConnection = new LndMobileServiceConnection(req);
+      litdMobileServiceConnection = new LitdMobileServiceConnection(req);
       messenger = new Messenger(new IncomingHandler()); // me
-      Intent intent = new Intent(getReactApplicationContext(), LndMobileService.class);
+      Intent intent = new Intent(getReactApplicationContext(), LitdMobileService.class);
       if (getPersistentServicesEnabled(getReactApplicationContext())) {
         getReactApplicationContext().startForegroundService(intent);
       }
       // else rely on bindService to start LND
       getReactApplicationContext().bindService(
         intent,
-        lndMobileServiceConnection,
+        litdMobileServiceConnection,
         Context.BIND_AUTO_CREATE
       );
 
-      lndMobileServiceBound = true;
+      litdMobileServiceBound = true;
 
-      // Note: Promise is returned from MSG_REGISTER_CLIENT_ACK message from LndMobileService
+      // Note: Promise is returned from MSG_REGISTER_CLIENT_ACK message from LitdMobileService
     } else {
       promise.resolve(0);
     }
   }
 
   @ReactMethod
-  public void unbindLndMobileService(Promise promise) {
-    if (lndMobileServiceBound) {
+  public void unbindLitdMobileService(Promise promise) {
+    if (litdMobileServiceBound) {
       int req = new Random().nextInt();
       requests.put(req, promise);
 
-      if (lndMobileServiceMessenger != null) {
+      if (litdMobileServiceMessenger != null) {
         try {
-          Message message = Message.obtain(null, LndMobileService.MSG_UNREGISTER_CLIENT, req);
+          Message message = Message.obtain(null, LitdMobileService.MSG_UNREGISTER_CLIENT, req);
           message.replyTo = messenger;
-          lndMobileServiceMessenger.send(message);
+          litdMobileServiceMessenger.send(message);
         } catch (RemoteException e) {
           // ignore
         }
       }
 
-      getReactApplicationContext().unbindService(lndMobileServiceConnection);
-      lndMobileServiceBound = false;
+      getReactApplicationContext().unbindService(litdMobileServiceConnection);
+      litdMobileServiceBound = false;
     }
   }
 
-  // TODO unbind LndMobileService?
+  // TODO unbind LitdMobileService?
 
   @ReactMethod
   public void checkStatus(Promise promise) {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_CHECKSTATUS, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_CHECKSTATUS, req, 0);
     message.replyTo = messenger;
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_CHECKSTATUS to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_CHECKSTATUS to LitdMobileService", e);
     }
   }
 
@@ -341,12 +341,12 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_START_LND, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_START_LND, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
 
-    String params = "--lnddir=" + getReactApplicationContext().getFilesDir().getPath();
+    String params = "--lnd.lnddir=" + getReactApplicationContext().getFilesDir().getPath();
     if (isTorEnabled) {
       // int listenPort = ZeusTorUtils.getListenPort(isTestnet);
       // String controlSocket = "unix://" + getReactApplicationContext().getDir(TorService.class.getSimpleName(), Context.MODE_PRIVATE).getAbsolutePath() + "/data/ControlSocket";
@@ -355,7 +355,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     } else {
       // If Tor isn't active, make sure we aren't
       // listening at all
-      params += " --nolisten";
+      params += " --lnd.nolisten";
     }
     bundle.putString(
       "args",
@@ -364,9 +364,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_START_LND to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_START_LND to LitdMobileService", e);
     }
   }
 
@@ -375,13 +375,13 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_STOP_LND, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_STOP_LND, req, 0);
     message.replyTo = messenger;
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_STOP_LND to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_STOP_LND to LitdMobileService", e);
     }
   }
 
@@ -390,7 +390,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_GOSSIP_SYNC, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GOSSIP_SYNC, req, 0);
     message.replyTo = messenger;
     Bundle bundle = new Bundle();
     bundle.putString(
@@ -400,9 +400,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_GOSSIP_SYNC to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_GOSSIP_SYNC to LitdMobileService", e);
     }
   }
 
@@ -411,7 +411,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_COMMAND, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_COMMAND, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
@@ -420,9 +420,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_GRPC_COMMAND to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_GRPC_COMMAND to LitdMobileService", e);
     }
   }
 
@@ -431,7 +431,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_STREAM_COMMAND, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_STREAM_COMMAND, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
@@ -441,9 +441,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_GRPC_STREAM_COMMAND to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_GRPC_STREAM_COMMAND to LitdMobileService", e);
     }
 
     promise.resolve("done");
@@ -454,7 +454,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_BIDI_STREAM_COMMAND, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_BIDI_STREAM_COMMAND, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
@@ -463,9 +463,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_GRPC_BIDI_STREAM_COMMAND to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_GRPC_BIDI_STREAM_COMMAND to LitdMobileService", e);
     }
 
     promise.resolve("done");
@@ -476,7 +476,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_STREAM_WRITE, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_STREAM_WRITE, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
@@ -485,9 +485,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_GRPC_STREAM_WRITE to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_GRPC_STREAM_WRITE to LitdMobileService", e);
     }
 
     promise.resolve("done");
@@ -498,7 +498,7 @@ class LndMobile extends ReactContextBaseJavaModule {
     int req = new Random().nextInt();
     requests.put(req, promise);
 
-    Message message = Message.obtain(null, LndMobileService.MSG_UNLOCKWALLET, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_UNLOCKWALLET, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
@@ -506,9 +506,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_UNLOCKWALLET to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_UNLOCKWALLET to LitdMobileService", e);
     }
   }
 
@@ -524,13 +524,13 @@ class LndMobile extends ReactContextBaseJavaModule {
       }
     }
 
-    Message message = Message.obtain(null, LndMobileService.MSG_INITWALLET, req, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_INITWALLET, req, 0);
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
     // TODO(hsjoberg): this could possibly be faster if we
     // just encode it to a bytearray using the grpc lib here,
-    // instead of letting LndMobileService do that part
+    // instead of letting LitdMobileService do that part
     bundle.putStringArrayList("seed", seedList);
     bundle.putString("password", password);
     bundle.putInt("recoveryWindow", recoveryWindow);
@@ -538,9 +538,9 @@ class LndMobile extends ReactContextBaseJavaModule {
     message.setData(bundle);
 
     try {
-      lndMobileServiceMessenger.send(message);
+      litdMobileServiceMessenger.send(message);
     } catch (RemoteException e) {
-      promise.reject(TAG, "Could not Send MSG_INITWALLET to LndMobileService", e);
+      promise.reject(TAG, "Could not Send MSG_INITWALLET to LitdMobileService", e);
     }
   }
 }

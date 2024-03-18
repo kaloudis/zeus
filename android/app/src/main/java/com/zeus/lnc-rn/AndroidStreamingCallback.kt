@@ -1,6 +1,6 @@
 package app.zeusln.zeus;
 
-import lndmobile.NativeCallback
+import litdmobile.NativeCallback
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.Arguments

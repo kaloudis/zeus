@@ -38,11 +38,11 @@ import com.google.protobuf.ByteString;
 
 // import org.torproject.jni.TorService;
 
-public class LndMobileScheduledSyncWorker extends ListenableWorker {
+public class LitdMobileScheduledSyncWorker extends ListenableWorker {
   private final String TAG = "LndScheduledSyncWorker";
-  private final String HANDLERTHREAD_NAME = "zeus_lndmobile_sync";
+  private final String HANDLERTHREAD_NAME = "zeus_litdmobile_sync";
   private Handler incomingHandler;
-  private boolean lndMobileServiceBound = false;
+  private boolean litdMobileServiceBound = false;
   private Messenger messengerService; // The service
   private Messenger messenger; // Me
   private ReactDatabaseSupplier dbSupplier;
@@ -69,7 +69,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   // }
   // WorkState currentState = WorkState.NOT_STARTED;
 
-  public LndMobileScheduledSyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+  public LitdMobileScheduledSyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
     super(context, workerParams);
     dbSupplier = ReactDatabaseSupplier.getInstance(getApplicationContext());
     // zeusTor = new ZeusTor(new ReactApplicationContext(getApplicationContext()));
@@ -169,13 +169,13 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
         incomingHandler = new Handler() {
           @Override
           public void handleMessage(Message msg) {
-            // Hyperlog.d(TAG, "Handling new incoming message from LndMobileService, msg id: " + msg.what);
+            // Hyperlog.d(TAG, "Handling new incoming message from LitdMobileService, msg id: " + msg.what);
             // Hyperlog.v(TAG, msg.toString());
             Bundle bundle;
 
             try {
               switch (msg.what) {
-                case LndMobileService.MSG_REGISTER_CLIENT_ACK: {
+                case LitdMobileService.MSG_REGISTER_CLIENT_ACK: {
                   try {
                     if (!lndStarted) {
                       // Hyperlog.i(TAG, "Sending MSG_START_LND request");
@@ -183,7 +183,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
                     } else {
                       // Just exit if we reach this scenario
                       // Hyperlog.w(TAG, "WARNING, Got MSG_REGISTER_CLIENT_ACK when lnd should already be started, quitting work.");
-                      unbindLndMobileService();
+                      unbindLitdMobileService();
                       completer.set(Result.success());
                       return;
                     }
@@ -192,13 +192,13 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
                   }
                   break;
                 }
-                case LndMobileService.MSG_START_LND_RESULT: {
+                case LitdMobileService.MSG_START_LND_RESULT: {
                   // TODO(hsjoberg): check for "lnd already started" error? (strictly not needed though)
                   lndStarted = true;
                   subscribeStateRequest();
                   break;
                 }
-                case LndMobileService.MSG_GRPC_STREAM_RESULT: {
+                case LitdMobileService.MSG_GRPC_STREAM_RESULT: {
                   bundle = msg.getData();
                   final byte[] response = bundle.getByteArray("response");
                   final String method = bundle.getString("method");
@@ -216,7 +216,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
                         // Hyperlog.i(TAG, "Waiting for WalletState.RPC_ACTIVE");
                       } else if (currentState == lnrpc.Stateservice.WalletState.RPC_ACTIVE) {
                         // Hyperlog.i(TAG, "Got WalletState.RPC_ACTIVE");
-                        // Hyperlog.i(TAG, "LndMobileService reports RPC server ready. Sending GetInfo request");
+                        // Hyperlog.i(TAG, "LitdMobileService reports RPC server ready. Sending GetInfo request");
                         getInfoRequest();
                       } else if (currentState == lnrpc.Stateservice.WalletState.SERVER_ACTIVE) {
                         // Hyperlog.i(TAG, "Got WalletState.SERVER_ACTIVE");
@@ -232,7 +232,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
                   }
                   break;
                 }
-                case LndMobileService.MSG_GRPC_COMMAND_RESULT: {
+                case LitdMobileService.MSG_GRPC_COMMAND_RESULT: {
                   bundle = msg.getData();
                   final byte[] response = bundle.getByteArray("response");
                   final String method = bundle.getString("method");
@@ -284,7 +284,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
                     }
                   }
                   else {
-                    Log.w(TAG, "Got unexpected method in MSG_GRPC_COMMAND_RESULT from LndMobileService. " +
+                    Log.w(TAG, "Got unexpected method in MSG_GRPC_COMMAND_RESULT from LitdMobileService. " +
                               "Expected GetInfo or UnlockWallet, got " + method);
                   }
                   break;
@@ -300,12 +300,12 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
         };
 
         messenger = new Messenger(incomingHandler); // me
-        bindLndMobileService();
+        bindLitdMobileService();
       }
     };
     // FIXME(hsjoberg):
     // Calling thread.start() causes fatal exception:
-    // java.lang.RuntimeException: Can't create handler inside thread Thread[zeus_lndmobile_sync,5,main] that has not called Looper.prepare()
+    // java.lang.RuntimeException: Can't create handler inside thread Thread[zeus_litdmobile_sync,5,main] that has not called Looper.prepare()
     // Calling run instead, this is really wrong through.
     // Maybe use AsyncTask instead?
     thread.run();
@@ -313,7 +313,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
 
   private void stopWorker(boolean success, CallbackToFutureAdapter.Completer<Result> completer) {
     // Hyperlog.i(TAG, "Job is done. Quitting");
-    unbindLndMobileService();
+    unbindLitdMobileService();
 
     if (torStarted) {
         //  zeusTor.stopTor(new PromiseWrapper() {
@@ -383,20 +383,20 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   }
 
   private void startLnd() throws RemoteException {
-    Message message = Message.obtain(null, LndMobileService.MSG_START_LND, 0, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_START_LND, 0, 0);
     message.replyTo = messenger;
     Bundle bundle = new Bundle();
-    String params = "--lnddir=" + getApplicationContext().getFilesDir().getPath();
+    String params = "--lnd.lnddir=" + getApplicationContext().getFilesDir().getPath();
     if (torEnabled) {
       // String controlSocket = "unix://" + getApplicationContext().getDir(TorService.class.getSimpleName(), Context.MODE_PRIVATE).getAbsolutePath() + "/data/ControlSocket";
       // Hyperlog.d(TAG, "Adding Tor params for starting lnd, torSocksPort: " + torSocksPort + ", controlSocket: " + controlSocket);
       // params += " --tor.active --tor.socks=127.0.0.1:" + torSocksPort + " --tor.control=" + controlSocket;
-      // params += " --nolisten";
+      // params += " --lnd.nolisten";
     }
     else {
       // If Tor isn't active, make sure we aren't
       // listening at all
-      params += " --nolisten";
+      params += " --lnd.nolisten";
     }
     bundle.putString("args", params);
     message.setData(bundle);
@@ -404,7 +404,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   }
 
   private void subscribeStateRequest() throws RemoteException {
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_STREAM_COMMAND, 0, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_STREAM_COMMAND, 0, 0);
     message.replyTo = messenger;
     Bundle bundle = new Bundle();
     bundle.putString("method", "SubscribeState");
@@ -414,7 +414,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   }
 
   private void unlockWalletRequest(String password) throws RemoteException {
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_COMMAND, 0, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_COMMAND, 0, 0);
     message.replyTo = messenger;
     Bundle bundle = new Bundle();
     bundle.putString("method", "UnlockWallet");
@@ -424,7 +424,7 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   }
 
   private void getInfoRequest() throws RemoteException {
-    Message message = Message.obtain(null, LndMobileService.MSG_GRPC_COMMAND, 0, 0);
+    Message message = Message.obtain(null, LitdMobileService.MSG_GRPC_COMMAND, 0, 0);
     message.replyTo = messenger;
     Bundle getinfoBundle = new Bundle();
     getinfoBundle.putString("method", "GetInfo");
@@ -433,30 +433,30 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
     messengerService.send(message);
   }
 
-  private void bindLndMobileService() {
+  private void bindLitdMobileService() {
     getApplicationContext().bindService(
-      new Intent(getApplicationContext(), LndMobileService.class),
+      new Intent(getApplicationContext(), LitdMobileService.class),
       serviceConnection,
       Context.BIND_AUTO_CREATE
     );
-    lndMobileServiceBound = true;
+    litdMobileServiceBound = true;
   }
 
-  private void unbindLndMobileService() {
-    if (lndMobileServiceBound) {
+  private void unbindLitdMobileService() {
+    if (litdMobileServiceBound) {
       if (messengerService != null) {
         try {
-          Message message = Message.obtain(null, LndMobileService.MSG_UNREGISTER_CLIENT);
+          Message message = Message.obtain(null, LitdMobileService.MSG_UNREGISTER_CLIENT);
           message.replyTo = messenger;
           messengerService.send(message);
         } catch (RemoteException e) {
-          // Hyperlog.e(TAG, "Unable to send unbind request to LndMobileService", e);
+          // Hyperlog.e(TAG, "Unable to send unbind request to LitdMobileService", e);
         }
       }
 
       getApplicationContext().unbindService(serviceConnection);
-      lndMobileServiceBound = false;
-      // Hyperlog.i(TAG, "Unbinding LndMobileService");
+      litdMobileServiceBound = false;
+      // Hyperlog.i(TAG, "Unbinding LitdMobileService");
     }
   }
 
@@ -535,8 +535,8 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
     ActivityManager am = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
       // Hyperlog.d(TAG, "Process " + p.processName);
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
-        // Hyperlog.d(TAG, "Found " + packageName + ":zeusLndMobile pid: " + String.valueOf(p.pid));
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
+        // Hyperlog.d(TAG, "Found " + packageName + ":zeusLitdMobile pid: " + String.valueOf(p.pid));
         return true;
       }
     }
@@ -547,8 +547,8 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
     String packageName = getApplicationContext().getPackageName();
     ActivityManager am = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
     for (ActivityManager.RunningAppProcessInfo p : am.getRunningAppProcesses()) {
-      if (p.processName.equals(packageName + ":zeusLndMobile")) {
-        // Hyperlog.i(TAG, "Killing " + packageName + ":zeusLndMobile with pid: " + String.valueOf(p.pid));
+      if (p.processName.equals(packageName + ":zeusLitdMobile")) {
+        // Hyperlog.i(TAG, "Killing " + packageName + ":zeusLitdMobile with pid: " + String.valueOf(p.pid));
         Process.killProcess(p.pid);
         return true;
       }
@@ -559,23 +559,23 @@ public class LndMobileScheduledSyncWorker extends ListenableWorker {
   private ServiceConnection serviceConnection = new ServiceConnection() {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        lndMobileServiceBound = true;
+        litdMobileServiceBound = true;
         messengerService = new Messenger(service);
 
         try {
             Message msg = Message.obtain(null,
-                    LndMobileService.MSG_REGISTER_CLIENT);
+                    LitdMobileService.MSG_REGISTER_CLIENT);
             msg.replyTo = messenger;
             messengerService.send(msg);
         } catch (RemoteException e) {
-          // Hyperlog.e(TAG, "Unable to send MSG_REGISTER_CLIENT to LndMobileService", e);
+          // Hyperlog.e(TAG, "Unable to send MSG_REGISTER_CLIENT to LitdMobileService", e);
         }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName className) {
       messengerService = null;
-      lndMobileServiceBound = false;
+      litdMobileServiceBound = false;
     }
   };
 }
