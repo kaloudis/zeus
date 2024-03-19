@@ -345,8 +345,16 @@ class LitdMobile extends ReactContextBaseJavaModule {
     message.replyTo = messenger;
 
     Bundle bundle = new Bundle();
+    
+    String litPath = getReactApplicationContext().getFilesDir().getPath();
+    String params = "--lit-dir=" + litPath;
+    params += " --lnd.lnddir=" + litPath + "/lnd";
+    params += " --faraday.faradaydir=" + litPath + "/faraday";
+    params += " --loop.loopdir=" + litPath + "/loop";
+    params += " --pool.basedir=" + litPath + "/pool";
+    params += " --taproot-assets.tapddir=" + litPath + "/tapd";
+    params += " --disableui";
 
-    String params = "--lnd.lnddir=" + getReactApplicationContext().getFilesDir().getPath();
     if (isTorEnabled) {
       // int listenPort = ZeusTorUtils.getListenPort(isTestnet);
       // String controlSocket = "unix://" + getReactApplicationContext().getDir(TorService.class.getSimpleName(), Context.MODE_PRIVATE).getAbsolutePath() + "/data/ControlSocket";

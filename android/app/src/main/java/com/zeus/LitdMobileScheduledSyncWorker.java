@@ -386,7 +386,17 @@ public class LitdMobileScheduledSyncWorker extends ListenableWorker {
     Message message = Message.obtain(null, LitdMobileService.MSG_START_LND, 0, 0);
     message.replyTo = messenger;
     Bundle bundle = new Bundle();
-    String params = "--lnd.lnddir=" + getApplicationContext().getFilesDir().getPath();
+    String litPath = getApplicationContext().getFilesDir().getPath();
+    String params = "--lit-dir=" + litPath;
+    params += " --lnd.lnddir=" + litPath + "/lnd";
+    params += " --faraday.faradaydir=" + litPath + "/faraday";
+    params += " --loop.loopdir=" + litPath + "/loop";
+    params += " --pool.basedir=" + litPath + "/pool";
+    params += " --taproot-assets.tapddir=" + litPath + "/tapd";
+    params += " --disableui";
+
+    // TODO add migration for existing LND instances
+
     if (torEnabled) {
       // String controlSocket = "unix://" + getApplicationContext().getDir(TorService.class.getSimpleName(), Context.MODE_PRIVATE).getAbsolutePath() + "/data/ControlSocket";
       // Hyperlog.d(TAG, "Adding Tor params for starting lnd, torSocksPort: " + torSocksPort + ", controlSocket: " + controlSocket);
