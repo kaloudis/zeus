@@ -128,7 +128,11 @@ export default class TransactionsStore {
         this.loading = true;
 
         // Decode the raw transaction hex string
-        const tx = bitcoin.Transaction.fromHex(raw_final_tx);
+        const tx = bitcoin.Transaction.fromHex(
+            raw_final_tx.includes('=')
+                ? Base64Utils.base64ToHex(raw_final_tx)
+                : raw_final_tx
+        );
         // Get the transaction ID (txid)
         const txid = tx.getId();
 
@@ -261,8 +265,14 @@ export default class TransactionsStore {
     public sendCoinsLNDCoinControl = (
         transactionRequest: TransactionRequest
     ) => {
-        const { utxos, addr, amount, sat_per_vbyte, account } =
-            transactionRequest;
+        const {
+            utxos,
+            addr,
+            amount,
+            sat_per_vbyte,
+            account,
+            additional_outputs
+        } = transactionRequest;
         const inputs: any = [];
         const outputs: any = {};
 
@@ -276,6 +286,10 @@ export default class TransactionsStore {
         if (addr) {
             outputs[addr] = Number(amount);
         }
+
+        additional_outputs.map((output) => {
+            outputs[output.address] = Number(output.satAmount);
+        });
 
         const fundPsbtRequest = {
             raw: {
@@ -321,9 +335,10 @@ export default class TransactionsStore {
         this.loading = true;
 
         if (
-            BackendUtils.isLNDBased() &&
-            transactionRequest.utxos &&
-            transactionRequest.utxos.length > 0
+            (BackendUtils.isLNDBased() &&
+                transactionRequest.utxos &&
+                transactionRequest.utxos.length > 0) ||
+            transactionRequest.additional_outputs.length > 0
         ) {
             return this.sendCoinsLNDCoinControl(transactionRequest);
         }
