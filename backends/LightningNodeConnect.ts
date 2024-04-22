@@ -452,5 +452,6 @@ export default class LightningNodeConnect {
     supportsCustomPreimages = () => true;
     supportsSweep = () => true;
     supportsOnchainBatching = () => true;
+    supportsChannelBatching = () => true;
     isLNDBased = () => true;
 }

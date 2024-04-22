@@ -611,5 +611,6 @@ export default class LND {
     supportsCustomPreimages = () => true;
     supportsSweep = () => true;
     supportsOnchainBatching = () => true;
+    supportsChannelBatching = () => true;
     isLNDBased = () => true;
 }

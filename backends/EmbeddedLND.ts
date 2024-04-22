@@ -212,19 +212,20 @@ export default class EmbeddedLND extends LND {
     };
     fundingStateStep = async (data: any) => {
         // Verify
-        if (data.psbt_finalize?.funded_psbt)
+        if (data.psbt_finalize?.funded_psbt && Base64Utils.isHex(data.psbt_finalize?.funded_psbt))
             data.psbt_finalize.funded_psbt = Base64Utils.hexToBase64(
                 data.psbt_finalize.funded_psbt
             );
         // Finalize
-        if (data.psbt_finalize?.final_raw_tx)
+        if (data.psbt_finalize?.final_raw_tx && Base64Utils.isHex(data.psbt_finalize?.final_raw_tx))
             data.psbt_finalize.final_raw_tx = Base64Utils.hexToBase64(
                 data.psbt_finalize.final_raw_tx
             );
-        if (data.psbt_finalize?.signed_psbt)
+        if (data.psbt_finalize?.signed_psbt && Base64Utils.isHex(data.psbt_finalize?.signed_psbt))
             data.psbt_finalize.signed_psbt = Base64Utils.hexToBase64(
                 data.psbt_finalize.signed_psbt
             );
+        console.log('FSS DATA final', data);
         return await fundingStateStep(data);
     };
 
@@ -268,5 +269,6 @@ export default class EmbeddedLND extends LND {
     supportsCustomPreimages = () => true;
     supportsSweep = () => true;
     supportsOnchainBatching = () => true;
+    supportsChannelBatching = () => true;
     isLNDBased = () => true;
 }

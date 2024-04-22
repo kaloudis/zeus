@@ -45,18 +45,21 @@ export const bumpFee = async ({
  */
 export const fundPsbt = async ({
     account,
+    psbt,
     raw,
     spend_unconfirmed,
     sat_per_vbyte
 }: {
     account?: string;
-    raw: walletrpc.TxTemplate;
+    psbt?: Uint8Array;
+    raw?: walletrpc.TxTemplate;
     spend_unconfirmed?: boolean;
     sat_per_vbyte?: Long;
 }): Promise<walletrpc.FundPsbtResponse> => {
     const options: walletrpc.IFundPsbtRequest = {
         account,
         raw,
+        psbt,
         spend_unconfirmed,
         sat_per_vbyte: sat_per_vbyte ? Long.fromValue(sat_per_vbyte) : undefined
     };

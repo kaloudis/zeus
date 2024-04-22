@@ -45,6 +45,8 @@ import NodeInfoStore from '../stores/NodeInfoStore';
 import SettingsStore from '../stores/SettingsStore';
 import UTXOsStore from '../stores/UTXOsStore';
 
+import { AdditionalChannel } from '../models/OpenChannelRequest';
+
 import CaretDown from '../assets/images/SVG/Caret Down.svg';
 import CaretRight from '../assets/images/SVG/Caret Right.svg';
 import Scan from '../assets/images/SVG/Scan.svg';
@@ -79,6 +81,7 @@ interface OpenChannelState {
     advancedSettingsToggle: boolean;
     // external account funding
     account: string;
+    additionalChannels: Array<AdditionalChannel>;
 }
 
 @inject(
@@ -99,6 +102,7 @@ export default class OpenChannel extends React.Component<
         super(props);
         this.state = {
             node_pubkey_string: '',
+            host: '',
             local_funding_amount: '',
             fundMax: false,
             satAmount: '',
@@ -108,13 +112,21 @@ export default class OpenChannel extends React.Component<
             privateChannel: true,
             scidAlias: true,
             simpleTaprootChannel: false,
-            host: '',
             suggestImport: '',
             utxos: [],
             utxoBalance: 0,
             connectPeerOnly: false,
             advancedSettingsToggle: false,
-            account: 'default'
+            account: 'default',
+            additionalChannels: [
+                {
+                    node_pubkey_string:
+                        '03e84a109cd70e57864274932fc87c5e6434c59ebb8e6e7d28532219ba38f7f6df',
+                    host: '139.144.22.237:9735',
+                    local_funding_amount: '',
+                    satAmount: ''
+                }
+            ]
         };
     }
 
@@ -213,9 +225,9 @@ export default class OpenChannel extends React.Component<
 
         const node_pubkey_string = navigation.getParam(
             'node_pubkey_string',
-            ''
+            '021713d5331898c206b57c4f7d40635079de9a97d97782646f31dac18a53f2d979'
         );
-        const host = navigation.getParam('host', '');
+        const host = navigation.getParam('host', '[2a09:8280:1::15:a57c]:9735');
 
         this.setState({
             node_pubkey_string,
@@ -325,7 +337,8 @@ export default class OpenChannel extends React.Component<
             scidAlias,
             simpleTaprootChannel,
             connectPeerOnly,
-            advancedSettingsToggle
+            advancedSettingsToggle,
+            additionalChannels
         } = this.state;
         const { implementation } = SettingsStore;
 
@@ -371,6 +384,10 @@ export default class OpenChannel extends React.Component<
                                         connectPeerOnly
                                             ? localeString(
                                                   'views.OpenChannel.connectPeer'
+                                              )
+                                            : additionalChannels.length > 0
+                                            ? localeString(
+                                                  'views.OpenChannel.openChannels'
                                               )
                                             : localeString(
                                                   'views.OpenChannel.openChannel'
@@ -523,46 +540,6 @@ export default class OpenChannel extends React.Component<
 
                         {!connectPeerOnly && (
                             <>
-                                {BackendUtils.supportsChannelCoinControl() && (
-                                    <UTXOPicker
-                                        onValueChange={this.selectUTXOs}
-                                        UTXOsStore={UTXOsStore}
-                                    />
-                                )}
-
-                                {BackendUtils.isLNDBased() && (
-                                    <>
-                                        <Text
-                                            style={{
-                                                top: 20,
-                                                color: themeColor(
-                                                    'secondaryText'
-                                                )
-                                            }}
-                                        >
-                                            {localeString(
-                                                'views.OpenChannel.fundMax'
-                                            )}
-                                        </Text>
-                                        <Switch
-                                            value={fundMax}
-                                            onValueChange={() => {
-                                                const newValue: boolean =
-                                                    !fundMax;
-                                                this.setState({
-                                                    fundMax: newValue,
-                                                    local_funding_amount:
-                                                        newValue &&
-                                                        implementation ===
-                                                            'c-lightning-REST'
-                                                            ? 'all'
-                                                            : ''
-                                                });
-                                            }}
-                                        />
-                                    </>
-                                )}
-
                                 {!fundMax && (
                                     <AmountInput
                                         amount={local_funding_amount}
@@ -594,6 +571,238 @@ export default class OpenChannel extends React.Component<
                                                     : confirmedBlockchainBalance
                                             }
                                             toggleable
+                                        />
+                                    </View>
+                                )}
+
+                                {BackendUtils.isLNDBased() &&
+                                    additionalChannels.length === 0 && (
+                                        <>
+                                            <Text
+                                                style={{
+                                                    marginTop: -20,
+                                                    top: 20,
+                                                    color: themeColor(
+                                                        'secondaryText'
+                                                    )
+                                                }}
+                                            >
+                                                {localeString(
+                                                    'views.OpenChannel.fundMax'
+                                                )}
+                                            </Text>
+                                            <Switch
+                                                value={fundMax}
+                                                onValueChange={() => {
+                                                    const newValue: boolean =
+                                                        !fundMax;
+                                                    this.setState({
+                                                        fundMax: newValue,
+                                                        local_funding_amount:
+                                                            newValue &&
+                                                            implementation ===
+                                                                'c-lightning-REST'
+                                                                ? 'all'
+                                                                : ''
+                                                    });
+                                                }}
+                                            />
+                                        </>
+                                    )}
+
+                                {additionalChannels.map((channel, index) => {
+                                    return (
+                                        <View
+                                            key={`additionalChannel-${index}`}
+                                        >
+                                            <Text
+                                                style={{
+                                                    ...styles.text,
+                                                    color: themeColor(
+                                                        'secondaryText'
+                                                    )
+                                                }}
+                                            >
+                                                {localeString(
+                                                    'views.OpenChannel.nodePubkey'
+                                                )}
+                                            </Text>
+                                            <TextInput
+                                                placeholder={'0A...'}
+                                                value={
+                                                    channel?.node_pubkey_string
+                                                }
+                                                onChangeText={(
+                                                    text: string
+                                                ) => {
+                                                    let newChannels =
+                                                        additionalChannels;
+
+                                                    newChannels[
+                                                        index
+                                                    ].node_pubkey_string = text;
+
+                                                    this.setState({
+                                                        additionalChannels:
+                                                            newChannels
+                                                    });
+                                                }}
+                                            />
+                                            <Text
+                                                style={{
+                                                    ...styles.text,
+                                                    color: themeColor(
+                                                        'secondaryText'
+                                                    )
+                                                }}
+                                            >
+                                                {localeString(
+                                                    'views.OpenChannel.host'
+                                                )}
+                                            </Text>
+                                            <TextInput
+                                                value={channel?.host}
+                                                placeholder={localeString(
+                                                    'views.OpenChannel.hostPort'
+                                                )}
+                                                onChangeText={(
+                                                    text: string
+                                                ) => {
+                                                    let newChannels =
+                                                        additionalChannels;
+
+                                                    newChannels[index].host =
+                                                        text;
+
+                                                    this.setState({
+                                                        additionalChannels:
+                                                            newChannels
+                                                    });
+                                                }}
+                                            />
+                                            <AmountInput
+                                                amount={
+                                                    channel?.local_funding_amount
+                                                }
+                                                title={localeString(
+                                                    'views.OpenChannel.localAmt'
+                                                )}
+                                                onAmountChange={(
+                                                    amount: string,
+                                                    satAmount: string | number
+                                                ) => {
+                                                    let newChannels =
+                                                        additionalChannels;
+
+                                                    newChannels[
+                                                        index
+                                                    ].local_funding_amount = amount;
+                                                    newChannels[
+                                                        index
+                                                    ].satAmount = satAmount;
+
+                                                    this.setState({
+                                                        additionalChannels:
+                                                            newChannels
+                                                    });
+                                                }}
+                                            />
+                                            <View
+                                                style={{
+                                                    marginTop: 10,
+                                                    marginBottom: 20
+                                                }}
+                                            >
+                                                <Button
+                                                    title={localeString(
+                                                        'views.OpenChannel.removeAdditionalChannel'
+                                                    )}
+                                                    icon={{
+                                                        name: 'remove',
+                                                        size: 25,
+                                                        color: themeColor(
+                                                            'background'
+                                                        )
+                                                    }}
+                                                    onPress={() => {
+                                                        let newChannels =
+                                                            additionalChannels;
+
+                                                        newChannels =
+                                                            newChannels.filter(
+                                                                (item) =>
+                                                                    item !==
+                                                                    channel
+                                                            );
+
+                                                        this.setState({
+                                                            additionalChannels:
+                                                                newChannels
+                                                        });
+                                                    }}
+                                                    tertiary
+                                                />
+                                            </View>
+                                        </View>
+                                    );
+                                })}
+
+                                {BackendUtils.supportsChannelBatching() &&
+                                    node_pubkey_string &&
+                                    host && (
+                                        <View
+                                            style={{
+                                                ...styles.button,
+                                                marginTop:
+                                                    additionalChannels.length ===
+                                                    0
+                                                        ? 10
+                                                        : 0
+                                            }}
+                                        >
+                                            <Button
+                                                title={localeString(
+                                                    'views.OpenChannel.openAdditionalChannel'
+                                                )}
+                                                icon={{
+                                                    name: 'add',
+                                                    size: 25,
+                                                    color: themeColor(
+                                                        'background'
+                                                    )
+                                                }}
+                                                onPress={() => {
+                                                    const additionalChannels =
+                                                        this.state
+                                                            .additionalChannels;
+
+                                                    additionalChannels.push({
+                                                        node_pubkey_string: '',
+                                                        host: '',
+                                                        local_funding_amount:
+                                                            '',
+                                                        satAmount: ''
+                                                    });
+
+                                                    this.setState({
+                                                        additionalChannels,
+                                                        fundMax: false
+                                                    });
+                                                }}
+                                            />
+                                        </View>
+                                    )}
+
+                                {BackendUtils.supportsChannelCoinControl() && (
+                                    <View
+                                        style={{
+                                            marginTop: 10,
+                                            marginBottom: 20
+                                        }}
+                                    >
+                                        <UTXOPicker
+                                            onValueChange={this.selectUTXOs}
+                                            UTXOsStore={UTXOsStore}
                                         />
                                     </View>
                                 )}
@@ -785,6 +994,10 @@ export default class OpenChannel extends React.Component<
                                         ? localeString(
                                               'views.OpenChannel.connectPeer'
                                           )
+                                        : additionalChannels.length > 0
+                                        ? localeString(
+                                              'views.OpenChannel.openChannels'
+                                          )
                                         : localeString(
                                               'views.OpenChannel.openChannel'
                                           )
@@ -802,7 +1015,8 @@ export default class OpenChannel extends React.Component<
                                     if (
                                         implementation ===
                                             'lightning-node-connect' &&
-                                        this.state.account !== 'default' &&
+                                        (this.state.account !== 'default' ||
+                                            additionalChannels.length > 0) &&
                                         !connectPeerOnly
                                     ) {
                                         ChannelsStore.setLoading(true);
@@ -826,7 +1040,12 @@ export default class OpenChannel extends React.Component<
                                                         pending_chan_id:
                                                             randomBytes(
                                                                 32
-                                                            ).toString('base64')
+                                                            ).toString(
+                                                                'base64'
+                                                            ),
+                                                        no_publish:
+                                                            additionalChannels.length >
+                                                            0
                                                     }
                                                 }
                                             };

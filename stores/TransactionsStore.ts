@@ -186,6 +186,13 @@ export default class TransactionsStore {
     ) => {
         this.loading = true;
 
+        console.log('FSS chan req', {
+            psbt_finalize: {
+                signed_psbt,
+                pending_chan_id
+            }
+        })
+
         return BackendUtils.fundingStateStep({
             psbt_finalize: {
                 signed_psbt,
@@ -193,6 +200,7 @@ export default class TransactionsStore {
             }
         })
             .then((data: any) => {
+                console.log('fss chan data', data);
                 if (data.publish_error) {
                     this.error_msg = errorToUserFriendly(data.publish_error);
                     this.error = true;
@@ -215,6 +223,7 @@ export default class TransactionsStore {
                 }
             })
             .catch((error: any) => {
+                console.log('fss chan error', error);
                 // handle error
                 this.error_msg = errorToUserFriendly(error.message);
                 this.error = true;
