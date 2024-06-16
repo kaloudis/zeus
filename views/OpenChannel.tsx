@@ -11,7 +11,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { inject, observer } from 'mobx-react';
 import NfcManager, { NfcEvents, TagEvent } from 'react-native-nfc-manager';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Amount from '../components/Amount';
 import AmountInput from '../components/AmountInput';
@@ -52,7 +52,7 @@ import Scan from '../assets/images/SVG/Scan.svg';
 
 interface OpenChannelProps {
     exitSetup: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     BalanceStore: BalanceStore;
     ChannelsStore: ChannelsStore;
     ModalStore: ModalStore;

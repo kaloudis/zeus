@@ -15,7 +15,7 @@ import {
     useCodeScanner
 } from 'react-native-vision-camera';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 
@@ -37,7 +37,7 @@ interface QRProps {
     text?: string;
     handleQRScanned: (data: string) => void;
     goBack: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     parts?: number;
     totalParts?: number;
     mode?: string;

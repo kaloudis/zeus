@@ -9,7 +9,7 @@ import {
     Text
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Globe from '../assets/images/SVG/Globe.svg';
 import Wordmark from '../assets/images/SVG/wordmark-black.svg';
@@ -28,7 +28,7 @@ import { themeColor } from '../utils/ThemeUtils';
 import TresArrows from '../assets/images/SVG/TresArrows.svg';
 
 interface IntroSplashProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
 }
 

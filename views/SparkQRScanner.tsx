@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Alert } from 'react-native';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import QRCodeScanner from './../components/QRCodeScanner';
 
 import { localeString } from './../utils/LocaleUtils';
 
 interface SparkQRProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<'SparkQRScanner', { index: any }>;
 }
 

@@ -9,7 +9,7 @@ import Animated, {
     useSharedValue
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import stores from '../stores/Stores';
 
@@ -31,7 +31,7 @@ const Four = require('../assets/images/intro/4.png');
 import Wordmark from '../assets/images/SVG/wordmark-black.svg';
 
 interface IntroProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }
 
 const Intro: React.FC<IntroProps> = (props) => {

@@ -4,7 +4,7 @@ import { Alert, View } from 'react-native';
 import { Header } from 'react-native-elements';
 import { observer } from 'mobx-react';
 import { URDecoder } from '@ngraveio/bc-ur';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CryptoAccount } from '@keystonehq/bc-ur-registry';
 
 import LoadingIndicator from '../components/LoadingIndicator';
@@ -17,7 +17,7 @@ import { localeString } from '../utils/LocaleUtils';
 import { themeColor } from '../utils/ThemeUtils';
 
 interface HandleAnythingQRProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }
 
 interface HandleAnythingQRState {

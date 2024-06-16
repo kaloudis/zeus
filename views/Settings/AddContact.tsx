@@ -17,7 +17,7 @@ import { Icon, Divider } from 'react-native-elements';
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../components/Button';
 import { localeString } from '../../utils/LocaleUtils';
@@ -38,7 +38,7 @@ import Scan from '../../assets/images/SVG/Scan.svg';
 import Star from '../../assets/images/SVG/Star.svg';
 
 interface AddContactProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<
         'AddContact',
         { isEdit: boolean; prefillContact: Contact; isNostrContact: boolean }
@@ -462,7 +462,7 @@ export default class AddContact extends React.Component<
         const ScanBadge = ({
             navigation
         }: {
-            navigation: StackNavigationProp<any, any>;
+            navigation: NativeStackNavigationProp<any, any>;
         }) => (
             <TouchableOpacity
                 onPress={() => navigation.navigate('HandleAnythingQRScanner')}

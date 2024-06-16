@@ -2536,6 +2536,14 @@
   dependencies:
     color "^4.2.3"
 
+"@react-navigation/native-stack@7.0.0-alpha.20":
+  version "7.0.0-alpha.20"
+  resolved "https://registry.yarnpkg.com/@react-navigation/native-stack/-/native-stack-7.0.0-alpha.20.tgz#1147108f59dac47f73a45731b267db0583c3c80a"
+  integrity sha512-QGJjQNEAeb0JESia5lBBkns5ELuzsDJ0Ff4/nPDGYRDBXjW4d+SJ4Nu5pBXmkIXs0MK5PqMy46kKXf38ew5Hrw==
+  dependencies:
+    "@react-navigation/elements" "^2.0.0-alpha.17"
+    warn-once "^0.1.1"
+
 "@react-navigation/native@7.0.0-alpha.18":
   version "7.0.0-alpha.18"
   resolved "https://registry.yarnpkg.com/@react-navigation/native/-/native-7.0.0-alpha.18.tgz#ea18461ff40d538f87b80938384c470788d924db"
@@ -2553,14 +2561,6 @@
   integrity sha512-0V+/WRbgVmrPXW5TjMLxf8NJAHsUoG9G8X4WWmVIf1ASMF3POZM4CCbhEeudhgUxN4QEvkoSIrzvUpoUplQOMw==
   dependencies:
     nanoid "3.3.7"
-
-"@react-navigation/stack@7.0.0-alpha.20":
-  version "7.0.0-alpha.20"
-  resolved "https://registry.yarnpkg.com/@react-navigation/stack/-/stack-7.0.0-alpha.20.tgz#90a3aea5e78ab629193da3972ae984e25d39b43b"
-  integrity sha512-yi+PyNQoa/7Jt3+dqCiSElo+7+Wk3ZGz0Q/aOlvTeAFmJtj/PzimOX2Ysul08thpHBdo7SL06HfSEEAIB6exxA==
-  dependencies:
-    "@react-navigation/elements" "^2.0.0-alpha.17"
-    color "^4.2.3"
 
 "@remobile/react-native-qrcode-local-image@github:BlueWallet/react-native-qrcode-local-image#31b0113":
   version "1.0.4"
@@ -10298,7 +10298,7 @@ walker@^1.0.7, walker@^1.0.8:
   dependencies:
     makeerror "1.0.12"
 
-warn-once@^0.1.0:
+warn-once@^0.1.0, warn-once@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/warn-once/-/warn-once-0.1.1.tgz#952088f4fb56896e73fd4e6a3767272a3fccce43"
   integrity sha512-VkQZJbO8zVImzYFteBXvBOZEl1qL175WH8VmZcxF2fZAoudNhNDvHi+doCaAEdU2l2vtcIwa2zn0QK5+I1HQ3Q==

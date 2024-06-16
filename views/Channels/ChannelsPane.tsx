@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import { duration } from 'moment';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { ChannelsHeader } from '../../components/Channels/ChannelsHeader';
 import { ChannelItem } from '../../components/Channels/ChannelItem';
@@ -39,7 +39,7 @@ export enum Status {
 }
 
 interface ChannelsProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore?: ChannelsStore;
     SettingsStore?: SettingsStore;
 }

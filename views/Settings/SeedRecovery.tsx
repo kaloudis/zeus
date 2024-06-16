@@ -9,7 +9,7 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard';
 import { inject, observer } from 'mobx-react';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { ErrorMessage } from '../../components/SuccessErrorMessage';
 
@@ -32,7 +32,7 @@ import SettingsStore from '../../stores/SettingsStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 
 interface SeedRecoveryProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
     route: Route<'SeedRecovery', { network: string }>;
 }

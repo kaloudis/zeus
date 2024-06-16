@@ -4,7 +4,7 @@ import { Button, Icon, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import { isEqual } from 'lodash';
 import DatePicker from 'react-native-date-picker';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import BackendUtils from '../../utils/BackendUtils';
 import { localeString } from '../../utils/LocaleUtils';
@@ -19,7 +19,7 @@ import Switch from '../../components/Switch';
 import TextInput from '../../components/TextInput';
 
 interface ActivityFilterProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ActivityStore: ActivityStore;
     SettingsStore: SettingsStore;
 }

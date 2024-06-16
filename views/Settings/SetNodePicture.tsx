@@ -12,7 +12,9 @@ import { Avatar } from 'react-native-elements';
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import Animated from 'react-native-reanimated';
 
 import AddIcon from '../../assets/images/SVG/Add.svg';
 
@@ -26,7 +28,7 @@ import Button from '../../components/Button';
 import { localeString } from '../../utils/LocaleUtils';
 
 interface SetNodePictureProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<'SetNodePicture', { implementation: string }>;
 }
 
@@ -198,11 +200,12 @@ export default class SetNodePicture extends React.Component<
                             }}
                         >
                             {photo ? (
-                                <Image
+                                <Animated.Image
                                     source={{
                                         uri: getPhoto(photo)
                                     }}
                                     style={styles.photo}
+                                    sharedTransitionTag={getPhoto(photo)}
                                 />
                             ) : (
                                 <AddPhotos />

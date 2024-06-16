@@ -4,7 +4,6 @@ import {
     StyleSheet,
     Text,
     View,
-    Image,
     ScrollView,
     TouchableOpacity
 } from 'react-native';
@@ -14,7 +13,8 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import cloneDeep from 'lodash/cloneDeep';
 import differenceBy from 'lodash/differenceBy';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated from 'react-native-reanimated';
 
 import { hash, STORAGE_KEY } from '../../backends/LNC/credentialStore';
 
@@ -57,7 +57,7 @@ import {
 } from '../../utils/LndMobileUtils';
 
 interface NodeConfigurationProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
     route: Route<
         'NodeConfiguration',
@@ -1034,13 +1034,16 @@ export default class NodeConfiguration extends React.Component<
                                     }}
                                 >
                                     {node?.photo || photo ? (
-                                        <Image
+                                        <Animated.Image
                                             source={{
                                                 uri: getPhoto(
                                                     node?.photo || photo
                                                 )
                                             }}
                                             style={styles.imageBackground}
+                                            sharedTransitionTag={getPhoto(
+                                                node?.photo || photo
+                                            )}
                                         />
                                     ) : (
                                         <AddPhotos />

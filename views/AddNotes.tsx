@@ -3,7 +3,7 @@ import { Keyboard, TouchableOpacity, View } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { inject, observer } from 'mobx-react';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Header from '../components/Header';
 import Screen from '../components/Screen';
@@ -18,7 +18,7 @@ import TextInput from '../components/TextInput';
 import SaveIcon from '../assets/images/SVG/Save.svg';
 
 interface AddNotesProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     NotesStore: NotesStore;
     route: Route<
         'AddNotes',

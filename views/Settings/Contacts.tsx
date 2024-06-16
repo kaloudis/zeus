@@ -10,7 +10,8 @@ import {
 import { SearchBar, Divider } from 'react-native-elements';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated from 'react-native-reanimated';
 
 import Screen from '../../components/Screen';
 import Button from '../../components/Button';
@@ -26,7 +27,7 @@ import Add from '../../assets/images/SVG/Add.svg';
 import NostrichIcon from '../../assets/images/SVG/Nostrich.svg';
 
 interface ContactsSettingsProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<'Contacts', { SendScreen: boolean }>;
 }
 
@@ -157,7 +158,8 @@ export default class Contacts extends React.Component<
                             })) ||
                         this.props.navigation.navigate('ContactDetails', {
                             contactId: item.contactId || item.id,
-                            isNostrContact: false
+                            isNostrContact: false,
+                            animation: 'slide_from_right'
                         });
                 }}
             >
@@ -170,7 +172,7 @@ export default class Contacts extends React.Component<
                     }}
                 >
                     {contact.photo && (
-                        <Image
+                        <Animated.Image
                             source={{ uri: contact.getPhoto }}
                             style={{
                                 width: 40,
@@ -178,6 +180,7 @@ export default class Contacts extends React.Component<
                                 borderRadius: 20,
                                 marginRight: 10
                             }}
+                            sharedTransitionTag={contact.getPhoto}
                         />
                     )}
                     <View>

@@ -13,7 +13,7 @@ import { themeColor } from '../utils/ThemeUtils';
 
 import ArrowLeft from '../assets/images/SVG/Arrow_left.svg';
 import Close from '../assets/images/SVG/Close.svg';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 interface HeaderIcon extends IconObject {
     icon?: string;
@@ -33,7 +33,7 @@ interface HeaderProps {
     rightComponent?: React.ReactElement<{}> | TextProps | HeaderIcon;
     containerStyle?: ViewStyle;
     placement?: 'left' | 'center' | 'right' | undefined;
-    navigation?: StackNavigationProp<any, any>;
+    navigation?: NativeStackNavigationProp<any, any>;
     onBack?: () => void;
     navigateBackOnBackPress?: boolean;
 }

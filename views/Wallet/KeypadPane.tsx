@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Animated, View, Text, TouchableOpacity } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import BigNumber from 'bignumber.js';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../components/Button';
 import Conversion from '../../components/Conversion';
@@ -23,7 +23,7 @@ import { themeColor } from '../../utils/ThemeUtils';
 import { getDecimalPlaceholder } from '../../utils/UnitsUtils';
 
 interface KeypadPaneProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     FiatStore: FiatStore;
     NodeInfoStore: NodeInfoStore;

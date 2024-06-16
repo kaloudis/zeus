@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import DragList, { DragListRenderItemInfo } from 'react-native-draglist';
 import { Icon, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import Animated from 'react-native-reanimated';
 
 import Button from '../../components/Button';
 import Header from '../../components/Header';
@@ -27,7 +29,7 @@ import { cloneDeep } from 'lodash';
 
 interface NodesProps {
     nodes: any[];
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     edit?: boolean;
     loading?: boolean;
     selectedNode?: number;
@@ -255,13 +257,16 @@ export default class Nodes extends React.Component<NodesProps, NodesState> {
                                             }}
                                         >
                                             {item.photo ? (
-                                                <Image
+                                                <Animated.Image
                                                     source={{
                                                         uri: getPhoto(
                                                             item.photo
                                                         )
                                                     }}
                                                     style={styles.photo}
+                                                    sharedTransitionTag={getPhoto(
+                                                        item.photo
+                                                    )}
                                                 />
                                             ) : (
                                                 <NodeIdenticon

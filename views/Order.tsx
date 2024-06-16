@@ -11,7 +11,7 @@ import { ButtonGroup } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import BigNumber from 'bignumber.js';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Amount from '../components/Amount';
 import Button from '../components/Button';
@@ -32,7 +32,7 @@ import RNPrint from 'react-native-print';
 import PosStore from '../stores/PosStore';
 
 interface OrderProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
     FiatStore: FiatStore;
     UnitsStore: UnitsStore;

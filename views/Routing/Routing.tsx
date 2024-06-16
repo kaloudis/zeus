@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { ButtonGroup } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Header from '../../components/Header';
 import { ErrorMessage } from '../../components/SuccessErrorMessage';
@@ -22,7 +22,7 @@ import { RoutingListItem } from './RoutingListItem';
 import { RoutingHeader } from './RoutingHeader';
 
 interface RoutingProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     FeeStore: FeeStore;
 }
 
@@ -103,7 +103,7 @@ export default class Routing extends React.PureComponent<
         const FeeBadge = ({
             navigation
         }: {
-            navigation: StackNavigationProp<any, any>;
+            navigation: NativeStackNavigationProp<any, any>;
         }) => (
             <TouchableOpacity onPress={() => navigation.navigate('SetFees')}>
                 <Pie stroke={themeColor('highlight')} />

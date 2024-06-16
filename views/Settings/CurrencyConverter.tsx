@@ -14,7 +14,7 @@ import { Icon } from 'react-native-elements';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { isEmpty } from 'lodash';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Screen from '../../components/Screen';
 import Header from '../../components/Header';
@@ -34,7 +34,7 @@ import DragDots from '../../assets/images/SVG/DragDots.svg';
 import BitcoinIcon from '../../assets/images/SVG/bitcoin-icon.svg';
 
 interface CurrencyConverterProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     FiatStore?: FiatStore;
     route: Route<'CurrencyConverter', { selectedCurrency: string }>;
 }

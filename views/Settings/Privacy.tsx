@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import SettingsStore, { BLOCK_EXPLORER_KEYS } from '../../stores/SettingsStore';
 import { localeString } from '../../utils/LocaleUtils';
@@ -16,7 +16,7 @@ import Text from '../../components/Text';
 import TextInput from '../../components/TextInput';
 
 interface PrivacyProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
 }
 

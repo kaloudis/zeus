@@ -9,7 +9,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Amount from '../components/Amount';
 import AmountInput from '../components/AmountInput';
@@ -55,7 +55,7 @@ const zaplockerDestinations = [
 
 interface InvoiceProps {
     exitSetup: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     BalanceStore: BalanceStore;
     InvoicesStore: InvoicesStore;
     TransactionsStore: TransactionsStore;

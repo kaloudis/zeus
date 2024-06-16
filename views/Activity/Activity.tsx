@@ -12,7 +12,7 @@ import { Button, Icon, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import BigNumber from 'bignumber.js';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Amount from '../../components/Amount';
 import Header from '../../components/Header';
@@ -33,7 +33,7 @@ import Filter from '../../assets/images/SVG/Filter On.svg';
 import Invoice from '../../models/Invoice';
 
 interface ActivityProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ActivityStore: ActivityStore;
     FiatStore: FiatStore;
     PosStore: PosStore;

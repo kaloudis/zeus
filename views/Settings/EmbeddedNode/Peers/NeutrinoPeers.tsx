@@ -3,7 +3,7 @@ import { FlatList, ScrollView, TouchableOpacity, View } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import Ping from 'react-native-ping';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../../../components/Button';
 import Header from '../../../../components/Header';
@@ -35,7 +35,7 @@ import {
 import Stopwatch from '../../../../assets/images/SVG/Stopwatch.svg';
 
 interface NeutrinoPeersProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
 }
 

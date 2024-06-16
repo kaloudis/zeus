@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import Slider from '@react-native-community/slider';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { v4 as uuidv4 } from 'uuid';
 
 import CaretDown from '../../../assets/images/SVG/Caret Down.svg';
@@ -48,7 +48,7 @@ interface LSPS1Props {
     SettingsStore: SettingsStore;
     FiatStore: FiatStore;
     NodeInfoStore: NodeInfoStore;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }
 
 interface LSPS1State {

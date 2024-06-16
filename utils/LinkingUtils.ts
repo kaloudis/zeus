@@ -1,11 +1,11 @@
 import { Linking, Platform, NativeModules } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { localeString } from './LocaleUtils';
 import handleAnything from './handleAnything';
 
 class LinkingUtils {
-    handleInitialUrl = (navigation: StackNavigationProp<any, any>) =>
+    handleInitialUrl = (navigation: NativeStackNavigationProp<any, any>) =>
         Linking.getInitialURL().then(async (url) => {
             if (url) {
                 this.handleDeepLink(url, navigation);
@@ -19,7 +19,7 @@ class LinkingUtils {
         });
     handleDeepLink = (
         url: string,
-        navigation: StackNavigationProp<any, any>
+        navigation: NativeStackNavigationProp<any, any>
     ) => {
         if (url.startsWith('nostr:')) {
             Linking.openURL(url);

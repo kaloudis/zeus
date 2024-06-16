@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import Animated from 'react-native-reanimated';
 
 import Screen from '../components/Screen';
 import Button from '../components/Button';
@@ -32,7 +34,7 @@ import { localeString } from '../utils/LocaleUtils';
 import Contact from '../models/Contact';
 
 interface ContactDetailsProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<
         'ContactDetails',
         {
@@ -355,7 +357,7 @@ export default class ContactDetails extends React.Component<
                                 />
                             )}
                             {contact.photo && (
-                                <Image
+                                <Animated.Image
                                     source={{ uri: contact.getPhoto }}
                                     style={{
                                         width: 150,
@@ -364,6 +366,7 @@ export default class ContactDetails extends React.Component<
                                         marginBottom: 20,
                                         marginTop: contact.banner ? -100 : 0
                                     }}
+                                    sharedTransitionTag={contact.getPhoto }
                                 />
                             )}
                             <Text

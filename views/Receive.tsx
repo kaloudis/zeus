@@ -20,7 +20,7 @@ import NfcManager, {
     Ndef
 } from 'react-native-nfc-manager';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import handleAnything from '../utils/handleAnything';
 
@@ -91,7 +91,7 @@ import HopPicker from '../components/HopPicker';
 
 interface ReceiveProps {
     exitSetup: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     InvoicesStore: InvoicesStore;
     PosStore: PosStore;

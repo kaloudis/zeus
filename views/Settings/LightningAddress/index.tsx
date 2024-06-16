@@ -11,7 +11,7 @@ import { Icon, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import { generatePrivateKey, getPublicKey, nip19 } from 'nostr-tools';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import LightningAddressPayment from './LightningAddressPayment';
 
@@ -43,7 +43,7 @@ import QR from '../../../assets/images/SVG/QR.svg';
 import Gear from '../../../assets/images/SVG/Gear.svg';
 
 interface LightningAddressProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     LightningAddressStore: LightningAddressStore;
     SettingsStore: SettingsStore;

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import AlertStore from '../stores/AlertStore';
 import ChannelsStore from '../stores/ChannelsStore';
@@ -92,7 +92,7 @@ const MailboxAnimated = () => {
 const ActivityButton = ({
     navigation
 }: {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }) => (
     <TouchableOpacity
         onPress={() =>
@@ -110,7 +110,7 @@ const ActivityButton = ({
 const TempleButton = ({
     navigation
 }: {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }) => (
     <TouchableOpacity
         onPress={() => protectedNavigation(navigation, 'Wallet', true)}
@@ -127,7 +127,7 @@ const TempleButton = ({
 const MenuBadge = ({
     navigation
 }: {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
 }) => (
     <TouchableOpacity
         onPress={() =>
@@ -146,7 +146,7 @@ const ClipboardBadge = ({
     navigation,
     clipboard
 }: {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     clipboard: string;
 }) => (
     <TouchableOpacity
@@ -163,7 +163,7 @@ const ClipboardBadge = ({
 const PendingHtlcBadge = ({
     navigation
 }: {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     clipboard: string;
 }) => (
     <TouchableOpacity
@@ -203,7 +203,7 @@ interface WalletHeaderProps {
     LightningAddressStore?: LightningAddressStore;
     PosStore?: PosStore;
     SyncStore?: SyncStore;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     loading: boolean;
     title: string;
     channels: boolean;
@@ -292,11 +292,12 @@ export default class WalletHeader extends React.Component<
                 accessibilityLabel={localeString('views.Settings.title')}
             >
                 {selectedNode && selectedNode.photo ? (
-                    <Image
+                    <Animated.Image
                         source={{
                             uri: getPhoto(selectedNode.photo)
                         }}
                         style={styles.photo}
+                        sharedTransitionTag={getPhoto(selectedNode.photo)}
                     />
                 ) : (
                     <NodeIdenticon
@@ -448,7 +449,7 @@ export default class WalletHeader extends React.Component<
         const SyncBadge = ({
             navigation
         }: {
-            navigation: StackNavigationProp<any, any>;
+            navigation: NativeStackNavigationProp<any, any>;
         }) => {
             const [spinAnim] = useState(new Animated.Value(0));
 

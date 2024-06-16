@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Observer, Provider } from 'mobx-react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackHandler, NativeEventSubscription, StatusBar } from 'react-native';
 
@@ -192,7 +192,7 @@ export default class App extends React.PureComponent {
     };
 
     render() {
-        const Stack = createStackNavigator();
+        const Stack = createNativeStackNavigator();
         return (
             <Provider
                 AlertStore={Stores.alertStore}
@@ -242,28 +242,28 @@ export default class App extends React.PureComponent {
                                                         );
                                                     }
                                                 }}
-                                                theme={{
-                                                    dark: true,
-                                                    colors: {
-                                                        background:
-                                                            themeColor(
-                                                                'background'
-                                                            ),
-                                                        border: themeColor(
-                                                            'background'
-                                                        ),
-                                                        card: themeColor(
-                                                            'background'
-                                                        ),
-                                                        notification:
-                                                            themeColor('text'),
-                                                        primary:
-                                                            themeColor(
-                                                                'highlight'
-                                                            ),
-                                                        text: themeColor('text')
-                                                    }
-                                                }}
+                                                // theme={{
+                                                //     dark: true,
+                                                //     colors: {
+                                                //         background:
+                                                //             themeColor(
+                                                //                 'background'
+                                                //             ),
+                                                //         border: themeColor(
+                                                //             'background'
+                                                //         ),
+                                                //         card: themeColor(
+                                                //             'background'
+                                                //         ),
+                                                //         notification:
+                                                //             themeColor('text'),
+                                                //         primary:
+                                                //             themeColor(
+                                                //                 'highlight'
+                                                //             ),
+                                                //         text: themeColor('text')
+                                                //     }
+                                                // }}
                                             >
                                                 <Stack.Navigator
                                                     screenOptions={({

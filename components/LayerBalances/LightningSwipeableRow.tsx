@@ -9,7 +9,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import { getParams as getlnurlParams } from 'js-lnurl';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RectButton } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -25,7 +25,7 @@ import Routing from './../../assets/images/SVG/Routing.svg';
 import Send from './../../assets/images/SVG/Send.svg';
 
 interface LightningSwipeableRowProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     lightning?: string;
     locked?: boolean;
 }

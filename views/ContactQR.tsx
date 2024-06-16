@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dimensions, View, SafeAreaView } from 'react-native';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Animated, {
     Extrapolate,
@@ -17,7 +17,7 @@ import { themeColor } from '../utils/ThemeUtils';
 import CollapsedQR from '../components/CollapsedQR';
 
 interface ContactQRProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<
         'ContactQR',
         {

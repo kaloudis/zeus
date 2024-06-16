@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import { generatePrivateKey, getPublicKey, nip19 } from 'nostr-tools';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../../components/Button';
 import KeyValue from '../../../components/KeyValue';
@@ -30,7 +30,7 @@ import VisibleSVG from '../../../assets/images/SVG/eye_opened.svg';
 import Edit from '../../../assets/images/SVG/Pen.svg';
 
 interface NostrKeyProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
     LightningAddressStore: LightningAddressStore;
     route: Route<'NostrKey', { setup: boolean; nostrPrivateKey: string }>;

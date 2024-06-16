@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableWithoutFeedback, View } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native';
 
 import TextInput from '../components/TextInput';
 import { themeColor } from '../utils/ThemeUtils';
@@ -9,7 +9,7 @@ import stores from '../stores/Stores';
 import LoadingIndicator from './LoadingIndicator';
 
 interface OnchainFeeInputProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     fee?: string;
     onChangeFee: (fee: string) => void;
 }

@@ -3,7 +3,7 @@ import { View, ScrollView } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { inject, observer } from 'mobx-react';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Screen from '../../../components/Screen';
 import Header from '../../../components/Header';
@@ -21,7 +21,7 @@ import NodeInfoStore from '../../../stores/NodeInfoStore';
 import LSPS1OrderResponse from '../../../components/LSPS1OrderResponse';
 
 interface OrderProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     route: Route<'LSPS1Order', { orderId: string; orderShouldUpdate: boolean }>;
     LSPStore: LSPStore;
     SettingsStore: SettingsStore;

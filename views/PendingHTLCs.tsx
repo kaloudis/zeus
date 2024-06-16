@@ -3,7 +3,7 @@ import { FlatList, Platform, Text, View, StyleSheet } from 'react-native';
 import { Button, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Amount from '../components/Amount';
@@ -21,7 +21,7 @@ import FiatStore from '../stores/FiatStore';
 import SettingsStore from '../stores/SettingsStore';
 
 interface PendingHTLCsProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     FiatStore: FiatStore;
     SettingsStore: SettingsStore;

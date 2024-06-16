@@ -11,7 +11,7 @@ import { ButtonGroup } from 'react-native-elements';
 import { UR, UREncoder } from '@ngraveio/bc-ur';
 import clone from 'lodash/clone';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const bitcoin = require('bitcoinjs-lib');
 
@@ -36,7 +36,7 @@ import NodeInfoStore from '../stores/NodeInfoStore';
 import TransactionsStore from '../stores/TransactionsStore';
 
 interface TxHexProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     NodeInfoStore: NodeInfoStore;
     TransactionsStore: TransactionsStore;

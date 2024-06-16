@@ -21,7 +21,7 @@ import {
 } from '@react-navigation/native';
 import { inject, observer } from 'mobx-react';
 import RNRestart from 'react-native-restart';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
@@ -80,7 +80,7 @@ import Scan from '../../assets/images/SVG/Scan.svg';
 interface WalletProps {
     enterSetup: any;
     exitTransaction: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     AlertStore: AlertStore;
     BalanceStore: BalanceStore;
     ChannelsStore: ChannelsStore;

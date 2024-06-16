@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { RectButton } from 'react-native-gesture-handler';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { inject, observer } from 'mobx-react';
 import Amount from '../Amount';
@@ -38,7 +38,7 @@ interface LayerBalancesProps {
     BalanceStore: BalanceStore;
     UTXOsStore: UTXOsStore;
     UnitsStore: UnitsStore;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     onRefresh?: any;
     value?: string;
     amount?: string;
@@ -165,7 +165,7 @@ const SwipeableRow = ({
 }: {
     item: DataRow;
     index: number;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     selectMode: boolean;
     value?: string;
     amount?: string;

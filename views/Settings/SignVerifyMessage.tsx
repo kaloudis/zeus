@@ -2,7 +2,7 @@ import * as React from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { ButtonGroup } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../components/Button';
 import CopyButton from '../../components/CopyButton';
@@ -21,7 +21,7 @@ import { localeString } from '../../utils/LocaleUtils';
 import MessageSignStore from '../../stores/MessageSignStore';
 
 interface SignVerifyMessageProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     MessageSignStore: MessageSignStore;
 }
 

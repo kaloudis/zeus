@@ -23,7 +23,7 @@ import NfcManager, {
     Ndef
 } from 'react-native-nfc-manager';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import handleAnything, { isClipboardValue } from '../utils/handleAnything';
 
@@ -67,7 +67,7 @@ import { AdditionalOutput } from '../models/TransactionRequest';
 
 interface SendProps {
     exitSetup: any;
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     BalanceStore: BalanceStore;
     InvoicesStore: InvoicesStore;
     ModalStore: ModalStore;

@@ -11,7 +11,7 @@ import {
 import { Divider, Icon, ListItem } from 'react-native-elements';
 import { inject, observer } from 'mobx-react';
 import { Route } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Channel from '../../models/Channel';
 
@@ -43,7 +43,7 @@ import Edit from '../../assets/images/SVG/Edit.svg';
 import HourglassIcon from '../../assets/images/SVG/Hourglass.svg';
 
 interface ChannelProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     ChannelsStore: ChannelsStore;
     SettingsStore: SettingsStore;
     NodeInfoStore: NodeInfoStore;

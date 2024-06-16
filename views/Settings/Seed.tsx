@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { ErrorMessage } from '../../components/SuccessErrorMessage';
 
@@ -26,7 +26,7 @@ import { localeString } from '../../utils/LocaleUtils';
 import Skull from '../../assets/images/SVG/Skull.svg';
 
 interface SeedProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
 }
 

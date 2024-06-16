@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { LinearProgress } from 'react-native-elements';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import BigNumber from 'bignumber.js';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Button from '../../components/Button';
 import WalletHeader from '../../components/WalletHeader';
@@ -25,7 +25,7 @@ import { version } from '../../package.json';
 import LockIcon from '../../assets/images/SVG/Lock.svg';
 
 interface BalancePaneProps {
-    navigation: StackNavigationProp<any, any>;
+    navigation: NativeStackNavigationProp<any, any>;
     BalanceStore: BalanceStore;
     NodeInfoStore: NodeInfoStore;
     SettingsStore: SettingsStore;
