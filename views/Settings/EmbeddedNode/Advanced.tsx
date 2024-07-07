@@ -6,11 +6,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import Button from '../../../components/Button';
+import DropdownSetting from '../../../components/DropdownSetting';
 import Header from '../../../components/Header';
 import Screen from '../../../components/Screen';
 import Switch from '../../../components/Switch';
+import TextInput from '../../../components/TextInput';
 
-import SettingsStore from '../../../stores/SettingsStore';
+import SettingsStore, {
+    FEE_ESTIMATOR_KEYS
+} from '../../../stores/SettingsStore';
 
 import { localeString } from '../../../utils/LocaleUtils';
 import { restartNeeded } from '../../../utils/RestartUtils';
@@ -29,6 +33,8 @@ interface EmbeddedNodeAdvancedSettingsState {
     embeddedTor: boolean | undefined;
     persistentMode: boolean | undefined;
     compactDb: boolean | undefined;
+    defaultFeeEstimator: string;
+    customFeeEstimator: string;
 }
 
 const PERSISTENT_KEY = 'persistentServicesEnabled';
@@ -43,7 +49,10 @@ export default class EmbeddedNodeAdvancedSettings extends React.Component<
         rescan: false,
         persistentMode: false,
         embeddedTor: false,
-        compactDb: false
+        compactDb: false,
+        defaultFeeEstimator:
+            'https://bitcoinchainfees.zeusln.com/v1/fee-estimates',
+        customFeeEstimator: ''
     };
 
     async UNSAFE_componentWillMount() {
@@ -56,13 +65,24 @@ export default class EmbeddedNodeAdvancedSettings extends React.Component<
             rescan: settings.rescan,
             persistentMode: persistentMode === 'true' ? true : false,
             embeddedTor: settings.embeddedTor,
-            compactDb: settings.compactDb
+            compactDb: settings.compactDb,
+            defaultFeeEstimator:
+                settings.defaultFeeEstimator ||
+                'https://bitcoinchainfees.zeusln.com/v1/fee-estimates',
+            customFeeEstimator: settings.customFeeEstimator || ''
         });
     }
 
     render() {
         const { navigation, SettingsStore } = this.props;
-        const { rescan, persistentMode, embeddedTor, compactDb } = this.state;
+        const {
+            rescan,
+            persistentMode,
+            embeddedTor,
+            compactDb,
+            defaultFeeEstimator,
+            customFeeEstimator
+        } = this.state;
         const { updateSettings, embeddedLndNetwork, settings }: any =
             SettingsStore;
         const { bimodalPathfinding } = settings;
@@ -82,6 +102,55 @@ export default class EmbeddedNodeAdvancedSettings extends React.Component<
                         navigation={navigation}
                     />
                     <ScrollView>
+                        <View style={{ margin: 10 }}>
+                            <DropdownSetting
+                                title={localeString(
+                                    'views.Settings.EmbeddedNode.feeEstimator'
+                                )}
+                                selectedValue={defaultFeeEstimator}
+                                onValueChange={async (value: string) => {
+                                    this.setState({
+                                        defaultFeeEstimator: value
+                                    });
+                                    await updateSettings({
+                                        defaultFeeEstimator: value
+                                    });
+                                    restartNeeded();
+                                }}
+                                values={FEE_ESTIMATOR_KEYS}
+                            />
+
+                            {defaultFeeEstimator === 'Custom' && (
+                                <>
+                                    <Text
+                                        style={{
+                                            color: themeColor('secondaryText'),
+                                            fontFamily: 'PPNeueMontreal-Book'
+                                        }}
+                                    >
+                                        {localeString(
+                                            'views.Settings.EmbeddedNode.customFeeEstimator'
+                                        )}
+                                    </Text>
+                                    <TextInput
+                                        value={customFeeEstimator}
+                                        placeholder="https://bitcoinchainfees.zeusln.com/v1/fee-estimates"
+                                        onChangeText={async (text: string) => {
+                                            this.setState({
+                                                customFeeEstimator: text
+                                            });
+
+                                            await updateSettings({
+                                                customFeeEstimator: text
+                                            });
+                                        }}
+                                        autoCapitalize="none"
+                                        error={!customFeeEstimator}
+                                    />
+                                </>
+                            )}
+                        </View>
+
                         <ListItem
                             containerStyle={{
                                 backgroundColor: 'transparent'

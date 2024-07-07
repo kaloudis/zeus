@@ -134,7 +134,12 @@ const writeLndConfig = async (
     neutrino.persistfilters=true
 
     [fee]
-    fee.url=https://nodes.lightning.computer/fees/v1/btc-fee-estimates.json
+    fee.url=${
+        stores.settingsStore?.settings?.defaultFeeEstimator === 'Custom'
+            ? stores.settingsStore?.settings?.customFeeEstimator
+            : stores.settingsStore?.settings?.defaultFeeEstimator ||
+              'https://bitcoinchainfees.zeusln.com/v1/fee-estimates'
+    }
     
     [autopilot]
     autopilot.active=0
