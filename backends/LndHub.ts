@@ -157,5 +157,6 @@ export default class LndHub extends LND {
     supportsLSPS1customMessage = () => false;
     supportsLSPS1rest = () => false;
     supportsOffers = () => false;
+    supportsTaprootAssets = () => false;
     isLNDBased = () => false;
 }

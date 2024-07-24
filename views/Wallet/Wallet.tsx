@@ -69,6 +69,7 @@ import SettingsStore, {
 import SyncStore from '../../stores/SyncStore';
 import UnitsStore from '../../stores/UnitsStore';
 import UTXOsStore from '../../stores/UTXOsStore';
+import TaprootAssetsStore from '../../stores/TaprootAssetsStore';
 
 import Bitcoin from '../../assets/images/SVG/Bitcoin.svg';
 import CaretUp from '../../assets/images/SVG/Caret Up.svg';
@@ -96,6 +97,7 @@ interface WalletProps {
     ChannelBackupStore: ChannelBackupStore;
     LightningAddressStore: LightningAddressStore;
     LnurlPayStore: LnurlPayStore;
+    TaprootAssetsStore: TaprootAssetsStore;
 }
 
 interface WalletState {
@@ -118,7 +120,8 @@ interface WalletState {
     'LSPStore',
     'LnurlPayStore',
     'ChannelBackupStore',
-    'LightningAddressStore'
+    'LightningAddressStore',
+    'TaprootAssetsStore'
 )
 @observer
 export default class Wallet extends React.Component<WalletProps, WalletState> {
@@ -299,7 +302,8 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             ChannelBackupStore,
             SyncStore,
             LightningAddressStore,
-            LnurlPayStore
+            LnurlPayStore,
+            TaprootAssetsStore
         } = this.props;
         const {
             settings,
@@ -459,6 +463,8 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             await BalanceStore.getCombinedBalance();
             ChannelsStore.getChannels();
         }
+
+        if (BackendUtils.supportsTaprootAssets()) TaprootAssetsStore.listAssets();
 
         if (
             lightningAddress.enabled &&

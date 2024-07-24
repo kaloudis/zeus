@@ -169,6 +169,7 @@ class BackendUtils {
     supportsOnchainBatching = () => this.call('supportsOnchainBatching');
     supportsChannelBatching = () => this.call('supportsChannelBatching');
     supportsOffers = () => this.call('supportsOffers');
+    supportsTaprootAssets = () => this.call('supportsTaprootAssets');
     isLNDBased = () => this.call('isLNDBased');
 
     // LNC
@@ -177,6 +178,10 @@ class BackendUtils {
     checkPerms = () => this.call('checkPerms');
     isConnected = (...args: any[]) => this.call('isConnected', args);
     disconnect = (...args: any[]) => this.call('disconnect', args);
+
+    // Taproot Assets
+    taprootAssetsListAssets = (...args: any[]) => this.call('taprootAssetsListAssets', args);
+    taprootAssetsListBalances = (...args: any[]) => this.call('taprootAssetsListBalances', args);
 
     clearCachedCalls = (...args: any[]) => this.call('clearCachedCalls', args);
 }

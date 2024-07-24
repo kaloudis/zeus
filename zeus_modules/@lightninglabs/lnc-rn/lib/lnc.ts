@@ -5,6 +5,7 @@ import {
     LndApi,
     LoopApi,
     PoolApi,
+    TaprootAssetsApi,
     snakeKeysToCamel
 } from '@lightninglabs/lnc-core';
 import { createRpc } from './api/createRpc';
@@ -27,6 +28,7 @@ export default class LNC {
     pool: PoolApi;
     faraday: FaradayApi;
     lit: LitApi;
+    tap: TaprootAssetsApi;
 
     constructor(lncConfig?: LncConfig) {
         // merge the passed in config with the defaults
@@ -50,6 +52,7 @@ export default class LNC {
         this.pool = new PoolApi(createRpc, this);
         this.faraday = new FaradayApi(createRpc, this);
         this.lit = new LitApi(createRpc, this);
+        this.tap = new TaprootAssetsApi(createRpc, this);
         NativeModules.LncModule.initLNC(this._namespace);
     }
 

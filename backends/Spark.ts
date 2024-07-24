@@ -383,5 +383,6 @@ export default class Spark {
     supportsLSPS1customMessage = () => false;
     supportsLSPS1rest = () => true;
     supportsOffers = () => false;
+    supportsTaprootAssets = () => false;
     isLNDBased = () => false;
 }

@@ -670,5 +670,6 @@ export default class LND {
     supportsLSPS1customMessage = () => true;
     supportsLSPS1rest = () => false;
     supportsOffers = (): Promise<boolean> | boolean => false;
+    supportsTaprootAssets = () => false;
     isLNDBased = () => true;
 }

@@ -74,6 +74,13 @@ export default class LightningNodeConnect {
         this.permSignMessage = await this.lnc.hasPerms(
             'signrpc.Signer.SignMessage'
         );
+
+        console.log('this.lnc.tap', this.lnc.tap);
+        console.log('this.lnc.tap.mint', this.lnc.tap.mint);
+
+        const getInfo = await this.lnc.tap.taprootAssets.getInfo();
+
+        console.log('getInfo', getInfo);
     };
     isConnected = async () => await this.lnc.isConnected();
     disconnect = () => this.lnc.disconnect();
@@ -458,6 +465,10 @@ export default class LightningNodeConnect {
         return isSupportedVersion(version, minVersion, eosVersion);
     };
 
+    // Taproot Assets
+    taprootAssetsListAssets = async () => await this.lnc.tap.taprootAssets.listAssets();
+    taprootAssetsListBalances = async () => await this.lnc.tap.taprootAssets.listBalances();
+
     supportsMessageSigning = () => this.permSignMessage;
     supportsLnurlAuth = () => true;
     supportsOnchainSends = () => this.permSendCoins;
@@ -489,5 +500,6 @@ export default class LightningNodeConnect {
     supportsLSPS1customMessage = () => true;
     supportsLSPS1rest = () => false;
     supportsOffers = () => false;
+    supportsTaprootAssets = () => true;
     isLNDBased = () => true;
 }

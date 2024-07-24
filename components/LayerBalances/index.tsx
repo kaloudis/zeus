@@ -65,6 +65,9 @@ type DataRow = {
 const Row = ({ item }: { item: DataRow }) => {
     const moreAccounts =
         item.layer === localeString('components.LayerBalances.moreAccounts');
+    const tapas =
+        item.layer === localeString('tapas.taprootAssets');
+    const shortRow = (moreAccounts || tapas);
     return (
         <RectButton>
             <LinearGradient
@@ -79,7 +82,7 @@ const Row = ({ item }: { item: DataRow }) => {
                         : [themeColor('secondary'), themeColor('secondary')]
                 }
                 style={
-                    moreAccounts
+                    shortRow
                         ? {
                               ...styles.rectButton,
                               height: 40
@@ -94,14 +97,14 @@ const Row = ({ item }: { item: DataRow }) => {
                         <OnChainSvg />
                     ) : item.layer === 'Lightning' ? (
                         <LightningSvg />
-                    ) : moreAccounts ? null : (
+                    ) : shortRow ? null : (
                         <OnChainSvg />
                     )}
                     <Spacer width={5} />
                     <View
                         style={{
                             flexDirection: 'column',
-                            left: moreAccounts ? 5 : 0
+                            left: shortRow ? 5 : 0
                         }}
                     >
                         <Text
@@ -133,7 +136,7 @@ const Row = ({ item }: { item: DataRow }) => {
                     </View>
                 </View>
 
-                {!moreAccounts ? (
+                {!shortRow ? (
                     <Amount
                         sats={item.balance}
                         sensitive
@@ -210,6 +213,14 @@ const SwipeableRow = ({
         );
     }
 
+    if (item.layer === localeString('tapas.taprootAssets')) {
+        return (
+            <TouchableOpacity onPress={() => navigation.navigate('Accounts')}>
+                <Row item={item} />
+            </TouchableOpacity>
+        );
+    }
+
     const HideButton = () => (
         <TouchableOpacity
             onPress={async () => {
@@ -253,12 +264,13 @@ const SwipeableRow = ({
     );
 };
 
-@inject('BalanceStore', 'UTXOsStore')
+@inject('BalanceStore', 'UTXOsStore', 'TaprootAssetsStore')
 @observer
 export default class LayerBalances extends Component<LayerBalancesProps, {}> {
     render() {
         const {
             BalanceStore,
+            TaprootAssetsStore,
             navigation,
             value,
             amount,
@@ -271,6 +283,7 @@ export default class LayerBalances extends Component<LayerBalancesProps, {}> {
         } = this.props;
 
         const { totalBlockchainBalance, lightningBalance } = BalanceStore;
+        const { assets } = TaprootAssetsStore;
 
         const otherAccounts = editMode
             ? this.props.UTXOsStore.accounts
@@ -326,6 +339,15 @@ export default class LayerBalances extends Component<LayerBalancesProps, {}> {
             DATA.push({
                 layer: localeString('components.LayerBalances.moreAccounts'),
                 count: Object.keys(otherAccounts).length
+            });
+        }
+
+        console.log('~~', assets);
+
+        if (BackendUtils.supportsTaprootAssets()) {
+            DATA.push({
+                layer: localeString('tapas.taprootAssets'),
+                count: assets.length || 0
             });
         }
 

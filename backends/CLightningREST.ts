@@ -309,5 +309,6 @@ export default class CLightningREST extends LND {
         const supportsOffers: boolean = res['experimental-offers'] || false;
         return supportsOffers;
     };
+    supportsTaprootAssets = () => false;
     isLNDBased = () => false;
 }

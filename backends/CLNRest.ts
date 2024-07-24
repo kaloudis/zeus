@@ -404,5 +404,6 @@ export default class CLNRest {
 
         return supportsOffers;
     };
+    supportsTaprootAssets = () => false;
     isLNDBased = () => false;
 }

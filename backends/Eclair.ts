@@ -509,6 +509,7 @@ export default class Eclair {
     supportsLSPS1customMessage = () => false;
     supportsLSPS1rest = () => true;
     supportsOffers = () => false;
+    supportsTaprootAssets = () => false;
     isLNDBased = () => false;
 }
 

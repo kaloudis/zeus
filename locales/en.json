@@ -1230,5 +1230,6 @@
     "views.PendingHTLCs.outgoing": "Outgoing",
     "views.PendingHTLCs.expirationHeight": "Expiration height",
     "views.PendingHTLCs.recommendationIOS": "It's recommended to leave ZEUS running while there are pending HTLCs to prevent force closes.",
-    "views.PendingHTLCs.recommendationAndroid": "It's recommended to enable Persistent LND or leave ZEUS running while there are pending HTLCs to prevent force closes."
+    "views.PendingHTLCs.recommendationAndroid": "It's recommended to enable Persistent LND or leave ZEUS running while there are pending HTLCs to prevent force closes.",
+    "tapas.taprootAssets": "Taproot Assets"
 }

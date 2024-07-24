@@ -299,5 +299,6 @@ export default class EmbeddedLND extends LND {
     supportsLSPS1customMessage = () => true;
     supportsLSPS1rest = () => false;
     supportsOffers = () => false;
+    supportsTaprootAssets = () => false;
     isLNDBased = () => true;
 }
