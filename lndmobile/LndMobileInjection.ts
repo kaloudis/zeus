@@ -101,6 +101,7 @@ import {
     walletrpc
 } from '../proto/lightning';
 import type { WorkInfo } from './LndMobile.d.ts';
+import { OutPoint } from '../models/TransactionRequest';
 
 export interface ILndMobileInjections {
     index: {
@@ -329,7 +330,8 @@ export interface ILndMobileInjections {
             sat: number,
             feeRate?: number,
             spend_unconfirmed?: boolean,
-            send_all?: boolean
+            send_all?: boolean,
+            outpoints?: Array<OutPoint>
         ) => Promise<lnrpc.SendCoinsResponse>;
         sendCoinsAll: (
             address: string,

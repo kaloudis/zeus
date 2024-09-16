@@ -339,12 +339,20 @@ export default class TransactionsStore {
         this.crafting = true;
         this.loading = true;
 
-        if (
-            (BackendUtils.isLNDBased() &&
-                transactionRequest.utxos &&
-                transactionRequest.utxos.length > 0) ||
-            transactionRequest?.additional_outputs?.length > 0
-        ) {
+        if (transactionRequest.send_all) {
+            delete transactionRequest.amount;
+        }
+
+        if (transactionRequest.utxos) {
+            transactionRequest.utxos.forEach((input) => {
+                const [txid_str, output_index] = input.split(':');
+                const inputs = [];
+                inputs.push({ txid_str, output_index: Number(output_index) });
+                transactionRequest.outpoints = inputs;
+            });
+        }
+
+        if (transactionRequest?.additional_outputs?.length > 0) {
             return this.sendCoinsLNDCoinControl(transactionRequest);
         }
 
