@@ -3,12 +3,15 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
+import BigNumber from 'bignumber.js';
 
 import BalanceStore from '../../stores/BalanceStore';
 import NodeInfoStore from '../../stores/NodeInfoStore';
 import SettingsStore from '../../stores/SettingsStore';
 import SyncStore from '../../stores/SyncStore';
+import SwapStore from '../../stores/SwapStore';
 
+import Amount from '../../components/Amount';
 import Button from '../../components/Button';
 import { Row } from '../../components/layout/Row';
 import Screen from '../../components/Screen';
@@ -21,6 +24,7 @@ import { themeColor } from '../../utils/ThemeUtils';
 import ArrowDown from '../../assets/images/SVG/Arrow_down.svg';
 import OnChainSvg from '../../assets/images/SVG/DynamicSVG/OnChainSvg';
 import LightningSvg from '../../assets/images/SVG/DynamicSVG/LightningSvg';
+
 // import Swap from '../../assets/images/SVG/Swap.svg';
 
 interface SwapPaneProps {
@@ -29,6 +33,7 @@ interface SwapPaneProps {
     NodeInfoStore: NodeInfoStore;
     SettingsStore: SettingsStore;
     SyncStore: SyncStore;
+    SwapStore: SwapStore;
 }
 
 interface SwapPaneState {
@@ -36,7 +41,13 @@ interface SwapPaneState {
     reverse: boolean;
 }
 
-@inject('BalanceStore', 'NodeInfoStore', 'SettingsStore', 'SyncStore')
+@inject(
+    'BalanceStore',
+    'NodeInfoStore',
+    'SettingsStore',
+    'SyncStore',
+    'SwapStore'
+)
 @observer
 export default class SwapPane extends React.PureComponent<
     SwapPaneProps,
@@ -57,10 +68,24 @@ export default class SwapPane extends React.PureComponent<
     }
 
     render() {
-        const { NodeInfoStore, SettingsStore, navigation } = this.props;
+        const { NodeInfoStore, SettingsStore, SwapStore, navigation } =
+            this.props;
         const { reverse } = this.state;
+        const { subInfo, reverseInfo } = SwapStore;
+        const info: any = reverse ? reverseInfo : subInfo;
+        const min = info.limits.minimal;
+        const max = info.limits.maximal;
 
         console.log('reverse', reverse);
+        console.log('min', min);
+        console.log('max', max);
+
+        const serviceFee = info.fees.percentage;
+        const networkFee = reverse
+            ? new BigNumber(info.fees.minerFees.claim).plus(
+                  info.fees.minerFees.lockup
+              )
+            : info.fees.minerFees;
 
         return (
             <Screen>
@@ -145,22 +170,55 @@ export default class SwapPane extends React.PureComponent<
                                     />
                                 </Row>
                             </View>
-                            <View style={{ top: 150 }}>
-                                <Text
-                                    style={{
-                                        fontFamily: 'PPNeueMontreal-Book'
-                                    }}
-                                >
-                                    Min:
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontFamily: 'PPNeueMontreal-Book'
-                                    }}
-                                >
-                                    Max:
-                                </Text>
-                            </View>
+                            <Row justify="space-between">
+                                <View style={{ top: 165 }}>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Min:{' '}
+                                        </Text>
+                                        <Amount sats={min} />
+                                    </Row>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Max:{' '}
+                                        </Text>
+                                        <Amount sats={max} />
+                                    </Row>
+                                </View>
+                                <View style={{ top: 165 }}>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Service fee: {serviceFee}%
+                                        </Text>
+                                    </Row>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Network fee:{' '}
+                                        </Text>
+                                        <Amount sats={networkFee} />
+                                    </Row>
+                                </View>
+                            </Row>
                         </View>
                     </View>
                     <View style={{ marginBottom: 0 }}>
