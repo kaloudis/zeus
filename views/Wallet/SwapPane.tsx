@@ -33,6 +33,7 @@ interface SwapPaneProps {
 
 interface SwapPaneState {
     showBackupPrompt: boolean;
+    reverse: boolean;
 }
 
 @inject('BalanceStore', 'NodeInfoStore', 'SettingsStore', 'SyncStore')
@@ -42,7 +43,8 @@ export default class SwapPane extends React.PureComponent<
     SwapPaneState
 > {
     state = {
-        showBackupPrompt: false
+        showBackupPrompt: false,
+        reverse: false
     };
 
     async UNSAFE_componentWillMount() {
@@ -56,76 +58,109 @@ export default class SwapPane extends React.PureComponent<
 
     render() {
         const { NodeInfoStore, SettingsStore, navigation } = this.props;
+        const { reverse } = this.state;
+
+        console.log('reverse', reverse);
 
         return (
             <Screen>
                 <WalletHeader navigation={navigation} />
                 <View style={{ flex: 1, margin: 10 }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text
+                            style={{
+                                fontFamily: 'PPNeueMontreal-Book',
+                                fontSize: 20,
+                                marginBottom: 20
+                            }}
+                        >
+                            Create atomic swap
+                        </Text>
+                    </View>
                     <View style={{ flex: 1 }}>
-                        <View style={{ alignItems: 'center' }}>
-                            <Text
-                                style={{
-                                    fontFamily: 'PPNeueMontreal-Book',
-                                    fontSize: 20
-                                }}
-                            >
-                                Create atomic swap
-                            </Text>
-                        </View>
-                        <Text
-                            style={{
-                                fontFamily: 'PPNeueMontreal-Book'
-                            }}
-                        >
-                            Min:
-                        </Text>
-                        <Text
-                            style={{
-                                fontFamily: 'PPNeueMontreal-Book'
-                            }}
-                        >
-                            Max:
-                        </Text>
-                        <Row>
-                            <View style={{alignItems: 'center',
-        justifyContent: 'flex-start' }}>
-                                <LightningSvg />
-                            </View>
-                            <AmountInput
-                                onAmountChange={() => {}}
-                                hideConversion
-                            />
-                        </Row>
-                        <TouchableOpacity
-                            style={{
-                                alignItems: 'center',
-                                marginBottom: -20,
-                                marginTop: -20
-                            }}
-                        >
-                            <View
-                                style={{
-                                    backgroundColor: themeColor('background'),
-                                    borderRadius: 30,
-                                    padding: 20,
-                                    zIndex: 1
-                                }}
-                            >
-                                <ArrowDown
-                                    fill={themeColor('text')}
-                                    height="30"
-                                    width="30"
-                                />
-                            </View>
-                        </TouchableOpacity>
-                        <View style={{ top: -20, zIndex: 2 }}>
-                            <Row>
-                                <OnChainSvg width={50} />
+                        <View style={{ flex: 1 }}>
+                            <Row style={{ position: 'absolute', zIndex: 1 }}>
                                 <AmountInput
+                                    prefix={
+                                        <View style={{ marginLeft: -10 }}>
+                                            {reverse ? (
+                                                <LightningSvg width={60} />
+                                            ) : (
+                                                <OnChainSvg width={60} />
+                                            )}
+                                        </View>
+                                    }
                                     onAmountChange={() => {}}
                                     hideConversion
                                 />
                             </Row>
+                            <TouchableOpacity
+                                style={{
+                                    alignSelf: 'center',
+                                    position: 'absolute',
+                                    zIndex: 100,
+                                    top: 50
+                                }}
+                                onPress={() => {
+                                    this.setState({
+                                        reverse: !reverse
+                                    });
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        backgroundColor:
+                                            themeColor('background'),
+                                        borderRadius: 30,
+                                        padding: 10
+                                    }}
+                                >
+                                    <ArrowDown
+                                        fill={themeColor('text')}
+                                        height="30"
+                                        width="30"
+                                    />
+                                </View>
+                            </TouchableOpacity>
+                            <View style={{ zIndex: 2 }}>
+                                <Row
+                                    style={{
+                                        position: 'absolute',
+                                        zIndex: 1,
+                                        top: 70
+                                    }}
+                                >
+                                    <AmountInput
+                                        prefix={
+                                            <View style={{ marginLeft: -10 }}>
+                                                {reverse ? (
+                                                    <OnChainSvg width={60} />
+                                                ) : (
+                                                    <LightningSvg width={60} />
+                                                )}
+                                            </View>
+                                        }
+                                        onAmountChange={() => {}}
+                                        hideConversion
+                                    />
+                                </Row>
+                            </View>
+                        </View>
+                        <View style={{ marginBottom: 20 }}>
+                            <Text
+                                style={{
+                                    fontFamily: 'PPNeueMontreal-Book'
+                                }}
+                            >
+                                Min:
+                            </Text>
+                            <Text
+                                style={{
+                                    fontFamily: 'PPNeueMontreal-Book'
+                                }}
+                            >
+                                Max:
+                            </Text>
                         </View>
                     </View>
                     <View style={{ marginBottom: 15 }}>

@@ -5,6 +5,7 @@ import BigNumber from 'bignumber.js';
 
 import Amount from './Amount';
 import TextInput from './TextInput';
+import { Row } from './layout/Row';
 
 import { themeColor } from '../utils/ThemeUtils';
 
@@ -25,6 +26,7 @@ interface AmountInputProps {
     FiatStore?: FiatStore;
     SettingsStore?: SettingsStore;
     UnitsStore?: UnitsStore;
+    prefix?: any;
 }
 
 interface AmountInputState {
@@ -126,7 +128,8 @@ export default class AmountInput extends React.Component<
             hideConversion,
             FiatStore,
             UnitsStore,
-            SettingsStore
+            SettingsStore,
+            prefix
         } = this.props;
         const { units }: any = UnitsStore;
         const { getRate, getSymbol }: any = FiatStore;
@@ -145,7 +148,8 @@ export default class AmountInput extends React.Component<
                         {title}
                     </Text>
                 )}
-                <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Row>
+                    {prefix ? prefix : undefined}
                     <TextInput
                         keyboardType="numeric"
                         placeholder={'0'}
@@ -180,7 +184,7 @@ export default class AmountInput extends React.Component<
                     />
                     <TouchableOpacity
                         onPress={() => !locked && this.onChangeUnits()}
-                        style={{ marginTop: 22, marginLeft: 15 }}
+                        style={{ marginLeft: 15 }}
                     >
                         {UnitsStore!.getNextUnit() === 'fiat' ? (
                             <ExchangeFiatSVG
@@ -196,7 +200,7 @@ export default class AmountInput extends React.Component<
                             />
                         )}
                     </TouchableOpacity>
-                </View>
+                </Row>
                 {!hideConversion && (
                     <View style={{ marginBottom: 10 }}>
                         {fiatEnabled && (
