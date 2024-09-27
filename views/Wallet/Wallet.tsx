@@ -28,6 +28,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import ChannelsPane from '../Channels/ChannelsPane';
 import BalancePane from './BalancePane';
 import KeypadPane from './KeypadPane';
+import SwapPane from './SwapPane';
 import SquarePosPane from './SquarePosPane';
 import StandalonePosPane from './StandalonePosPane';
 import StandalonePosKeypadPane from './StandalonePosKeypadPane';
@@ -79,6 +80,7 @@ import ChannelsIcon from '../../assets/images/SVG/Channels.svg';
 import POS from '../../assets/images/SVG/POS.svg';
 import Temple from '../../assets/images/SVG/Temple.svg';
 import Scan from '../../assets/images/SVG/Scan.svg';
+import Swap from '../../assets/images/SVG/Swap.svg';
 
 import { version } from '../../package.json';
 
@@ -676,6 +678,14 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             );
         };
 
+        const SwapScreen = () => {
+            return (
+                <Screen>
+                    <SwapPane navigation={navigation} />
+                </Screen>
+            );
+        };
+
         const PosScreen = () => {
             return (
                 <Screen>
@@ -763,6 +773,9 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                                             if (route.name === 'Balance') {
                                                 return <Temple fill={color} />;
                                             }
+                                            if (route.name === 'Swap') {
+                                                return <Swap fill={color} />;
+                                            }
                                             if (route.name === 'Products') {
                                                 return <POS stroke={color} />;
                                             }
@@ -813,6 +826,12 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                                         <Tab.Screen
                                             name="Balance"
                                             component={BalanceScreen}
+                                        />
+                                    )}
+                                    {true && (
+                                        <Tab.Screen
+                                            name="Swap"
+                                            component={SwapScreen}
                                         />
                                     )}
                                     {posEnabled === PosEnabled.Standalone &&
