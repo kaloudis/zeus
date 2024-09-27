@@ -30,7 +30,6 @@ import LightningSvg from '../../assets/images/SVG/DynamicSVG/LightningSvg';
 interface SwapPaneProps {
     navigation: StackNavigationProp<any, any>;
     BalanceStore: BalanceStore;
-    NodeInfoStore: NodeInfoStore;
     SettingsStore: SettingsStore;
     SyncStore: SyncStore;
     SwapStore: SwapStore;
@@ -39,15 +38,12 @@ interface SwapPaneProps {
 interface SwapPaneState {
     showBackupPrompt: boolean;
     reverse: boolean;
+    serviceFeeSats: number;
+    inputSats: number;
+    outputSats: number;
 }
 
-@inject(
-    'BalanceStore',
-    'NodeInfoStore',
-    'SettingsStore',
-    'SyncStore',
-    'SwapStore'
-)
+@inject('BalanceStore', 'SettingsStore', 'SyncStore', 'SwapStore')
 @observer
 export default class SwapPane extends React.PureComponent<
     SwapPaneProps,
@@ -55,7 +51,10 @@ export default class SwapPane extends React.PureComponent<
 > {
     state = {
         showBackupPrompt: false,
-        reverse: false
+        reverse: false,
+        serviceFeeSats: 0,
+        inputSats: 0,
+        outputSats: 0
     };
 
     async UNSAFE_componentWillMount() {
@@ -68,24 +67,23 @@ export default class SwapPane extends React.PureComponent<
     }
 
     render() {
-        const { NodeInfoStore, SettingsStore, SwapStore, navigation } =
-            this.props;
-        const { reverse } = this.state;
+        const { SettingsStore, SwapStore, navigation } = this.props;
+        const { reverse, serviceFeeSats, inputSats, outputSats } = this.state;
         const { subInfo, reverseInfo } = SwapStore;
         const info: any = reverse ? reverseInfo : subInfo;
         const min = info.limits.minimal;
         const max = info.limits.maximal;
 
-        console.log('reverse', reverse);
-        console.log('min', min);
-        console.log('max', max);
-
-        const serviceFee = info.fees.percentage;
+        const serviceFeePct = info.fees.percentage;
         const networkFee = reverse
             ? new BigNumber(info.fees.minerFees.claim).plus(
                   info.fees.minerFees.lockup
               )
             : info.fees.minerFees;
+
+        const errorInput = inputSats < min;
+        const errorOutput = outputSats < 0;
+        const error = errorInput || errorOutput;
 
         return (
             <Screen>
@@ -115,8 +113,40 @@ export default class SwapPane extends React.PureComponent<
                                             )}
                                         </View>
                                     }
-                                    onAmountChange={() => {}}
+                                    onAmountChange={(
+                                        _,
+                                        satAmount: string | number
+                                    ) => {
+                                        console.log('satAmount', satAmount);
+                                        if (!satAmount || satAmount === '0') {
+                                            this.setState({
+                                                serviceFeeSats: 0,
+                                                outputSats: 0
+                                            });
+                                        }
+                                        const serviceFeeSats = satAmount
+                                            ? new BigNumber(satAmount)
+                                                  .times(serviceFeePct)
+                                                  .toNumber()
+                                            : 0;
+
+                                        const outputSats = satAmount
+                                            ? new BigNumber(satAmount)
+                                                  .minus(serviceFeeSats)
+                                                  .minus(networkFee)
+                                                  .toNumber()
+                                            : 0;
+                                        this.setState({
+                                            serviceFeeSats,
+                                            inputSats: Number(satAmount),
+                                            outputSats
+                                        });
+                                    }}
                                     hideConversion
+                                    amount={
+                                        inputSats ? inputSats.toString() : ''
+                                    }
+                                    error={errorInput}
                                 />
                             </Row>
                             <TouchableOpacity
@@ -128,7 +158,10 @@ export default class SwapPane extends React.PureComponent<
                                 }}
                                 onPress={() => {
                                     this.setState({
-                                        reverse: !reverse
+                                        reverse: !reverse,
+                                        inputSats: 0,
+                                        outputSats: 0,
+                                        serviceFeeSats: 0
                                     });
                                 }}
                             >
@@ -167,6 +200,12 @@ export default class SwapPane extends React.PureComponent<
                                         }
                                         onAmountChange={() => {}}
                                         hideConversion
+                                        amount={
+                                            outputSats
+                                                ? outputSats.toString()
+                                                : '0'
+                                        }
+                                        error={errorOutput}
                                     />
                                 </Row>
                             </View>
@@ -203,7 +242,17 @@ export default class SwapPane extends React.PureComponent<
                                                     'PPNeueMontreal-Book'
                                             }}
                                         >
-                                            Service fee: {serviceFee}%
+                                            Service fee:{' '}
+                                        </Text>
+                                        <Amount sats={serviceFeeSats} />
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            {' '}
+                                            ({serviceFeePct}%)
                                         </Text>
                                     </Row>
                                     <Row>
@@ -222,7 +271,7 @@ export default class SwapPane extends React.PureComponent<
                         </View>
                     </View>
                     <View style={{ marginBottom: 0 }}>
-                        <Button title="Initiate swap" />
+                        <Button title="Initiate swap" disabled={error} />
                     </View>
                 </View>
             </Screen>

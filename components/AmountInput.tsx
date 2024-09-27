@@ -27,6 +27,7 @@ interface AmountInputProps {
     SettingsStore?: SettingsStore;
     UnitsStore?: UnitsStore;
     prefix?: any;
+    error?: boolean;
 }
 
 interface AmountInputState {
@@ -129,7 +130,8 @@ export default class AmountInput extends React.Component<
             FiatStore,
             UnitsStore,
             SettingsStore,
-            prefix
+            prefix,
+            error
         } = this.props;
         const { units }: any = UnitsStore;
         const { getRate, getSymbol }: any = FiatStore;
@@ -181,6 +183,7 @@ export default class AmountInput extends React.Component<
                             flex: 1,
                             flexDirection: 'row'
                         }}
+                        error={error}
                     />
                     <TouchableOpacity
                         onPress={() => !locked && this.onChangeUnits()}
