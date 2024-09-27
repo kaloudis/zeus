@@ -145,25 +145,25 @@ export default class SwapPane extends React.PureComponent<
                                     />
                                 </Row>
                             </View>
-                        </View>
-                        <View style={{ marginBottom: 20 }}>
-                            <Text
-                                style={{
-                                    fontFamily: 'PPNeueMontreal-Book'
-                                }}
-                            >
-                                Min:
-                            </Text>
-                            <Text
-                                style={{
-                                    fontFamily: 'PPNeueMontreal-Book'
-                                }}
-                            >
-                                Max:
-                            </Text>
+                            <View style={{ top: 150 }}>
+                                <Text
+                                    style={{
+                                        fontFamily: 'PPNeueMontreal-Book'
+                                    }}
+                                >
+                                    Min:
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontFamily: 'PPNeueMontreal-Book'
+                                    }}
+                                >
+                                    Max:
+                                </Text>
+                            </View>
                         </View>
                     </View>
-                    <View style={{ marginBottom: 15 }}>
+                    <View style={{ marginBottom: 0 }}>
                         <Button title="Initiate swap" />
                     </View>
                 </View>
