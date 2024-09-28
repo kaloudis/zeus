@@ -72,7 +72,7 @@ export default class SwapPane extends React.PureComponent<
               )
             : info.fees.minerFees;
 
-        const errorInput = inputSats < min;
+        const errorInput = inputSats < min || inputSats > max;
         const errorOutput = outputSats < 0;
         const error = errorInput || errorOutput;
 
