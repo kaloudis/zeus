@@ -836,7 +836,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                                             component={BalanceScreen}
                                         />
                                     )}
-                                    {true && (
+                                    {BackendUtils.supportsOnchainSends() && (
                                         <Tab.Screen
                                             name="Swap"
                                             component={SwapScreen}

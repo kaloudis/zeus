@@ -137,7 +137,7 @@ export default class AmountInput extends React.Component<
 
     componentDidMount() {
         const { amount, onAmountChange }: any = this.props;
-        const satAmount = getSatAmount(amount);
+        const satAmount = amount ? getSatAmount(amount) : 0;
         onAmountChange(amount, satAmount);
         this.setState({ satAmount });
     }
@@ -155,7 +155,7 @@ export default class AmountInput extends React.Component<
     onChangeUnits = () => {
         const { amount, onAmountChange, UnitsStore }: any = this.props;
         UnitsStore.changeUnits();
-        const satAmount = getSatAmount(amount);
+        const satAmount = amount ? getSatAmount(amount) : 0;
         onAmountChange(amount, satAmount);
         this.setState({ satAmount });
     };
@@ -201,7 +201,9 @@ export default class AmountInput extends React.Component<
                         onChangeText={(text: string) => {
                             // remove spaces and non-numeric chars
                             const formatted = text.replace(/[^\d.,-]/g, '');
-                            const satAmount = getSatAmount(formatted);
+                            const satAmount = formatted
+                                ? getSatAmount(formatted)
+                                : 0;
                             onAmountChange(formatted, satAmount);
                             this.setState({ satAmount });
                         }}
