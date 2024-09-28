@@ -93,13 +93,13 @@ const getAmount = (sats: string | number) => {
 
     const rate = fiat && fiatRates && fiatEntry ? fiatEntry.rate : 0;
 
-    let amount: string | number;
+    let amount: string;
     switch (units) {
         case 'sats':
             amount = value;
             break;
         case 'BTC':
-            amount = new BigNumber(value || 0).div(SATS_PER_BTC).toNumber();
+            amount = new BigNumber(value || 0).div(SATS_PER_BTC).toString();
             break;
         case 'fiat':
             amount = rate
@@ -108,7 +108,7 @@ const getAmount = (sats: string | number) => {
                       .div(SATS_PER_BTC)
                       .toNumber()
                       .toFixed(0)
-                : 0;
+                : '0';
             break;
     }
 

@@ -1,14 +1,10 @@
 import * as React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import BigNumber from 'bignumber.js';
 
-import BalanceStore from '../../stores/BalanceStore';
-import NodeInfoStore from '../../stores/NodeInfoStore';
-import SettingsStore from '../../stores/SettingsStore';
-import SyncStore from '../../stores/SyncStore';
 import SwapStore from '../../stores/SwapStore';
 
 import Amount from '../../components/Amount';
@@ -25,13 +21,8 @@ import ArrowDown from '../../assets/images/SVG/Arrow_down.svg';
 import OnChainSvg from '../../assets/images/SVG/DynamicSVG/OnChainSvg';
 import LightningSvg from '../../assets/images/SVG/DynamicSVG/LightningSvg';
 
-// import Swap from '../../assets/images/SVG/Swap.svg';
-
 interface SwapPaneProps {
     navigation: StackNavigationProp<any, any>;
-    BalanceStore: BalanceStore;
-    SettingsStore: SettingsStore;
-    SyncStore: SyncStore;
     SwapStore: SwapStore;
 }
 
@@ -43,7 +34,7 @@ interface SwapPaneState {
     outputSats: number;
 }
 
-@inject('BalanceStore', 'SettingsStore', 'SyncStore', 'SwapStore')
+@inject('SwapStore')
 @observer
 export default class SwapPane extends React.PureComponent<
     SwapPaneProps,
@@ -67,7 +58,7 @@ export default class SwapPane extends React.PureComponent<
     }
 
     render() {
-        const { SettingsStore, SwapStore, navigation } = this.props;
+        const { SwapStore, navigation } = this.props;
         const { reverse, serviceFeeSats, inputSats, outputSats } = this.state;
         const { subInfo, reverseInfo } = SwapStore;
         const info: any = reverse ? reverseInfo : subInfo;
@@ -117,18 +108,12 @@ export default class SwapPane extends React.PureComponent<
                                         _,
                                         satAmount: string | number
                                     ) => {
-                                        console.log('//satAmount', satAmount);
                                         if (!satAmount || satAmount === '0') {
                                             this.setState({
                                                 serviceFeeSats: 0,
                                                 outputSats: 0
                                             });
                                         }
-
-                                        console.log(
-                                            'serviceFeePct',
-                                            serviceFeePct
-                                        );
 
                                         const serviceFeeSats = satAmount
                                             ? new BigNumber(satAmount)
@@ -137,19 +122,12 @@ export default class SwapPane extends React.PureComponent<
                                                   .toNumber()
                                             : 0;
 
-                                        console.log(
-                                            'serviceFeeSats',
-                                            serviceFeeSats
-                                        );
-
                                         const outputSats = satAmount
                                             ? new BigNumber(satAmount)
                                                   .minus(serviceFeeSats)
                                                   .minus(networkFee)
                                                   .toNumber()
                                             : 0;
-
-                                        console.log('outputSats', outputSats);
 
                                         this.setState({
                                             serviceFeeSats,
@@ -215,10 +193,6 @@ export default class SwapPane extends React.PureComponent<
                                             _,
                                             satAmount: string | number
                                         ) => {
-                                            console.log(
-                                                '//satAmount2',
-                                                satAmount
-                                            );
                                             if (
                                                 !satAmount ||
                                                 satAmount === '0'
@@ -228,6 +202,7 @@ export default class SwapPane extends React.PureComponent<
                                                     inputSats: 0
                                                 });
                                             }
+
                                             const serviceFeeSats = satAmount
                                                 ? new BigNumber(1)
                                                       .div(serviceFeePct)
@@ -236,11 +211,6 @@ export default class SwapPane extends React.PureComponent<
                                                       .toNumber()
                                                 : 0;
 
-                                            console.log(
-                                                'serviceFeeSats2',
-                                                serviceFeeSats
-                                            );
-
                                             const inputSats = satAmount
                                                 ? new BigNumber(satAmount)
                                                       .plus(serviceFeeSats)
@@ -248,10 +218,6 @@ export default class SwapPane extends React.PureComponent<
                                                       .toNumber()
                                                 : 0;
 
-                                            console.log(
-                                                'inputSats2',
-                                                inputSats
-                                            );
                                             this.setState({
                                                 serviceFeeSats,
                                                 inputSats,
@@ -337,17 +303,3 @@ export default class SwapPane extends React.PureComponent<
         );
     }
 }
-
-const styles = StyleSheet.create({
-    balance: {
-        alignItems: 'center'
-    },
-    conversion: {
-        top: 10,
-        alignItems: 'center'
-    },
-    conversionSecondary: {
-        top: 3,
-        alignItems: 'center'
-    }
-});
