@@ -20,6 +20,7 @@ import ExchangeFiatSVG from '../assets/images/SVG/ExchangeFiat.svg';
 interface AmountInputProps {
     onAmountChange: (amount: string, satAmount: string | number) => void;
     amount?: string;
+    sats?: string;
     locked?: boolean;
     title: string;
     hideConversion?: boolean;
@@ -75,6 +76,45 @@ const getSatAmount = (amount: string | number) => {
     return satAmount;
 };
 
+const getAmount = (sats: string | number) => {
+    const { fiatStore, settingsStore, unitsStore } = Stores;
+    const { fiatRates } = fiatStore;
+    const { settings } = settingsStore;
+    const { fiat } = settings;
+    const { units } = unitsStore;
+
+    // replace , with . for unit separator
+    const value = sats ? sats.toString().replace(/,/g, ',') : '';
+
+    const fiatEntry =
+        fiat && fiatRates
+            ? fiatRates.filter((entry: any) => entry.code === fiat)[0]
+            : null;
+
+    const rate = fiat && fiatRates && fiatEntry ? fiatEntry.rate : 0;
+
+    let amount: string | number;
+    switch (units) {
+        case 'sats':
+            amount = value;
+            break;
+        case 'BTC':
+            amount = new BigNumber(value || 0).div(SATS_PER_BTC).toNumber();
+            break;
+        case 'fiat':
+            amount = rate
+                ? new BigNumber(value.toString().replace(/,/g, '.'))
+                      .times(rate)
+                      .div(SATS_PER_BTC)
+                      .toNumber()
+                      .toFixed(0)
+                : 0;
+            break;
+    }
+
+    return amount;
+};
+
 @inject('FiatStore', 'SettingsStore', 'UnitsStore')
 @observer
 export default class AmountInput extends React.Component<
@@ -84,9 +124,10 @@ export default class AmountInput extends React.Component<
     constructor(props: any) {
         super(props);
 
-        const { amount, onAmountChange } = props;
+        const { amount, sats, onAmountChange } = props;
         let satAmount = '0';
         if (amount) satAmount = getSatAmount(amount).toString();
+        if (sats) satAmount = sats;
 
         onAmountChange(amount, satAmount);
         this.state = {
@@ -123,6 +164,7 @@ export default class AmountInput extends React.Component<
         const { satAmount } = this.state;
         const {
             amount,
+            sats,
             onAmountChange,
             title,
             locked,
@@ -155,7 +197,7 @@ export default class AmountInput extends React.Component<
                     <TextInput
                         keyboardType="numeric"
                         placeholder={'0'}
-                        value={amount}
+                        value={amount || sats ? getAmount(sats) : undefined}
                         onChangeText={(text: string) => {
                             // remove spaces and non-numeric chars
                             const formatted = text.replace(/[^\d.,-]/g, '');

@@ -117,18 +117,30 @@ export default class SwapPane extends React.PureComponent<
                                         _,
                                         satAmount: string | number
                                     ) => {
-                                        console.log('satAmount', satAmount);
+                                        console.log('//satAmount', satAmount);
                                         if (!satAmount || satAmount === '0') {
                                             this.setState({
                                                 serviceFeeSats: 0,
                                                 outputSats: 0
                                             });
                                         }
+
+                                        console.log(
+                                            'serviceFeePct',
+                                            serviceFeePct
+                                        );
+
                                         const serviceFeeSats = satAmount
                                             ? new BigNumber(satAmount)
                                                   .times(serviceFeePct)
+                                                  .div(100)
                                                   .toNumber()
                                             : 0;
+
+                                        console.log(
+                                            'serviceFeeSats',
+                                            serviceFeeSats
+                                        );
 
                                         const outputSats = satAmount
                                             ? new BigNumber(satAmount)
@@ -136,16 +148,17 @@ export default class SwapPane extends React.PureComponent<
                                                   .minus(networkFee)
                                                   .toNumber()
                                             : 0;
+
+                                        console.log('outputSats', outputSats);
+
                                         this.setState({
                                             serviceFeeSats,
                                             inputSats: Number(satAmount),
                                             outputSats
                                         });
                                     }}
+                                    sats={inputSats ? inputSats.toString() : ''}
                                     hideConversion
-                                    amount={
-                                        inputSats ? inputSats.toString() : ''
-                                    }
                                     error={errorInput}
                                 />
                             </Row>
@@ -198,42 +211,64 @@ export default class SwapPane extends React.PureComponent<
                                                 )}
                                             </View>
                                         }
-                                        onAmountChange={() => {}}
+                                        onAmountChange={(
+                                            _,
+                                            satAmount: string | number
+                                        ) => {
+                                            console.log(
+                                                '//satAmount2',
+                                                satAmount
+                                            );
+                                            if (
+                                                !satAmount ||
+                                                satAmount === '0'
+                                            ) {
+                                                this.setState({
+                                                    serviceFeeSats: 0,
+                                                    inputSats: 0
+                                                });
+                                            }
+                                            const serviceFeeSats = satAmount
+                                                ? new BigNumber(1)
+                                                      .div(serviceFeePct)
+                                                      .div(100)
+                                                      .times(satAmount)
+                                                      .toNumber()
+                                                : 0;
+
+                                            console.log(
+                                                'serviceFeeSats2',
+                                                serviceFeeSats
+                                            );
+
+                                            const inputSats = satAmount
+                                                ? new BigNumber(satAmount)
+                                                      .plus(serviceFeeSats)
+                                                      .plus(networkFee)
+                                                      .toNumber()
+                                                : 0;
+
+                                            console.log(
+                                                'inputSats2',
+                                                inputSats
+                                            );
+                                            this.setState({
+                                                serviceFeeSats,
+                                                inputSats,
+                                                outputSats: Number(satAmount)
+                                            });
+                                        }}
                                         hideConversion
-                                        amount={
+                                        sats={
                                             outputSats
                                                 ? outputSats.toString()
-                                                : '0'
+                                                : ''
                                         }
                                         error={errorOutput}
                                     />
                                 </Row>
                             </View>
                             <Row justify="space-between">
-                                <View style={{ top: 165 }}>
-                                    <Row>
-                                        <Text
-                                            style={{
-                                                fontFamily:
-                                                    'PPNeueMontreal-Book'
-                                            }}
-                                        >
-                                            Min:{' '}
-                                        </Text>
-                                        <Amount sats={min} />
-                                    </Row>
-                                    <Row>
-                                        <Text
-                                            style={{
-                                                fontFamily:
-                                                    'PPNeueMontreal-Book'
-                                            }}
-                                        >
-                                            Max:{' '}
-                                        </Text>
-                                        <Amount sats={max} />
-                                    </Row>
-                                </View>
                                 <View style={{ top: 165 }}>
                                     <Row>
                                         <Text
@@ -265,6 +300,30 @@ export default class SwapPane extends React.PureComponent<
                                             Network fee:{' '}
                                         </Text>
                                         <Amount sats={networkFee} />
+                                    </Row>
+                                </View>
+                                <View style={{ top: 165 }}>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Min:{' '}
+                                        </Text>
+                                        <Amount sats={min} />
+                                    </Row>
+                                    <Row>
+                                        <Text
+                                            style={{
+                                                fontFamily:
+                                                    'PPNeueMontreal-Book'
+                                            }}
+                                        >
+                                            Max:{' '}
+                                        </Text>
+                                        <Amount sats={max} />
                                     </Row>
                                 </View>
                             </Row>
