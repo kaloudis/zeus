@@ -4,7 +4,7 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <React/RCTLinkingManager.h>
-#import "RNNotifications.h"
+// #import "RNNotifications.h" // Removed for expo-notifications
 
 #ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
@@ -65,7 +65,7 @@ static void ClearKeychainIfNecessary() {
   InitializeFlipper(application);
 #endif
 
-  [RNNotifications startMonitorNotifications];
+  // [RNNotifications startMonitorNotifications]; // Removed for expo-notifications
 
   ClearKeychainIfNecessary();
 
@@ -97,12 +97,14 @@ static void ClearKeychainIfNecessary() {
 #endif
 }
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-  [RNNotifications didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
-}
+// Removed for expo-notifications
+// - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+//   [RNNotifications didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+// }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-  [RNNotifications didFailToRegisterForRemoteNotificationsWithError:error];
-}
+// Removed for expo-notifications
+// - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+//   [RNNotifications didFailToRegisterForRemoteNotificationsWithError:error];
+// }
 
 @end

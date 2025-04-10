@@ -958,8 +958,6 @@ PODS:
     - React-Core
   - react-native-nfc-manager (3.14.14):
     - React-Core
-  - react-native-notifications (5.1.0):
-    - React-Core
   - react-native-ping (1.2.8):
     - React
   - react-native-print (0.11.0):
@@ -1431,7 +1429,6 @@ DEPENDENCIES:
   - react-native-hce (from `../node_modules/react-native-hce`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-nfc-manager (from `../node_modules/react-native-nfc-manager`)
-  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-ping (from `../node_modules/react-native-ping`)
   - react-native-print (from `../node_modules/react-native-print`)
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
@@ -1574,8 +1571,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-picker"
   react-native-nfc-manager:
     :path: "../node_modules/react-native-nfc-manager"
-  react-native-notifications:
-    :path: "../node_modules/react-native-notifications"
   react-native-ping:
     :path: "../node_modules/react-native-ping"
   react-native-print:
@@ -1720,7 +1715,6 @@ SPEC CHECKSUMS:
   react-native-hce: f42561549a16f53ae98edb7f1b68ad87b6e732e1
   react-native-image-picker: b15a9e61c326c99b8215659d968accee6eddf639
   react-native-nfc-manager: f74a1e52807a916d27c2f428633e474cf661d611
-  react-native-notifications: 3bafa1237ae8a47569a84801f17d80242fe9f6a5
   react-native-ping: 589027e929c300b0b68cc5c34105f33610177055
   react-native-print: 692e8782bc89872ea01738c6759631388e77358c
   react-native-randombytes: 4a00fba06ca0d80a7c02a6b73cfe58ffa4a093a0

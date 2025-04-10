@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { action, observable, runInAction } from 'mobx';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { Notifications } from 'react-native-notifications';
+import * as Notifications from 'expo-notifications';
 
 import BigNumber from 'bignumber.js';
 import bolt11 from 'bolt11';
@@ -636,22 +636,15 @@ export default class LightningAddressStore {
             const body = `Payment of ${value_commas} ${
                 value_commas === '1' ? 'sat' : 'sats'
             } automatically accepted`;
-            if (Platform.OS === 'android') {
-                // @ts-ignore:next-line
-                Notifications.postLocalNotification({
-                    title,
-                    body
-                });
-            }
 
-            if (Platform.OS === 'ios') {
-                // @ts-ignore:next-line
-                Notifications.postLocalNotification({
+            Notifications.scheduleNotificationAsync({
+                content: {
                     title,
                     body,
-                    sound: 'chime.aiff'
-                });
-            }
+                    sound: Platform.OS === 'ios' ? 'chime.aiff' : 'default' // Use default sound on Android, custom on iOS
+                },
+                trigger: null // Send immediately
+            });
         };
 
         try {
@@ -924,22 +917,15 @@ export default class LightningAddressStore {
                 const body = `Payment of ${value_commas} ${
                     value_commas === '1' ? 'sat' : 'sats'
                 } automatically accepted`;
-                if (Platform.OS === 'android') {
-                    // @ts-ignore:next-line
-                    Notifications.postLocalNotification({
-                        title,
-                        body
-                    });
-                }
 
-                if (Platform.OS === 'ios') {
-                    // @ts-ignore:next-line
-                    Notifications.postLocalNotification({
+                Notifications.scheduleNotificationAsync({
+                    content: {
                         title,
                         body,
-                        sound: 'chime.aiff'
-                    });
-                }
+                        sound: Platform.OS === 'ios' ? 'chime.aiff' : 'default' // Use default sound on Android, custom on iOS
+                    },
+                    trigger: null // Send immediately
+                });
             };
 
             return await BackendUtils.createInvoice({
