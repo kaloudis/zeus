@@ -101,6 +101,7 @@ import ProductDetails from './views/POS/ProductDetails';
 import PaymentsSettings from './views/Settings/PaymentsSettings';
 import InvoicesSettings from './views/Settings/InvoicesSettings';
 import LSP from './views/Settings/LSP';
+import NWCService from './views/Settings/NWCService'; // Added NWCService view
 import ChannelsSettings from './views/Settings/ChannelsSettings';
 import SetWalletPicture from './views/Settings/SetWalletPicture';
 import ChoosePaymentMethod from './views/ChoosePaymentMethod';
@@ -301,6 +302,7 @@ export default class App extends React.PureComponent {
                 TransactionsStore={transactionsStore}
                 UnitsStore={unitsStore}
                 UTXOsStore={utxosStore}
+                NWCStore={nwcStore} {/* Added NWCStore to Provider */}
             >
                 <AppContainer>
                     <PushNotificationManager>
@@ -635,6 +637,10 @@ export default class App extends React.PureComponent {
                                                         component={
                                                             NodeQRScanner
                                                         }
+                                                    />
+                                                    <Stack.Screen
+                                                        name="NWCService" // @ts-ignore:next-line
+                                                        component={NWCService}
                                                     />
                                                     <Stack.Screen
                                                         name="Order" // @ts-ignore:next-line
