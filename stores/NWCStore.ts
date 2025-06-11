@@ -3,9 +3,12 @@ import { generateSecretKey, getPublicKey } from 'nostr-tools';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { NWCWalletService, NWCWalletServiceKeyPair } from '@alby/js-sdk'; // Assuming js-sdk is installed
 
-import settingsStore from './SettingsStore'; // To access NWC settings and wallet details
+import settingsStoreInstance from './SettingsStore'; // To access NWC settings and wallet details
+import TransactionsStore from './TransactionsStore';
+import NodeInfoStore from './NodeInfoStore';
+import BalanceStore from './BalanceStore';
+import ChannelsStore from './ChannelsStore';
 // Import other necessary stores or utils for payment processing (LND, Cashu)
-// e.g. import lndStore from './LndStore';
 // e.g. import cashuStore from './CashuStore';
 
 const DEFAULT_NWC_RELAY = 'wss://relay.getalby.com/v1';
@@ -14,7 +17,7 @@ export default class NWCStore {
     @observable public isServiceEnabled: boolean = false;
     @observable public serviceUri: string | null = null;
     @observable public error: string | null = null;
-    @observable public_loading: boolean = false;
+    @observable public loading: boolean = false; // Renamed from public_loading
 
     private walletService: NWCWalletService | null = null;
     private walletServiceSecretKey: string | null = null;
@@ -22,14 +25,24 @@ export default class NWCStore {
     // Store active subscriptions/keypairs if needed
     private activeSubscriptions: Map<string, () => void> = new Map();
 
+    private transactionsStore: TransactionsStore;
+    private nodeInfoStore: NodeInfoStore;
+    private balanceStore: BalanceStore;
+    private channelsStore: ChannelsStore;
 
     constructor() {
+        // In a real app, these would likely be injected or part of a root store
+        this.channelsStore = new ChannelsStore(settingsStoreInstance);
+        this.nodeInfoStore = new NodeInfoStore(this.channelsStore, settingsStoreInstance);
+        this.transactionsStore = new TransactionsStore(settingsStoreInstance, this.nodeInfoStore, this.channelsStore);
+        this.balanceStore = new BalanceStore(settingsStoreInstance);
+
         this.initializeFromSettings();
     }
 
     @action
     private initializeFromSettings = async () => {
-        const { nwcService } = settingsStore.settings;
+        const { nwcService } = settingsStoreInstance.settings;
         if (nwcService.enabled && nwcService.secretKey && nwcService.publicKey) {
             this.walletServiceSecretKey = nwcService.secretKey;
             this.walletServicePubkey = nwcService.publicKey;
@@ -49,13 +62,13 @@ export default class NWCStore {
             this.walletServiceSecretKey = bytesToHex(secret);
             this.walletServicePubkey = getPublicKey(secret);
 
-            await settingsStore.updateSettings({
+            await settingsStoreInstance.updateSettings({
                 nwcService: {
-                    ...settingsStore.settings.nwcService,
+                    ...settingsStoreInstance.settings.nwcService,
                     enabled: true,
                     secretKey: this.walletServiceSecretKey,
                     publicKey: this.walletServicePubkey,
-                    relayUrl: settingsStore.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY,
+                    relayUrl: settingsStoreInstance.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY,
                 }
             });
             await this.startService();
@@ -76,9 +89,9 @@ export default class NWCStore {
         this.loading = true;
         try {
             this.stopService();
-            await settingsStore.updateSettings({
+            await settingsStoreInstance.updateSettings({
                 nwcService: {
-                    ...settingsStore.settings.nwcService,
+                    ...settingsStoreInstance.settings.nwcService,
                     enabled: false,
                     // Optionally clear secretKey and publicKey for security,
                     // or keep them if user might re-enable with same keys.
@@ -104,7 +117,7 @@ export default class NWCStore {
             return;
         }
 
-        const relayUrl = settingsStore.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY;
+        const relayUrl = settingsStoreInstance.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY;
         this.walletService = new NWCWalletService({
             relayUrl,
         });
@@ -169,36 +182,47 @@ export default class NWCStore {
 
     private handleGetInfo = async () => {
         console.log("NWC: Received get_info request");
-        // TODO: Implement based on currently connected node (LND/Cashu)
-        // const alias = settingsStore.settings.nodes[settingsStore.settings.selectedNode]?.nickname || "Zeus Wallet";
-        // const balance = await lndStore.getBalance(); // or cashuStore.totalBalanceSats
-        return Promise.resolve({
-            result: {
-                methods: ["get_info", "pay_invoice", "get_balance"], // Reflect actual capabilities
-                alias: "Zeus Wallet", // TODO: Make dynamic
-                // color: "#yourbrandcolor",
-                // pubkey: this.walletServicePubkey,
-                // network: settingsStore.settings.nodes[settingsStore.settings.selectedNode]?.embeddedLndNetwork || "mainnet", // TODO: Make dynamic
-                // block_height: lndStore.blockHeight, // TODO
-                // block_hash: lndStore.blockHash, // TODO
-            },
-            error: undefined,
-        });
+        try {
+            await this.nodeInfoStore.getNodeInfo(); // Ensure nodeInfo is fresh
+            const nodeInfo = this.nodeInfoStore.nodeInfo;
+            const alias = nodeInfo?.alias || settingsStoreInstance.settings.nodes?.[settingsStoreInstance.settings.selectedNode || 0]?.nickname || "Zeus Wallet";
+            const network = nodeInfo?.isTestNet ? "testnet" : nodeInfo?.isRegTest ? "regtest" : "mainnet";
+            // block_height and block_hash might not be directly available or relevant for all node types in NodeInfo model
+            // const block_height = nodeInfo?.block_height;
+            // const block_hash = nodeInfo?.block_hash;
+
+            return Promise.resolve({
+                result: {
+                    methods: ["get_info", "pay_invoice", "get_balance"], // Reflect actual capabilities
+                    alias: alias,
+                    color: "#FCE588", // Zeus yellow, can be customized
+                    pubkey: this.walletServicePubkey,
+                    network: network,
+                    // block_height: block_height,
+                    // block_hash: block_hash,
+                },
+                error: undefined,
+            });
+        } catch (e: any) {
+            console.error("NWC: Error in get_info:", e);
+            return Promise.resolve({
+                error: { code: "INTERNAL", message: `Error fetching node info: ${e.message}` },
+            });
+        }
     }
 
     private handleGetBalance = async () => {
         console.log("NWC: Received get_balance request");
         try {
-            // TODO: Implement based on currently connected node (LND/Cashu)
-            // This is a placeholder. You'll need to fetch the actual balance.
-            // For LND: const balance = await lndStore.getWalletBalance(); // or similar
-            // For Cashu: const balance = cashuStore.totalBalanceSats;
-            const placeholderBalanceMsats = 100000 * 1000; // Example: 100,000 sats
+            // Assuming getLightningBalance fetches and sets the balance in the store
+            await this.balanceStore.getLightningBalance(true, true); // set=true, reset=true to refresh
+            const lightningBalanceSats = Number(this.balanceStore.lightningBalance) || 0;
+            const balanceMsats = lightningBalanceSats * 1000;
+
             return Promise.resolve({
                 result: {
-                    balance: placeholderBalanceMsats, // in msats
-                    // max_amount: 1000000, // in sats, optional
-                    // budget_renewal: "daily" // optional
+                    balance: balanceMsats, // in msats
+                    // TODO: Add max_amount and budget_renewal if applicable based on settings
                 },
                 error: undefined,
             });
@@ -212,36 +236,79 @@ export default class NWCStore {
 
     private handlePayInvoice = async (params: { invoice: string, amount?: number }) => {
         console.log("NWC: Received pay_invoice request", params);
-        const { invoice, amount } = params; // amount is in msat
+        const { invoice, amount } = params; // NWC amount is in msat, TransactionsStore.sendPayment expects sats for 'amount' if not keysend
 
         if (!invoice) {
             return Promise.resolve({ error: { code: "INVALID_PARAMETER", message: "Missing invoice" } });
         }
 
         try {
-            // TODO: Implement payment logic using LNDStore or CashuStore
-            // This is a placeholder.
-            // Example for LND:
-            // const paymentResult = await lndStore.sendPayment(invoice);
-            // if (paymentResult.payment_error) {
-            //    return Promise.resolve({ error: { code: "PAYMENT_FAILED", message: paymentResult.payment_error } });
-            // }
-            // return Promise.resolve({ result: { preimage: paymentResult.payment_preimage } });
+            // TransactionsStore.sendPayment handles both bolt11 and keysend (pubkey + amount)
+            // For NWC, 'amount' is optional for bolt11, but if provided, it's in msat.
+            // sendPayment takes amount in sats.
+            // If it's a keysend, the amount from NWC (msat) needs to be converted to sats for the 'amount' field of sendPayment.
+            // If it's a BOLT11 invoice, the amount is usually encoded in the invoice itself.
+            // The `sendPayment` interface in `TransactionsStore` might need adjustment or clarification
+            // on how it handles amounts for BOLT11 vs keysend.
+            // For now, we pass the invoice directly. If amount is for keysend, it should be handled by sendPayment.
 
-            // Placeholder success:
-            const placeholderPreimage = bytesToHex(generateSecretKey()); // Just a random hex string
-            console.log(`NWC: Mock payment success for invoice ${invoice.substring(0, 20)}...`);
-            return Promise.resolve({
-                result: {
-                    preimage: placeholderPreimage,
-                },
-                error: undefined,
+            // Resetting payment state in transactionsStore before new payment
+            this.transactionsStore.payment_preimage = null;
+            this.transactionsStore.payment_error = null;
+            this.transactionsStore.error_msg = null;
+            this.transactionsStore.error = false;
+
+
+            // The sendPayment method in TransactionStore is not async and uses .then().catch()
+            // We need to wrap it in a Promise to use await here for cleaner flow.
+            await new Promise<void>((resolve, reject) => {
+                this.transactionsStore.sendPayment({
+                    payment_request: invoice,
+                    // amount: amount ? (amount / 1000).toString() : undefined, // Convert msat to sat if amount is present
+                    // The `amount` field in `SendPaymentReq` is for keysend.
+                    // If `invoice` is a BOLT11, `amount` here would be ignored or conflict.
+                    // NWC `amount` is for BOLT11 if the invoice has amount 0.
+                    // This needs careful handling based on invoice type.
+                    // For simplicity, assuming `invoice` contains amount or is keysend handled by `sendPayment`.
+                });
+
+                // Poll for result or use a callback mechanism if sendPayment supports it.
+                // Since sendPayment updates store observables, we can watch them.
+                // This is a simplified polling approach. A more robust solution would use reactions or event emitters.
+                const maxAttempts = 20; // Approx 10 seconds
+                let attempts = 0;
+                const interval = setInterval(() => {
+                    attempts++;
+                    if (this.transactionsStore.payment_preimage) {
+                        clearInterval(interval);
+                        resolve();
+                    } else if (this.transactionsStore.payment_error || this.transactionsStore.error) {
+                        clearInterval(interval);
+                        reject(new Error(this.transactionsStore.payment_error || this.transactionsStore.error_msg || "Payment failed"));
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        reject(new Error("Payment timeout"));
+                    }
+                }, 500);
             });
 
+            if (this.transactionsStore.payment_preimage) {
+                return Promise.resolve({
+                    result: {
+                        preimage: this.transactionsStore.payment_preimage,
+                    },
+                    error: undefined,
+                });
+            } else {
+                // Error should have been caught by the promise rejection
+                return Promise.resolve({
+                    error: { code: "PAYMENT_FAILED", message: this.transactionsStore.payment_error || this.transactionsStore.error_msg || "Payment failed without specific error" },
+                });
+            }
         } catch (e: any) {
             console.error("NWC: Error in pay_invoice:", e);
             return Promise.resolve({
-                error: { code: "INTERNAL", message: `Error processing payment: ${e.message}` },
+                error: { code: "INTERNAL", message: e.message || `Error processing payment` },
             });
         }
     }
@@ -264,10 +331,11 @@ export default class NWCStore {
         this.loading = true;
         try {
             const clientSecretKeyBytes = generateSecretKey();
+            const clientSecretKeyBytes = generateSecretKey();
             const clientSecretKeyHex = bytesToHex(clientSecretKeyBytes);
             const clientPubkeyHex = getPublicKey(clientSecretKeyBytes);
 
-            const relayUrl = settingsStore.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY;
+            const relayUrl = settingsStoreInstance.settings.nwcService.relayUrl || DEFAULT_NWC_RELAY;
             const nwcUrl = `nostr+walletconnect://${this.walletServicePubkey}?relay=${relayUrl}&secret=${clientSecretKeyHex}`;
 
             // Now, subscribe this new client to our service
