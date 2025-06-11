@@ -33,7 +33,8 @@ import {
     syncStore,
     transactionsStore,
     unitsStore,
-    utxosStore
+    utxosStore,
+    nwcStore // Added NWCStore
 } from './stores/Stores';
 import NavigationService from './NavigationService';
 import PushNotificationManager from './PushNotificationManager';
