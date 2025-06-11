@@ -172,6 +172,43 @@ export default class Settings extends React.Component<SettingsProps, {}> {
                         </View>
                     )}
 
+                    {/* Nostr Wallet Connect Service Settings */}
+                    {selectedNode && ( // Only show if a node is selected, as NWC interacts with node capabilities
+                        <View
+                            style={{
+                                backgroundColor: themeColor('secondary'),
+                                width: '90%',
+                                borderRadius: 10,
+                                alignSelf: 'center',
+                                marginVertical: 5
+                            }}
+                        >
+                            <TouchableOpacity
+                                style={styles.columnField}
+                                onPress={() => navigation.navigate('NWCService')}
+                            >
+                                <View style={styles.icon}>
+                                    <NostrichIcon // Re-using NostrichIcon, consider a more specific one if available
+                                        fill={themeColor('text')}
+                                        width={23}
+                                        height={23}
+                                    />
+                                </View>
+                                <Text
+                                    style={{
+                                        ...styles.columnText,
+                                        color: themeColor('text')
+                                    }}
+                                >
+                                    {localeString('views.Settings.NWCService.title')}
+                                </Text>
+                                <View style={styles.ForwardArrow}>
+                                    <ForwardIcon stroke={forwardArrowColor} />
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
                     {selectedNode && (
                         <View
                             style={{
