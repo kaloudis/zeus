@@ -1,7 +1,7 @@
 import { observable, runInAction, action } from 'mobx';
 import { generateSecretKey, getPublicKey } from 'nostr-tools';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
-import { NWCWalletService, NWCWalletServiceKeyPair } from '@alby/js-sdk'; // Assuming js-sdk is installed
+import { NWCWalletService, NWCWalletServiceKeyPair } from '@getalby/sdk'; // Assuming js-sdk is installed
 
 import settingsStoreInstance from './SettingsStore'; // To access NWC settings and wallet details
 import TransactionsStore from './TransactionsStore';
@@ -330,7 +330,6 @@ export default class NWCStore {
         }
         this.loading = true;
         try {
-            const clientSecretKeyBytes = generateSecretKey();
             const clientSecretKeyBytes = generateSecretKey();
             const clientSecretKeyHex = bytesToHex(clientSecretKeyBytes);
             const clientPubkeyHex = getPublicKey(clientSecretKeyBytes);

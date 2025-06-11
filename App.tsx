@@ -102,7 +102,7 @@ import ProductDetails from './views/POS/ProductDetails';
 import PaymentsSettings from './views/Settings/PaymentsSettings';
 import InvoicesSettings from './views/Settings/InvoicesSettings';
 import LSP from './views/Settings/LSP';
-import NWCService from './views/Settings/NWCService'; // Added NWCService view
+import NWCService from './views/Settings/NWCService';
 import ChannelsSettings from './views/Settings/ChannelsSettings';
 import SetWalletPicture from './views/Settings/SetWalletPicture';
 import ChoosePaymentMethod from './views/ChoosePaymentMethod';
@@ -303,7 +303,7 @@ export default class App extends React.PureComponent {
                 TransactionsStore={transactionsStore}
                 UnitsStore={unitsStore}
                 UTXOsStore={utxosStore}
-                NWCStore={nwcStore} {/* Added NWCStore to Provider */}
+                NWCStore={nwcStore}
             >
                 <AppContainer>
                     <PushNotificationManager>
