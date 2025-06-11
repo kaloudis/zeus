@@ -25,6 +25,7 @@ import SyncStore from './SyncStore';
 import TransactionsStore from './TransactionsStore';
 import UnitsStore from './UnitsStore';
 import UTXOsStore from './UTXOsStore';
+import NWCStore from './NWCStore'; // Import NWCStore
 
 export const settingsStore = new SettingsStore();
 export const modalStore = new ModalStore();
@@ -84,3 +85,4 @@ export const lightningAddressStore = new LightningAddressStore(
 export const posStore = new PosStore(settingsStore, fiatStore);
 export const inventoryStore = new InventoryStore();
 export const swapStore = new SwapStore(nodeInfoStore, settingsStore);
+export const nwcStore = new NWCStore(); // Instantiate NWCStore
