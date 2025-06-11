@@ -141,6 +141,14 @@ interface EcashSettings {
     sweepThresholdSats?: number;
 }
 
+interface NWCServiceSettings {
+    enabled: boolean;
+    relayUrl: string;
+    secretKey?: string; // Wallet Service Secret Key
+    publicKey?: string; // Wallet Service Public Key
+    // Potentially add budget, allowed methods, etc. later
+}
+
 interface SwapsSettings {
     hostMainnet: string;
     hostTestnet: string;
@@ -211,6 +219,7 @@ export interface Settings {
     bolt12Address: Bolt12AddressSettings;
     selectNodeOnStartup: boolean;
     ecash: EcashSettings;
+    nwcService: NWCServiceSettings;
 }
 
 export const FIAT_RATES_SOURCE_KEYS = [
@@ -1302,6 +1311,11 @@ export default class SettingsStore {
             enableCashu: false,
             automaticallySweep: false,
             sweepThresholdSats: 10000
+        },
+        nwcService: {
+            enabled: false,
+            relayUrl: 'wss://relay.getalby.com/v1',
+            // secretKey and publicKey will be generated and stored when enabled
         },
         selectNodeOnStartup: false
     };

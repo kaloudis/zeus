@@ -9,6 +9,7 @@ import 'react-native-gesture-handler';
 import 'react-native-get-random-values';
 import 'react-native-url-polyfill/auto';
 import 'message-port-polyfill';
+import 'websocket-polyfill'; // NWC Service requirement
 const TextEncodingPolyfill = require("text-encoding");
 import Long from 'long';
 import protobuf from 'protobufjs';
