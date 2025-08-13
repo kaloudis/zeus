@@ -189,10 +189,13 @@ function AmountDisplay({
                 {unit !== 'BTC' && roundAmount && (
                     <ApproximateSymbol accessible={accessible} />
                 )}
-                {amount !== 'N/A' && unit === 'fiat' && (
+                {!rtl && amount !== 'N/A' && unit === 'fiat' && (
                     <FiatSymbol accessible />
                 )}
-                {space ? <TextSpace /> : <Spacer width={1} />}
+                {unit === 'BTC' && amount !== 'N/A' && (
+                    <FiatSymbol accessible />
+                )}
+                {!rtl && space ? <TextSpace /> : <Spacer width={1} />}
                 <Body
                     jumbo={jumboText}
                     defaultSize={defaultTextSize}
@@ -209,7 +212,8 @@ function AmountDisplay({
                         amount.toString()
                     )}
                 </Body>
-                {unit === 'BTC' && amount !== 'N/A' && (
+                {rtl && space ? <TextSpace /> : <Spacer width={1} />}
+                {rtl && amount !== 'N/A' && unit === 'fiat' && (
                     <FiatSymbol accessible />
                 )}
             </>
