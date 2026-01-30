@@ -15,7 +15,7 @@ export default function MatiSvg({ width = 70, height = 70 }) {
         cx: '25',
         cy: '25',
         r: '20',
-        fill: themeColor('background')
+        fill: themeColor('layerCircle') || themeColor('background')
     };
 
     const path1Props = {

@@ -1,5 +1,40 @@
 import { settingsStore } from '../stores/Stores';
 
+const Default: { [key: string]: any } = {
+    generalStyle: 'dark',
+    background: '#31363F',
+    gradientBackground: ['#000', '#0F1011', '#1E2022', '#282B31', '#31363F'],
+    secondary: '#31363F',
+    modalBackground: '#31363F',
+    text: 'white',
+    secondaryText: '#A7A9AC',
+    highlight: '#FFA900',
+    error: '#992600',
+    separator: '#31363F',
+    outbound: '#FFA900',
+    inbound: '#FFF0CA',
+    outboundReserve: '#B7B7B7',
+    inboundReserve: '#636569',
+    success: '#46BE43',
+    warning: '#E14C4C',
+    warningReserve: '#EA8181',
+    bitcoin: '#FFB040',
+    delete: '#992600',
+    layerCircle: '#1E2022',
+    bolt: '#FFF',
+    chain: '#FFF',
+    disabled: '#767577',
+    buttonBackground: '#FFA900',
+    buttonGradient: ['#FF9000', '#FFA900'],
+    buttonText: '#000000',
+    buttonTextSecondary: 'gray',
+    qr: '#000',
+    qrBackground: '#FFA900',
+    qrLogoBackground: '#FFA900',
+    qrFrame: '#FFD93F',
+    action: '#FFF'
+};
+
 const Kyriaki: { [key: string]: any } = {
     generalStyle: 'dark',
     background: '#1E2022',
@@ -396,6 +431,8 @@ export function themeColor(themeString: string): any {
     const theme = settings.display && settings.display.theme;
 
     switch (theme) {
+        case 'default':
+            return Default[themeString] || Dark[themeString];
         case 'kyriaki':
             return Kyriaki[themeString] || Dark[themeString];
         case 'light':

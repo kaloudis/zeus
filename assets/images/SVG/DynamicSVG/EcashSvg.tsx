@@ -20,7 +20,7 @@ export default function OnChainSvg({
         cx: '794.68',
         cy: '1000',
         r: '900',
-        fill: themeColor('background')
+        fill: themeColor('layerCircle') || themeColor('background')
     };
 
     const scale = 0.34;
