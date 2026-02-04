@@ -4,10 +4,10 @@ import {
     View,
     TouchableOpacity,
     FlatList,
-    Image,
     ScrollView
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
+import Animated from 'react-native-reanimated';
 import { SearchBar, Divider } from '@rneui/themed';
 import { Route } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -257,7 +257,10 @@ export default class Contacts extends React.Component<
                     } else {
                         this.props.navigation.navigate('ContactDetails', {
                             contactId: item.contactId || item.id,
-                            isNostrContact: false
+                            isNostrContact: false,
+                            // Pass data for shared element transition
+                            contactName: item.name,
+                            contactPhoto: contact.getPhoto
                         });
                     }
                 }}
@@ -271,7 +274,7 @@ export default class Contacts extends React.Component<
                     }}
                 >
                     {contact.photo && (
-                        <Image
+                        <Animated.Image
                             source={{ uri: contact.getPhoto }}
                             style={{
                                 width: 40,
@@ -279,14 +282,16 @@ export default class Contacts extends React.Component<
                                 borderRadius: 20,
                                 marginRight: 10
                             }}
+                            sharedTransitionTag={`contact-photo-${item.contactId || item.id}`}
                         />
                     )}
                     <View style={{ flex: 1 }}>
-                        <Text
+                        <Animated.Text
                             style={{ fontSize: 16, color: themeColor('text') }}
+                            sharedTransitionTag={`contact-name-${item.contactId || item.id}`}
                         >
                             {item.name}
-                        </Text>
+                        </Animated.Text>
                         <Text
                             style={{
                                 fontSize: 16,

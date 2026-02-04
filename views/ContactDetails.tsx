@@ -8,6 +8,7 @@ import {
     ScrollView
 } from 'react-native';
 import { inject, observer } from 'mobx-react';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Route } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { v4 as uuidv4 } from 'uuid';
@@ -325,6 +326,11 @@ export default class ContactDetails extends React.Component<
             );
         };
 
+        // Get params for shared element transition during loading
+        const contactId = this.props.route.params?.contactId;
+        const contactName = this.props.route.params?.contactName;
+        const contactPhoto = this.props.route.params?.contactPhoto;
+
         return (
             <>
                 {isLoading ? (
@@ -336,8 +342,37 @@ export default class ContactDetails extends React.Component<
                             }}
                             navigation={navigation}
                         />
-                        <View style={{ marginTop: 60 }}>
-                            <LoadingIndicator />
+                        <View style={{ alignItems: 'center', marginTop: 20 }}>
+                            {contactPhoto && (
+                                <Animated.Image
+                                    source={{ uri: contactPhoto }}
+                                    style={{
+                                        width: 150,
+                                        height: 150,
+                                        borderRadius: 75,
+                                        marginBottom: 20
+                                    }}
+                                    sharedTransitionTag={`contact-photo-${contactId}`}
+                                    entering={FadeIn.delay(200).duration(100)}
+                                />
+                            )}
+                            {contactName && (
+                                <Animated.Text
+                                    style={{
+                                        fontSize: 40,
+                                        fontWeight: 'bold',
+                                        marginBottom: 10,
+                                        color: 'white'
+                                    }}
+                                    sharedTransitionTag={`contact-name-${contactId}`}
+                                    entering={FadeIn.delay(200).duration(100)}
+                                >
+                                    {contactName}
+                                </Animated.Text>
+                            )}
+                            <View style={{ marginTop: 40 }}>
+                                <LoadingIndicator />
+                            </View>
                         </View>
                     </Screen>
                 ) : (
@@ -377,7 +412,7 @@ export default class ContactDetails extends React.Component<
                                 />
                             )}
                             {contact.photo && (
-                                <Image
+                                <Animated.Image
                                     source={{ uri: contact.getPhoto }}
                                     style={{
                                         width: 150,
@@ -386,18 +421,20 @@ export default class ContactDetails extends React.Component<
                                         marginBottom: 20,
                                         marginTop: contact.banner ? -100 : 0
                                     }}
+                                    sharedTransitionTag={`contact-photo-${contact.contactId || contact.id}`}
                                 />
                             )}
-                            <Text
+                            <Animated.Text
                                 style={{
                                     fontSize: 40,
                                     fontWeight: 'bold',
                                     marginBottom: 10,
                                     color: 'white'
                                 }}
+                                sharedTransitionTag={`contact-name-${contact.contactId || contact.id}`}
                             >
                                 {contact.name}
-                            </Text>
+                            </Animated.Text>
                             <Text
                                 style={{
                                     fontSize: 20,
