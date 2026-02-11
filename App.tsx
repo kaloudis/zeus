@@ -193,6 +193,14 @@ import Order from './views/Order';
 import Intro from './views/Intro';
 import IntroSplash from './views/IntroSplash';
 
+// Onboarding
+import Onboarding1 from './views/Onboarding/Onboarding1';
+import RecommendedSettings from './views/Onboarding/RecommendedSettings';
+import Questionnaire1 from './views/Onboarding/Questionnaire1';
+import Questionnaire2 from './views/Onboarding/Questionnaire2';
+import Questionnaire3 from './views/Onboarding/Questionnaire3';
+import Questionnaire4 from './views/Onboarding/Questionnaire4';
+
 import EditFee from './views/EditFee';
 
 // Embedded LND
@@ -449,6 +457,40 @@ export default class App extends React.PureComponent {
                                                     <Stack.Screen
                                                         name="IntroSplash" // @ts-ignore:next-line
                                                         component={IntroSplash}
+                                                    />
+                                                    <Stack.Screen
+                                                        name="Onboarding1" // @ts-ignore:next-line
+                                                        component={Onboarding1}
+                                                    />
+                                                    <Stack.Screen
+                                                        name="RecommendedSettings" // @ts-ignore:next-line
+                                                        component={
+                                                            RecommendedSettings
+                                                        }
+                                                    />
+                                                    <Stack.Screen
+                                                        name="Questionnaire1" // @ts-ignore:next-line
+                                                        component={
+                                                            Questionnaire1
+                                                        }
+                                                    />
+                                                    <Stack.Screen
+                                                        name="Questionnaire2" // @ts-ignore:next-line
+                                                        component={
+                                                            Questionnaire2
+                                                        }
+                                                    />
+                                                    <Stack.Screen
+                                                        name="Questionnaire3" // @ts-ignore:next-line
+                                                        component={
+                                                            Questionnaire3
+                                                        }
+                                                    />
+                                                    <Stack.Screen
+                                                        name="Questionnaire4" // @ts-ignore:next-line
+                                                        component={
+                                                            Questionnaire4
+                                                        }
                                                     />
                                                     <Stack.Screen
                                                         name="Intro" // @ts-ignore:next-line
