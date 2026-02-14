@@ -308,7 +308,7 @@ export default class SwapStore {
             console.log('Navigating to SwapDetails...');
             navigation.navigate('SwapDetails', {
                 swapData: responseData,
-                keys,
+                privateKeyHex: Buffer.from(keys.privateKey!).toString('hex'),
                 endpoint: this.getHost,
                 serviceProvider: this.getServiceProvider,
                 invoice
@@ -418,7 +418,7 @@ export default class SwapStore {
 
             // Add the swap type
             responseData.type = SwapType.Reverse;
-            responseData.preimage = preimage;
+            responseData.preimage = preimage.toString('hex');
             responseData.destinationAddress = destinationAddress;
 
             await this.saveReverseSwaps(
@@ -438,7 +438,7 @@ export default class SwapStore {
             console.log('Navigating to SwapDetails...');
             navigation.navigate('SwapDetails', {
                 swapData: responseData,
-                keys,
+                privateKeyHex: Buffer.from(keys.privateKey!).toString('hex'),
                 endpoint: this.getHost,
                 serviceProvider: this.getServiceProvider,
                 invoice: destinationAddress,
@@ -472,7 +472,9 @@ export default class SwapStore {
                 ...newSwap,
                 keys,
                 destinationAddress,
-                preimage,
+                preimage: Buffer.isBuffer(preimage)
+                    ? preimage.toString('hex')
+                    : preimage,
                 endpoint,
                 implementation,
                 nodePubkey,

@@ -25,6 +25,7 @@ import { Row } from '../../components/layout/Row';
 import Text from '../../components/Text';
 
 import handleAnything from '../../utils/handleAnything';
+import BackendUtils from '../../utils/BackendUtils';
 import { localeString, pascalToHumanReadable } from '../../utils/LocaleUtils';
 import { sleep } from '../../utils/SleepUtils';
 import { font } from '../../utils/FontUtils';
@@ -48,7 +49,8 @@ interface SwapDetailsProps {
         'SwapDetails',
         {
             swapData: Swap;
-            keys: any;
+            privateKeyHex?: string;
+            keys?: any;
             endpoint: string;
             serviceProvider: string;
             invoice: string;
@@ -67,6 +69,7 @@ interface SwapDetailsState {
     socketConnected: boolean;
     swapTreeToggle: boolean;
     swapData: Swap;
+    privateKeyHex: string;
 }
 
 @inject('NodeInfoStore', 'SwapStore')
@@ -77,6 +80,7 @@ export default class SwapDetails extends React.Component<
 > {
     constructor(props: SwapDetailsProps) {
         super(props);
+        const rawSwapData = props.route.params.swapData;
         this.state = {
             updates: null,
             failureReason: '',
@@ -84,12 +88,85 @@ export default class SwapDetails extends React.Component<
             loading: false,
             socketConnected: true,
             swapTreeToggle: false,
-            swapData: new Swap(props.route.params.swapData)
+            swapData: new Swap(rawSwapData),
+            privateKeyHex: props.route.params.privateKeyHex || ''
         };
     }
 
-    componentDidMount() {
-        const { swapData } = this.state;
+    /**
+     * Resolve privateKeyHex from route params, stored keys, or rescue key.
+     */
+    resolvePrivateKeyHex = (): string => {
+        const { privateKeyHex, keys } = this.props.route.params;
+        if (privateKeyHex) return privateKeyHex;
+
+        // Fall back to stored keys (serialized ECPair from storage)
+        const storedKeys = keys || this.state.swapData?.keys;
+        if (storedKeys?.__D) {
+            const d = storedKeys.__D;
+            if (d.type === 'Buffer' && Array.isArray(d.data)) {
+                return Buffer.from(d.data).toString('hex');
+            }
+            // Real Buffer (shouldn't happen after serialization, but handle it)
+            return Buffer.from(d).toString('hex');
+        }
+
+        return '';
+    };
+
+    /**
+     * For rescued reverse swaps, derive missing destinationAddress and preimage.
+     */
+    resolveReverseSwapData = async (swapData: Swap): Promise<Swap> => {
+        const { SwapStore } = this.props;
+        let needsUpdate = false;
+        const updates: any = {};
+
+        // Derive preimage from rescue key if missing
+        if (!swapData.preimage && swapData.keyIndex != null) {
+            try {
+                const preimageBuffer =
+                    await SwapStore!.derivePreimageFromRescueKey(
+                        swapData.keyIndex
+                    );
+                updates.preimage = preimageBuffer.toString('hex');
+                needsUpdate = true;
+                console.log('Derived preimage from rescue key');
+            } catch (e) {
+                console.error('Failed to derive preimage:', e);
+            }
+        }
+
+        // Generate a new destination address if missing
+        if (!swapData.destinationAddress) {
+            try {
+                const data = await BackendUtils.getNewAddress({});
+                const address =
+                    data.address ||
+                    data.bech32 ||
+                    data.p2tr ||
+                    (data[0] && data[0].address);
+                if (address) {
+                    updates.destinationAddress = address;
+                    needsUpdate = true;
+                    console.log(
+                        'Generated destination address for rescued swap:',
+                        address
+                    );
+                }
+            } catch (e) {
+                console.error('Failed to generate destination address:', e);
+            }
+        }
+
+        if (needsUpdate) {
+            return new Swap({ ...swapData, ...updates });
+        }
+        return swapData;
+    };
+
+    async componentDidMount() {
+        let { swapData } = this.state;
 
         // reset units to help prevent wrong amount being sent
         unitsStore.resetUnits();
@@ -97,6 +174,12 @@ export default class SwapDetails extends React.Component<
         if (!swapData) {
             console.error('No swap data provided.');
             return;
+        }
+
+        // Resolve privateKeyHex from available sources
+        const privateKeyHex = this.resolvePrivateKeyHex();
+        if (privateKeyHex) {
+            this.setState({ privateKeyHex });
         }
 
         if (swapData.isSubmarineSwap) {
@@ -125,6 +208,12 @@ export default class SwapDetails extends React.Component<
 
             this.getSwapUpdates(swapData, swapData.isSubmarineSwap);
         } else {
+            // For reverse swaps, resolve missing data before connecting
+            swapData = await this.resolveReverseSwapData(swapData);
+            if (swapData !== this.state.swapData) {
+                this.setState({ swapData });
+            }
+
             const failedStatus = [
                 SwapState.InvoiceExpired,
                 SwapState.TransactionRefunded,
@@ -227,7 +316,8 @@ export default class SwapDetails extends React.Component<
     };
 
     getSwapUpdates = async (createdResponse: any, isSubmarineSwap: boolean) => {
-        const { keys, endpoint, invoice } = this.props.route.params;
+        const { endpoint, invoice } = this.props.route.params;
+        const { privateKeyHex } = this.state;
 
         const { SwapStore } = this.props;
 
@@ -345,7 +435,7 @@ export default class SwapDetails extends React.Component<
                         submitted = await this.createClaimTransaction(
                             claimTxDetails,
                             createdResponse,
-                            keys,
+                            privateKeyHex,
                             endpoint
                         );
                     }
@@ -417,8 +507,8 @@ export default class SwapDetails extends React.Component<
         createdResponse: any,
         isSubmarineSwap: boolean
     ) => {
-        const { keys, endpoint, fee } = this.props.route.params;
-        const { swapData } = this.state;
+        console.log('getReverseSwapUpdates');
+        const { endpoint, fee } = this.props.route.params;
 
         const { SwapStore } = this.props;
 
@@ -508,16 +598,21 @@ export default class SwapDetails extends React.Component<
                     } else {
                         console.log('Creating claim transaction');
 
-                        submitted = await this.createReverseClaimTransaction(
-                            createdResponse,
-                            keys,
-                            endpoint,
-                            swapData.lockupAddress!,
-                            swapData.destinationAddress!,
-                            swapData.preimage,
-                            data.transaction.hex,
-                            fee
-                        );
+                        try {
+                            const { swapData: currentSwapData, privateKeyHex } = this.state;
+                            submitted = await this.createReverseClaimTransaction(
+                                createdResponse,
+                                privateKeyHex,
+                                endpoint,
+                                currentSwapData.effectiveLockupAddress!,
+                                currentSwapData.destinationAddress!,
+                                currentSwapData.preimage as string,
+                                data.transaction.hex,
+                                fee
+                            );
+                        } catch(e) {
+                            console.log('Error creating reverse claim tx', e);
+                        }
                     }
                     break;
 
@@ -608,42 +703,26 @@ export default class SwapDetails extends React.Component<
     createClaimTransaction = async (
         claimTxDetails: any,
         createdResponse: any,
-        keys: any,
+        privateKeyHex: string,
         endpoint: string
     ): Promise<boolean> => {
         try {
-            const dObject = keys.__D;
+            const swapTree = createdResponse.swapTreeDetails;
+            await createClaimTransaction({
+                endpoint,
+                swapId: createdResponse.id,
+                claimLeaf: swapTree.claimLeaf.output,
+                refundLeaf: swapTree.refundLeaf.output,
+                privateKey: privateKeyHex,
+                servicePubKey: createdResponse.servicePubKey,
+                transactionHash: claimTxDetails.transactionHash,
+                pubNonce: claimTxDetails.pubNonce
+            });
 
-            // Extract keys, sort them numerically, and map to byte values
-            const dBytes = Object.keys(dObject)
-                .map((key) => parseInt(key, 10))
-                .sort((a, b) => a - b)
-                .map((key) => dObject[key]);
-
-            const privateKeyHex = dBytes
-                .map((byte) => byte.toString(16).padStart(2, '0'))
-                .join('');
-
-            try {
-                await createClaimTransaction({
-                    endpoint,
-                    swapId: createdResponse.id,
-                    claimLeaf: createdResponse.swapTree.claimLeaf.output,
-                    refundLeaf: createdResponse.swapTree.refundLeaf.output,
-                    privateKey: privateKeyHex,
-                    servicePubKey: createdResponse.claimPublicKey,
-                    transactionHash: claimTxDetails.transactionHash,
-                    pubNonce: claimTxDetails.pubNonce
-                });
-
-                console.log('Claim transaction submitted successfully.');
-                return true;
-            } catch (error) {
-                console.log('Error submitting claim tx', error);
-                return false;
-            }
-        } catch (e) {
-            console.log('Error creating claim tx ', e);
+            console.log('Claim transaction submitted successfully.');
+            return true;
+        } catch (error) {
+            console.log('Error submitting claim tx', error);
             return false;
         }
     };
@@ -659,41 +738,31 @@ export default class SwapDetails extends React.Component<
      * Create and send a claim transaction for a reverse swap
      */
     createReverseClaimTransaction = async (
-        createdResponse: any,
-        keys: any,
+        createdResponse: Swap,
+        privateKeyHex: string,
         endpoint: string,
         lockupAddress: string,
         destinationAddress: string,
-        preimage: any,
+        preimage: string,
         transactionHex: string,
         fee: string
     ): Promise<boolean> => {
         try {
-            const dObject = keys.__D;
-
-            // Extract keys, sort them numerically, and map to byte values
-            const dBytes = Object.keys(dObject)
-                .map((key) => parseInt(key, 10))
-                .sort((a, b) => a - b)
-                .map((key) => dObject[key]);
-
-            const privateKeyHex = dBytes
-                .map((byte) => byte.toString(16).padStart(2, '0'))
-                .join('');
 
             // allow some retries in case of alt network
             // tx propagation issues
             for (let i = 0; i <= 10; i++) {
                 try {
                     await sleep(1000);
+                    const swapTree = createdResponse.swapTreeDetails;
                     await createReverseClaimTransaction({
                         endpoint,
                         swapId: createdResponse.id,
-                        claimLeaf: createdResponse.swapTree.claimLeaf.output,
-                        refundLeaf: createdResponse.swapTree.refundLeaf.output,
+                        claimLeaf: swapTree.claimLeaf.output,
+                        refundLeaf: swapTree.refundLeaf.output,
                         privateKey: privateKeyHex,
-                        servicePubKey: createdResponse.refundPublicKey,
-                        preimageHex: preimage.toString('hex'),
+                        servicePubKey: createdResponse.refundPubKey,
+                        preimageHex: preimage,
                         transactionHex,
                         lockupAddress,
                         destinationAddress,

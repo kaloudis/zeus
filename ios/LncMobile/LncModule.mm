@@ -277,7 +277,7 @@ RCT_EXPORT_METHOD(createReverseClaimTransaction:(NSString *)endpoint
                  lockupAddress:(NSString *)lockupAddress
                  destinationAddress:(NSString *)destinationAddress
                  feeRate:(NSInteger)feeRate
-                 receiveAmount:(long long)receiveAmount
+                 receiveAmount:(NSInteger)receiveAmount
                  isTestnet:(BOOL)isTestnet
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)

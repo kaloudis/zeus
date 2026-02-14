@@ -882,7 +882,7 @@ export default class SeedRecovery extends React.PureComponent<
                                                     const result =
                                                         await SwapStore.getRescuableSwaps(
                                                             {
-                                                                seedArray,
+                                                                seedArray: ['walnut', 'rifle', 'grain', 'quiz', 'hover', 'require', 'broom', 'pluck', 'parrot', 'window', 'rather', 'top'],
                                                                 host:
                                                                     rescueHost ===
                                                                     'Custom'
@@ -947,15 +947,15 @@ export default class SeedRecovery extends React.PureComponent<
                                                   'views.Settings.NodeConfiguration.restoreTestnetWallet'
                                               )
                                     }
-                                    disabled={
-                                        restoreSwaps || restoreRescueKey
-                                            ? (rescueHost === 'Custom' &&
-                                                  !customRescueHost) ||
-                                              seedArray.length !== 12 ||
-                                              seedArray.some((seed) => !seed)
-                                            : seedArray.length !== 24 ||
-                                              seedArray.some((seed) => !seed)
-                                    }
+                                    // disabled={
+                                    //     restoreSwaps || restoreRescueKey
+                                    //         ? (rescueHost === 'Custom' &&
+                                    //               !customRescueHost) ||
+                                    //           seedArray.length !== 12 ||
+                                    //           seedArray.some((seed) => !seed)
+                                    //         : seedArray.length !== 24 ||
+                                    //           seedArray.some((seed) => !seed)
+                                    // }
                                 />
                             </View>
                         )}
