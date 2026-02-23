@@ -171,6 +171,17 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     }
 
     @ReactMethod
+    fun setLiquiditySourceLsps7(nodeId: String, address: String, token: String?, promise: Promise) {
+        try {
+            val builder = this.builder ?: throw Exception("Builder not initialized")
+            builder.setLiquiditySourceLsps7(nodeId, address, token)
+            promise.resolve(null)
+        } catch (e: Exception) {
+            promise.reject("error", e.message, e)
+        }
+    }
+
+    @ReactMethod
     fun setTrustedPeers0conf(peers: ReadableArray, promise: Promise) {
         try {
             this.builder ?: throw Exception("Builder not initialized")
@@ -1159,6 +1170,112 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             Lsps1PaymentState.EXPECT_PAYMENT -> "expectPayment"
             Lsps1PaymentState.PAID -> "paid"
             Lsps1PaymentState.REFUNDED -> "refunded"
+            else -> "unknown"
+        }
+    }
+
+    // LSPS7 Methods
+
+    @ReactMethod
+    fun lsps7GetExtendableChannels(promise: Promise) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val node = this@LdkNodeModule.node ?: throw Exception("Node not initialized")
+                val lsps7 = node.lsps7Liquidity()
+                val channels = lsps7.getExtendableChannels()
+                val result = Arguments.createArray()
+                for (channel in channels) {
+                    result.pushMap(lsps7ExtendableChannelToMap(channel))
+                }
+                withContext(Dispatchers.Main) {
+                    promise.resolve(result)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    promise.reject("error", e.message, e)
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun lsps7CreateOrder(shortChannelId: String, channelExtensionExpiryBlocks: Double, token: String?, refundOnchainAddress: String?, promise: Promise) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val node = this@LdkNodeModule.node ?: throw Exception("Node not initialized")
+                val lsps7 = node.lsps7Liquidity()
+                val response = lsps7.createOrder(
+                    shortChannelId,
+                    channelExtensionExpiryBlocks.toInt().toUInt(),
+                    token,
+                    refundOnchainAddress
+                )
+                withContext(Dispatchers.Main) {
+                    promise.resolve(lsps7OrderResponseToMap(response))
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    promise.reject("error", e.message, e)
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun lsps7CheckOrderStatus(orderId: String, promise: Promise) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val node = this@LdkNodeModule.node ?: throw Exception("Node not initialized")
+                val lsps7 = node.lsps7Liquidity()
+                val response = lsps7.checkOrderStatus(orderId)
+                withContext(Dispatchers.Main) {
+                    promise.resolve(lsps7OrderResponseToMap(response))
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    promise.reject("error", e.message, e)
+                }
+            }
+        }
+    }
+
+    private fun lsps7OrderResponseToMap(response: Lsps7OrderResponse): WritableMap {
+        val map = Arguments.createMap()
+        map.putString("orderId", response.orderId.toString())
+        map.putString("orderState", lsps7OrderStateToString(response.orderState))
+        map.putDouble("channelExtensionExpiryBlocks", response.channelExtensionExpiryBlocks.toDouble())
+        map.putDouble("newChannelExpiryBlock", response.newChannelExpiryBlock.toDouble())
+        map.putMap("paymentInfo", lsps1PaymentInfoToMap(response.payment))
+        map.putMap("channel", lsps7ExtendableChannelToMap(response.channel))
+        return map
+    }
+
+    private fun lsps7ExtendableChannelToMap(channel: Lsps7ExtendableChannel): WritableMap {
+        val map = Arguments.createMap()
+        map.putString("shortChannelId", channel.shortChannelId)
+        map.putDouble("maxChannelExtensionExpiryBlocks", channel.maxChannelExtensionExpiryBlocks.toDouble())
+        map.putDouble("expirationBlock", channel.expirationBlock.toDouble())
+        channel.originalOrder?.let { order ->
+            val orderMap = Arguments.createMap()
+            orderMap.putString("id", order.id)
+            orderMap.putString("service", order.service)
+            map.putMap("originalOrder", orderMap)
+        }
+        channel.extensionOrderIds?.let { ids ->
+            val idsArray = Arguments.createArray()
+            for (id in ids) {
+                idsArray.pushString(id)
+            }
+            map.putArray("extensionOrderIds", idsArray)
+        }
+        return map
+    }
+
+    private fun lsps7OrderStateToString(state: Lsps7OrderState): String {
+        return when (state) {
+            Lsps7OrderState.CREATED -> "created"
+            Lsps7OrderState.COMPLETED -> "completed"
+            Lsps7OrderState.FAILED -> "failed"
             else -> "unknown"
         }
     }

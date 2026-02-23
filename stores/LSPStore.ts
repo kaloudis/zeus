@@ -74,7 +74,8 @@ export default class LSPStore {
             () => {
                 const lspPubkey = this.getLSPSPubkey();
                 if (
-                    BackendUtils.supportsLSPScustomMessage() &&
+                    (BackendUtils.supportsLSPScustomMessage() ||
+                        BackendUtils.supportsLSPS7native()) &&
                     lspPubkey &&
                     this.channelsStore.channels.some(
                         (channel: { remotePubkey: string }) =>
@@ -926,10 +927,28 @@ export default class LSPStore {
     // LSPS7
 
     @action
-    public getExtendableChannels = () => {
+    public getExtendableChannels = async () => {
         this.error = false;
         this.error_msg = '';
 
+        // Use native LSPS7 method if available (LDK Node backend)
+        if (BackendUtils.supportsLSPS7native()) {
+            try {
+                const channels =
+                    await BackendUtils.lsps7GetExtendableChannels();
+                this.getExtendableOrdersData = channels;
+                this.loadingLSPS7 = false;
+                return;
+            } catch (error: any) {
+                this.error = true;
+                this.error_msg =
+                    error?.message || 'Failed to get extendable channels';
+                this.loadingLSPS7 = false;
+                return;
+            }
+        }
+
+        // Fall back to custom message for other backends
         this.getExtendableOrdersId = uuidv4();
         const method = 'lsps7.get_extendable_channels';
 
@@ -955,11 +974,33 @@ export default class LSPStore {
     };
 
     @action
-    public lsps7CreateOrderCustomMessage = (state: any) => {
+    public lsps7CreateOrderCustomMessage = async (state: any) => {
         this.loadingLSPS7 = true;
         this.error = false;
         this.error_msg = '';
 
+        // Use native LSPS7 method if available (LDK Node backend)
+        if (BackendUtils.supportsLSPS7native()) {
+            try {
+                const response = await BackendUtils.lsps7CreateOrder({
+                    shortChannelId: state.chanId,
+                    channelExtensionExpiryBlocks: state.channelExtensionBlocks,
+                    token: state.token,
+                    refundOnchainAddress: state.refundOnchainAddress
+                });
+                this.createExtensionOrderResponse = { result: response };
+                this.loadingLSPS7 = false;
+                return;
+            } catch (error: any) {
+                this.error = true;
+                this.error_msg =
+                    error?.message || 'Failed to create LSPS7 order';
+                this.loadingLSPS7 = false;
+                return;
+            }
+        }
+
+        // Fall back to custom message for other backends
         this.createExtensionOrderId = uuidv4();
         const method = 'lsps7.create_order';
 
@@ -994,9 +1035,31 @@ export default class LSPStore {
     };
 
     @action
-    public lsps7GetOrderCustomMessage(orderId: string, peer: string) {
+    public lsps7GetOrderCustomMessage = async (
+        orderId: string,
+        peer: string
+    ) => {
         this.loadingLSPS7 = true;
 
+        // Use native LSPS7 method if available (LDK Node backend)
+        if (BackendUtils.supportsLSPS7native()) {
+            try {
+                const response = await BackendUtils.lsps7CheckOrderStatus(
+                    orderId
+                );
+                this.getExtensionOrderResponse = { result: response };
+                this.loadingLSPS7 = false;
+                return;
+            } catch (error: any) {
+                this.error = true;
+                this.error_msg =
+                    error?.message || 'Failed to get LSPS7 order status';
+                this.loadingLSPS7 = false;
+                return;
+            }
+        }
+
+        // Fall back to custom message for other backends
         this.getExtensionOrderId = uuidv4();
         const method = 'lsps7.get_order';
 
@@ -1024,5 +1087,5 @@ export default class LSPStore {
                     error
                 );
             });
-    }
+    };
 }

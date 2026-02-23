@@ -194,6 +194,17 @@ class LdkNodeModule: RCTEventEmitter {
         resolve(["status": "ok"])
     }
 
+    @objc(setLiquiditySourceLsps7:address:token:resolver:rejecter:)
+    func setLiquiditySourceLsps7(_ nodeId: String, address: String, token: String?, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let builder = self.builder else {
+            reject("error", "Builder not initialized", nil)
+            return
+        }
+
+        builder.setLiquiditySourceLsps7(nodeId: nodeId, address: address, token: token)
+        resolve(["status": "ok"])
+    }
+
     // MARK: - Mnemonic Methods
 
     @objc(generateMnemonic:resolver:rejecter:)
@@ -790,6 +801,68 @@ class LdkNodeModule: RCTEventEmitter {
         }
     }
 
+    // MARK: - LSPS7 Methods
+
+    @objc(lsps7GetExtendableChannels:rejecter:)
+    func lsps7GetExtendableChannels(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let node = self.node else {
+            reject("error", "Node not initialized", nil)
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let lsps7 = node.lsps7Liquidity()
+                let channels = try lsps7.getExtendableChannels()
+                let result = channels.map { self.serializeLsps7ExtendableChannel($0) }
+                resolve(result)
+            } catch {
+                reject("error", error.localizedDescription, error)
+            }
+        }
+    }
+
+    @objc(lsps7CreateOrder:channelExtensionExpiryBlocks:token:refundOnchainAddress:resolver:rejecter:)
+    func lsps7CreateOrder(_ shortChannelId: String, channelExtensionExpiryBlocks: Double, token: String?, refundOnchainAddress: String?, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let node = self.node else {
+            reject("error", "Node not initialized", nil)
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let lsps7 = node.lsps7Liquidity()
+                let response = try lsps7.createOrder(
+                    shortChannelId: shortChannelId,
+                    channelExtensionExpiryBlocks: UInt32(channelExtensionExpiryBlocks),
+                    token: token,
+                    refundOnchainAddress: refundOnchainAddress
+                )
+                resolve(self.serializeLsps7OrderResponse(response))
+            } catch {
+                reject("error", error.localizedDescription, error)
+            }
+        }
+    }
+
+    @objc(lsps7CheckOrderStatus:resolver:rejecter:)
+    func lsps7CheckOrderStatus(_ orderId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let node = self.node else {
+            reject("error", "Node not initialized", nil)
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let lsps7 = node.lsps7Liquidity()
+                let response = try lsps7.checkOrderStatus(orderId: orderId)
+                resolve(self.serializeLsps7OrderResponse(response))
+            } catch {
+                reject("error", error.localizedDescription, error)
+            }
+        }
+    }
+
     // MARK: - Message Signing Methods
 
     @objc(signMessage:resolver:rejecter:)
@@ -1215,6 +1288,49 @@ class LdkNodeModule: RCTEventEmitter {
             return "paid"
         case .refunded:
             return "refunded"
+        }
+    }
+
+    // MARK: - LSPS7 Serialization Helpers
+
+    private func serializeLsps7OrderResponse(_ response: Lsps7OrderResponse) -> [String: Any] {
+        var result: [String: Any] = [
+            "orderId": response.orderId,
+            "orderState": serializeLsps7OrderState(response.orderState),
+            "channelExtensionExpiryBlocks": response.channelExtensionExpiryBlocks,
+            "newChannelExpiryBlock": response.newChannelExpiryBlock,
+            "paymentInfo": serializeLsps1PaymentInfo(response.payment),
+            "channel": serializeLsps7ExtendableChannel(response.channel)
+        ]
+        return result
+    }
+
+    private func serializeLsps7ExtendableChannel(_ channel: Lsps7ExtendableChannel) -> [String: Any] {
+        var result: [String: Any] = [
+            "shortChannelId": channel.shortChannelId,
+            "maxChannelExtensionExpiryBlocks": channel.maxChannelExtensionExpiryBlocks,
+            "expirationBlock": channel.expirationBlock
+        ]
+        if let originalOrder = channel.originalOrder {
+            result["originalOrder"] = [
+                "id": originalOrder.id,
+                "service": originalOrder.service
+            ]
+        }
+        if let extensionOrderIds = channel.extensionOrderIds {
+            result["extensionOrderIds"] = extensionOrderIds
+        }
+        return result
+    }
+
+    private func serializeLsps7OrderState(_ state: Lsps7OrderState) -> String {
+        switch state {
+        case .created:
+            return "created"
+        case .completed:
+            return "completed"
+        case .failed:
+            return "failed"
         }
     }
 }

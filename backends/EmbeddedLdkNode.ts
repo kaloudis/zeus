@@ -820,6 +820,102 @@ export default class EmbeddedLdkNode {
     };
 
     // ========================================================================
+    // LSPS7 Methods
+    // ========================================================================
+
+    lsps7GetExtendableChannels = async (): Promise<any> => {
+        return await LdkNode.lsps7.getExtendableChannels();
+    };
+
+    lsps7CreateOrder = async (params: {
+        shortChannelId: string;
+        channelExtensionExpiryBlocks: number;
+        token?: string;
+        refundOnchainAddress?: string;
+    }): Promise<any> => {
+        const response = await LdkNode.lsps7.createOrder({
+            shortChannelId: params.shortChannelId,
+            channelExtensionExpiryBlocks: params.channelExtensionExpiryBlocks,
+            token: params.token,
+            refundOnchainAddress: params.refundOnchainAddress
+        });
+
+        // Transform to match LSPStore expected format
+        const paymentInfo = response.paymentInfo || {};
+        const bolt11 = paymentInfo.bolt11Invoice;
+        const onchain = paymentInfo.onchainPayment;
+
+        return {
+            order_id: response.orderId,
+            order_state: response.orderState,
+            channel_extension_expiry_blocks:
+                response.channelExtensionExpiryBlocks,
+            new_channel_expiry_block: response.newChannelExpiryBlock,
+            payment: {
+                state: paymentInfo.state || bolt11?.state || onchain?.state,
+                fee_total_sat:
+                    paymentInfo.feeTotalSat ||
+                    bolt11?.feeTotalSat ||
+                    onchain?.feeTotalSat,
+                order_total_sat:
+                    paymentInfo.orderTotalSat ||
+                    bolt11?.orderTotalSat ||
+                    onchain?.orderTotalSat,
+                bolt11_invoice: bolt11?.invoice,
+                onchain_address: onchain?.address,
+                onchain_total_sat: onchain?.orderTotalSat
+            },
+            channel: response.channel
+                ? {
+                      short_channel_id: response.channel.shortChannelId,
+                      max_channel_extension_expiry_blocks:
+                          response.channel.maxChannelExtensionExpiryBlocks,
+                      expiration_block: response.channel.expirationBlock
+                  }
+                : null
+        };
+    };
+
+    lsps7CheckOrderStatus = async (orderId: string): Promise<any> => {
+        const response = await LdkNode.lsps7.checkOrderStatus(orderId);
+
+        const paymentInfo = response.paymentInfo || {};
+        const bolt11 = paymentInfo.bolt11Invoice;
+        const onchain = paymentInfo.onchainPayment;
+
+        return {
+            order_id: response.orderId,
+            order_state: response.orderState,
+            channel_extension_expiry_blocks:
+                response.channelExtensionExpiryBlocks,
+            new_channel_expiry_block: response.newChannelExpiryBlock,
+            payment: {
+                state: paymentInfo.state || bolt11?.state || onchain?.state,
+                fee_total_sat:
+                    paymentInfo.feeTotalSat ||
+                    bolt11?.feeTotalSat ||
+                    onchain?.feeTotalSat,
+                order_total_sat:
+                    paymentInfo.orderTotalSat ||
+                    bolt11?.orderTotalSat ||
+                    onchain?.orderTotalSat,
+                bolt11_invoice: bolt11?.invoice,
+                bolt11_state: bolt11?.state,
+                onchain_address: onchain?.address,
+                onchain_state: onchain?.state
+            },
+            channel: response.channel
+                ? {
+                      short_channel_id: response.channel.shortChannelId,
+                      max_channel_extension_expiry_blocks:
+                          response.channel.maxChannelExtensionExpiryBlocks,
+                      expiration_block: response.channel.expirationBlock
+                  }
+                : null
+        };
+    };
+
+    // ========================================================================
     // Message Signing Methods
     // ========================================================================
 
@@ -1063,6 +1159,7 @@ export default class EmbeddedLdkNode {
     supportsLSPScustomMessage = () => false;
     supportsLSPS1rest = () => true; // Use REST API for LSPS1 (Olympus supports this)
     supportsLSPS1native = () => false; // Disabled - Olympus doesn't support native LSPS1 over custom messages
+    supportsLSPS7native = () => true;
     supportsOffers = () => false; // LDK Node supports BOLT12 but needs implementation
     supportsBolt11BlindedRoutes = () => false;
     supportsAddressesWithDerivationPaths = () => false;

@@ -376,6 +376,34 @@ export interface Lsps1OrderStatus {
 }
 
 // ============================================================================
+// LSPS7 Types
+// ============================================================================
+
+export type Lsps7OrderState = 'created' | 'completed' | 'failed';
+
+export interface Lsps7OriginalOrder {
+    id: string;
+    service: string;
+}
+
+export interface Lsps7ExtendableChannel {
+    shortChannelId: string;
+    maxChannelExtensionExpiryBlocks: number;
+    expirationBlock: number;
+    originalOrder?: Lsps7OriginalOrder;
+    extensionOrderIds?: string[];
+}
+
+export interface Lsps7OrderResponse {
+    orderId: string;
+    orderState: Lsps7OrderState;
+    channelExtensionExpiryBlocks: number;
+    newChannelExpiryBlock: number;
+    paymentInfo: Lsps1PaymentInfo;
+    channel: Lsps7ExtendableChannel;
+}
+
+// ============================================================================
 // Module Interface
 // ============================================================================
 
@@ -473,6 +501,21 @@ export interface ILdkNodeModule {
         announceChannel: boolean
     ): Promise<Lsps1OrderResponse>;
     lsps1CheckOrderStatus(orderId: string): Promise<Lsps1OrderStatus>;
+
+    // LSPS7 Methods
+    setLiquiditySourceLsps7(
+        nodeId: string,
+        address: string,
+        token?: string | null
+    ): Promise<void>;
+    lsps7GetExtendableChannels(): Promise<Lsps7ExtendableChannel[]>;
+    lsps7CreateOrder(
+        shortChannelId: string,
+        channelExtensionExpiryBlocks: number,
+        token?: string | null,
+        refundOnchainAddress?: string | null
+    ): Promise<Lsps7OrderResponse>;
+    lsps7CheckOrderStatus(orderId: string): Promise<Lsps7OrderResponse>;
 
     // Message Signing Methods
     signMessage(message: string): Promise<{ signature: string }>;
