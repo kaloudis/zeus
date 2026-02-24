@@ -922,6 +922,110 @@ export default class EmbeddedLdkNode {
     };
 
     // ========================================================================
+    // BOLT12 / Offers Methods
+    // ========================================================================
+
+    createOffer = async ({
+        description,
+        label: _label,
+        singleUse
+    }: {
+        description?: string;
+        label?: string;
+        singleUse?: boolean;
+    }): Promise<any> => {
+        const result = await LdkNode.bolt12.bolt12ReceiveVariableAmount({
+            description: description || '',
+            expirySecs: 0
+        });
+
+        return {
+            bolt12: result.offer,
+            offer_id: result.offerId,
+            active: true,
+            single_use: singleUse || false,
+            used: false
+        };
+    };
+
+    listOffers = async (): Promise<any> => {
+        // LDK Node doesn't store offers natively
+        return { offers: [] };
+    };
+
+    disableOffer = async ({ offer_id }: { offer_id: string }): Promise<any> => {
+        // No-op: LDK Node doesn't support disabling offers natively
+        return { offer_id, active: false };
+    };
+
+    fetchInvoiceFromOffer = async (
+        bolt12: string,
+        amountSatoshis: string
+    ): Promise<any> => {
+        const paymentId = await LdkNode.bolt12.bolt12SendUsingAmount({
+            offer: bolt12,
+            amountMsat: Number(amountSatoshis) * 1000
+        });
+
+        // Poll for payment completion (up to 60 seconds)
+        const maxAttempts = 60;
+        const delayMs = 1000;
+        let payment = null;
+
+        for (let i = 0; i < maxAttempts; i++) {
+            const payments = await LdkNode.payments.listPayments();
+            payment = payments.find((p) => p.id === paymentId);
+
+            if (payment?.status === 'succeeded') {
+                break;
+            }
+            if (payment?.status === 'failed') {
+                throw new Error('Payment failed');
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+
+        const preimage = payment?.kind.preimage || '';
+        const hash = payment?.kind.hash || paymentId;
+
+        return {
+            payment_hash: hash,
+            payment_preimage: preimage,
+            status: 'SUCCEEDED'
+        };
+    };
+
+    createWithdrawalRequest = async ({
+        amount,
+        description: _description
+    }: {
+        amount: string;
+        description: string;
+    }): Promise<any> => {
+        const refundStr = await LdkNode.bolt12.bolt12InitiateRefund({
+            amountMsat: Number(amount) * 1000,
+            expirySecs: 3600
+        });
+
+        return { bolt12: refundStr };
+    };
+
+    redeemWithdrawalRequest = async ({
+        invreq,
+        label: _label
+    }: {
+        invreq: string;
+        label: string;
+    }): Promise<any> => {
+        const invoiceStr = await LdkNode.bolt12.bolt12RequestRefundPayment(
+            invreq
+        );
+
+        return { bolt12: invoiceStr };
+    };
+
+    // ========================================================================
     // Message Signing Methods
     // ========================================================================
 
@@ -1147,7 +1251,7 @@ export default class EmbeddedLdkNode {
     supportsAccounts = () => false;
     supportsRouting = () => false;
     supportsNodeInfo = () => true;
-    supportsWithdrawalRequests = () => false;
+    supportsWithdrawalRequests = () => true;
     singleFeesEarnedTotal = () => false;
     supportsAddressTypeSelection = () => false;
     supportsNestedSegWit = () => false;
@@ -1166,7 +1270,7 @@ export default class EmbeddedLdkNode {
     supportsLSPS1rest = () => true; // Use REST API for LSPS1 (Olympus supports this)
     supportsLSPS1native = () => false; // Disabled - Olympus doesn't support native LSPS1 over custom messages
     supportsLSPS7native = () => true;
-    supportsOffers = () => false; // LDK Node supports BOLT12 but needs implementation
+    supportsOffers = () => true;
     supportsBolt11BlindedRoutes = () => false;
     supportsAddressesWithDerivationPaths = () => false;
     isLNDBased = () => false;
