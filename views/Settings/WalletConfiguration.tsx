@@ -74,7 +74,8 @@ import {
     createLdkNodeWallet,
     stopLdkNode,
     getDefaultEsploraServer,
-    getDefaultRgsServer
+    getDefaultRgsServer,
+    DEFAULT_VSS_SERVER
 } from '../../utils/EmbeddedLdkNodeUtils';
 import { restartNeeded } from '../../utils/RestartUtils';
 
@@ -895,7 +896,8 @@ export default class WalletConfiguration extends React.Component<
                     ldkEsploraServer || getDefaultEsploraServer(networkType),
                 rgsServerUrl: ldkRgsServer || getDefaultRgsServer(networkType),
                 lsps1Config,
-                trustedPeers0conf: [flowLspPubkey]
+                trustedPeers0conf: [flowLspPubkey],
+                vssServerUrl: DEFAULT_VSS_SERVER
             });
 
             if (response && response.mnemonic) {

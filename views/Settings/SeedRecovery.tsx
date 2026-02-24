@@ -46,7 +46,8 @@ import {
     createLdkNodeWallet,
     stopLdkNode,
     getDefaultEsploraServer,
-    getDefaultRgsServer
+    getDefaultRgsServer,
+    DEFAULT_VSS_SERVER
 } from '../../utils/EmbeddedLdkNodeUtils';
 
 import { BIP39_WORD_LIST } from '../../utils/Bip39Utils';
@@ -513,7 +514,8 @@ export default class SeedRecovery extends React.PureComponent<
                             | 'signet'
                             | 'regtest',
                         lsps1Config,
-                        trustedPeers0conf: [flowLspPubkey]
+                        trustedPeers0conf: [flowLspPubkey],
+                        vssServerUrl: DEFAULT_VSS_SERVER
                     });
 
                     this.setState({

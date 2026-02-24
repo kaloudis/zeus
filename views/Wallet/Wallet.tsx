@@ -54,7 +54,8 @@ import {
 } from '../../utils/LndMobileUtils';
 import {
     startLdkNodeWallet,
-    stopLdkNode
+    stopLdkNode,
+    DEFAULT_VSS_SERVER
 } from '../../utils/EmbeddedLdkNodeUtils';
 import { localeString, bridgeJavaStrings } from '../../utils/LocaleUtils';
 import { isBatterySaverEnabled } from '../../utils/BatteryUtils';
@@ -451,6 +452,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             embeddedLdkNetwork,
             ldkEsploraServer,
             ldkRgsServer,
+            ldkVssServer,
             updateSettings,
             fetchLock
         } = SettingsStore;
@@ -547,7 +549,8 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     esploraServerUrl: ldkEsploraServer,
                     rgsServerUrl: ldkRgsServer,
                     lsps1Config,
-                    trustedPeers0conf: [flowLspPubkey]
+                    trustedPeers0conf: [flowLspPubkey],
+                    vssServerUrl: ldkVssServer || DEFAULT_VSS_SERVER
                 });
             } else {
                 console.error(

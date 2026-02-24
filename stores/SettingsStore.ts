@@ -55,6 +55,7 @@ export interface Node {
     ldkPassphrase?: string;
     ldkEsploraServer?: string;
     ldkRgsServer?: string;
+    ldkVssServer?: string;
 }
 
 interface PrivacySettings {
@@ -1553,6 +1554,7 @@ export default class SettingsStore {
     @observable public embeddedLdkNetwork?: string;
     @observable public ldkEsploraServer?: string;
     @observable public ldkRgsServer?: string;
+    @observable public ldkVssServer?: string;
     // NWC
     @observable public nostrWalletConnectUrl: string;
     // Favorite currencies
@@ -1754,6 +1756,7 @@ export default class SettingsStore {
             this.embeddedLdkNetwork = node.embeddedLdkNetwork;
             this.ldkEsploraServer = node.ldkEsploraServer;
             this.ldkRgsServer = node.ldkRgsServer;
+            this.ldkVssServer = node.ldkVssServer;
             // NWC
             this.nostrWalletConnectUrl = node.nostrWalletConnectUrl;
         }

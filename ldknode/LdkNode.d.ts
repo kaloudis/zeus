@@ -417,6 +417,9 @@ export interface ILdkNodeModule {
     setGossipSourceP2p(): Promise<void>;
     setListeningAddresses(addresses: string[]): Promise<void>;
 
+    // VSS Methods
+    setVssServer(vssUrl: string, storeId: string): Promise<void>;
+
     // Mnemonic Methods
     generateMnemonic(wordCount: number): Promise<string>;
 
