@@ -1196,13 +1196,11 @@ export default class WalletConfiguration extends React.Component<
 
         const supportsTor =
             implementation !== 'lightning-node-connect' &&
-            implementation !== 'embedded-lnd' &&
-            implementation !== 'embedded-ldk-node' &&
+            !BackendUtils.isLocalWallet() &&
             implementation !== 'nostr-wallet-connect';
         const supportsCertVerification =
             implementation !== 'lightning-node-connect' &&
-            implementation !== 'embedded-lnd' &&
-            implementation !== 'embedded-ldk-node' &&
+            !BackendUtils.isLocalWallet() &&
             implementation !== 'nostr-wallet-connect';
 
         const CertInstallInstructions = () => (
