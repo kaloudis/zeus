@@ -3,6 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { inject, observer } from 'mobx-react';
 import { StackNavigationProp } from '@react-navigation/stack';
 
+import Button from '../../../components/Button';
 import Header from '../../../components/Header';
 import Screen from '../../../components/Screen';
 import TextInput from '../../../components/TextInput';
@@ -45,6 +46,9 @@ export default class EsploraServer extends React.Component<
                 | 'signet'
                 | 'regtest') || 'mainnet'
         );
+
+        const showReset =
+            esploraServer !== '' && esploraServer !== defaultServer;
 
         return (
             <Screen>
@@ -118,6 +122,26 @@ export default class EsploraServer extends React.Component<
                                 : {defaultServer || 'None'}
                             </Text>
                         </View>
+
+                        {showReset && (
+                            <View style={{ marginTop: 20 }}>
+                                <Button
+                                    title={localeString('general.reset')}
+                                    accessibilityLabel={localeString(
+                                        'general.reset'
+                                    )}
+                                    onPress={async () => {
+                                        this.setState({
+                                            esploraServer: defaultServer
+                                        });
+                                        await updateSettings({
+                                            ldkEsploraServer: defaultServer
+                                        });
+                                        restartNeeded();
+                                    }}
+                                />
+                            </View>
+                        )}
                     </ScrollView>
                 </View>
             </Screen>

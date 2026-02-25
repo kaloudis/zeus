@@ -13,41 +13,33 @@ import SettingsStore from '../../../stores/SettingsStore';
 import { localeString } from '../../../utils/LocaleUtils';
 import { restartNeeded } from '../../../utils/RestartUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
-import { getDefaultRgsServer } from '../../../utils/EmbeddedLdkNodeUtils';
+import { DEFAULT_VSS_SERVER } from '../../../utils/EmbeddedLdkNodeUtils';
 
-interface RapidGossipSyncProps {
+interface VssServerProps {
     navigation: StackNavigationProp<any, any>;
     SettingsStore: SettingsStore;
 }
 
-interface RapidGossipSyncState {
-    rgsServer: string;
+interface VssServerState {
+    vssServer: string;
 }
 
 @inject('SettingsStore')
 @observer
-export default class RapidGossipSync extends React.Component<
-    RapidGossipSyncProps,
-    RapidGossipSyncState
+export default class VssServer extends React.Component<
+    VssServerProps,
+    VssServerState
 > {
     state = {
-        rgsServer: this.props.SettingsStore.ldkRgsServer || ''
+        vssServer: this.props.SettingsStore.ldkVssServer || ''
     };
 
     render() {
         const { navigation, SettingsStore } = this.props;
-        const { rgsServer } = this.state;
-        const { embeddedLdkNetwork, updateSettings }: any = SettingsStore;
+        const { vssServer } = this.state;
+        const { updateSettings }: any = SettingsStore;
 
-        const defaultServer = getDefaultRgsServer(
-            (embeddedLdkNetwork?.toLowerCase() as
-                | 'mainnet'
-                | 'testnet'
-                | 'signet'
-                | 'regtest') || 'mainnet'
-        );
-
-        const showReset = rgsServer !== '' && rgsServer !== defaultServer;
+        const showReset = vssServer !== '' && vssServer !== DEFAULT_VSS_SERVER;
 
         return (
             <Screen>
@@ -56,7 +48,7 @@ export default class RapidGossipSync extends React.Component<
                         leftComponent="Back"
                         centerComponent={{
                             text: localeString(
-                                'views.Settings.EmbeddedNode.RapidGossipSync.title'
+                                'views.Settings.EmbeddedNode.VssServer.title'
                             ),
                             style: {
                                 color: themeColor('text'),
@@ -75,7 +67,7 @@ export default class RapidGossipSync extends React.Component<
                                 }}
                             >
                                 {localeString(
-                                    'views.Settings.EmbeddedNode.RapidGossipSync.subtitle'
+                                    'views.Settings.EmbeddedNode.VssServer.subtitle'
                                 )}
                             </Text>
                         </View>
@@ -87,19 +79,19 @@ export default class RapidGossipSync extends React.Component<
                             }}
                         >
                             {localeString(
-                                'views.Settings.EmbeddedNode.RapidGossipSync.serverUrl'
+                                'views.Settings.EmbeddedNode.VssServer.serverUrl'
                             )}
                         </Text>
                         <TextInput
-                            value={rgsServer}
-                            placeholder={defaultServer || ''}
+                            value={vssServer}
+                            placeholder={DEFAULT_VSS_SERVER}
                             onChangeText={async (text: string) => {
                                 this.setState({
-                                    rgsServer: text
+                                    vssServer: text
                                 });
 
                                 await updateSettings({
-                                    ldkRgsServer: text
+                                    ldkVssServer: text
                                 });
 
                                 restartNeeded();
@@ -116,9 +108,9 @@ export default class RapidGossipSync extends React.Component<
                                 }}
                             >
                                 {localeString(
-                                    'views.Settings.EmbeddedNode.RapidGossipSync.defaultServer'
+                                    'views.Settings.EmbeddedNode.VssServer.defaultServer'
                                 )}
-                                : {defaultServer || 'None'}
+                                : {DEFAULT_VSS_SERVER}
                             </Text>
                         </View>
 
@@ -131,10 +123,10 @@ export default class RapidGossipSync extends React.Component<
                                     )}
                                     onPress={async () => {
                                         this.setState({
-                                            rgsServer: defaultServer || ''
+                                            vssServer: DEFAULT_VSS_SERVER
                                         });
                                         await updateSettings({
-                                            ldkRgsServer: defaultServer || ''
+                                            ldkVssServer: DEFAULT_VSS_SERVER
                                         });
                                         restartNeeded();
                                     }}
