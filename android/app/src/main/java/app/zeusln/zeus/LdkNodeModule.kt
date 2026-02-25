@@ -789,7 +789,8 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val bolt11 = node.bolt11Payment()
             val invoiceDescription = Bolt11InvoiceDescription.Direct(description)
             val invoice = bolt11.receive(amountMsat.toLong().toULong(), invoiceDescription, expirySecs.toInt().toUInt())
-            promise.resolve(mapOf("invoice" to invoice.toString()))
+            val result = Arguments.createMap().apply { putString("invoice", invoice.toString()) }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
@@ -802,7 +803,8 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val bolt11 = node.bolt11Payment()
             val invoiceDescription = Bolt11InvoiceDescription.Direct(description)
             val invoice = bolt11.receiveVariableAmount(invoiceDescription, expirySecs.toInt().toUInt())
-            promise.resolve(mapOf("invoice" to invoice.toString()))
+            val result = Arguments.createMap().apply { putString("invoice", invoice.toString()) }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
@@ -861,7 +863,11 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val bolt12 = node.bolt12Payment()
             val expiry = if (expirySecs > 0) expirySecs.toInt().toUInt() else null
             val offer = bolt12.receive(amountMsat.toLong().toULong(), description, expiry, null)
-            promise.resolve(mapOf("offer" to offer.toString(), "offerId" to offer.id()))
+            val result = Arguments.createMap().apply {
+                putString("offer", offer.toString())
+                putString("offerId", offer.id())
+            }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
@@ -874,7 +880,11 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val bolt12 = node.bolt12Payment()
             val expiry = if (expirySecs > 0) expirySecs.toInt().toUInt() else null
             val offer = bolt12.receiveVariableAmount(description, expiry)
-            promise.resolve(mapOf("offer" to offer.toString(), "offerId" to offer.id()))
+            val result = Arguments.createMap().apply {
+                putString("offer", offer.toString())
+                putString("offerId", offer.id())
+            }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
@@ -930,7 +940,8 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val node = this.node ?: throw Exception("Node not initialized")
             val bolt12 = node.bolt12Payment()
             val refund = bolt12.initiateRefund(amountMsat.toLong().toULong(), expirySecs.toInt().toUInt(), null, null, null)
-            promise.resolve(mapOf("refund" to refund.toString()))
+            val result = Arguments.createMap().apply { putString("refund", refund.toString()) }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
@@ -943,7 +954,8 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             val bolt12 = node.bolt12Payment()
             val refund = Refund.fromStr(refundStr)
             val invoice = bolt12.requestRefundPayment(refund)
-            promise.resolve(mapOf("invoice" to invoice.toString()))
+            val result = Arguments.createMap().apply { putString("invoice", invoice.toString()) }
+            promise.resolve(result)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
         }
