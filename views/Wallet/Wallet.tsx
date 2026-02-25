@@ -537,7 +537,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     ? DEFAULT_LSPS1_PUBKEY_TESTNET
                     : DEFAULT_LSPS1_PUBKEY_MAINNET;
 
-                await startLdkNodeWallet({
+                const ldkResult = await startLdkNodeWallet({
                     nodeDir: ldkNodeDir,
                     seedMnemonic: ldkMnemonic,
                     passphrase: ldkPassphrase,
@@ -552,6 +552,16 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     trustedPeers0conf: [flowLspPubkey],
                     vssServerUrl: ldkVssServer || DEFAULT_VSS_SERVER
                 });
+
+                if (ldkResult?.vssError) {
+                    AlertStore.setVssError(ldkResult.vssError);
+                }
+                if (ldkResult?.esploraError) {
+                    AlertStore.setEsploraError(ldkResult.esploraError);
+                }
+                if (ldkResult?.rgsError) {
+                    AlertStore.setRgsError(ldkResult.rgsError);
+                }
             } else {
                 console.error(
                     'LDK Node configuration missing mnemonic or nodeDir'
