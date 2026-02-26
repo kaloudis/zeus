@@ -10,6 +10,7 @@ import { Hash as sha256Hash } from 'fast-sha256';
 
 import LdkNode from '../ldknode/LdkNodeInjection';
 import Base64Utils from '../utils/Base64Utils';
+import { localeString } from '../utils/LocaleUtils';
 import type {
     Network,
     NodeStatus,
@@ -540,11 +541,15 @@ export default class EmbeddedLdkNode {
                 break;
             }
             if (payment?.status === 'failed') {
-                throw new Error('Payment failed');
+                throw new Error(localeString('error.paymentFailed'));
             }
 
             // Wait before next poll
             await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+
+        if (payment?.status !== 'succeeded') {
+            throw new Error(localeString('error.paymentTimedOut'));
         }
 
         const preimage = payment?.kind.preimage || '';
@@ -980,10 +985,14 @@ export default class EmbeddedLdkNode {
                 break;
             }
             if (payment?.status === 'failed') {
-                throw new Error('Payment failed');
+                throw new Error(localeString('error.paymentFailed'));
             }
 
             await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+
+        if (payment?.status !== 'succeeded') {
+            throw new Error(localeString('error.paymentTimedOut'));
         }
 
         const preimage = payment?.kind.preimage || '';
