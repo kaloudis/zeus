@@ -440,7 +440,8 @@ export default class Menu extends React.Component<MenuProps, MenuState> {
                         )}
 
                     {selectedNode &&
-                        BackendUtils.supportsCustomPreimages() &&
+                        (BackendUtils.supportsCustomPreimages() ||
+                            BackendUtils.supportsCashuWallet()) &&
                         !NodeInfoStore.testnet && (
                             <View
                                 style={{
