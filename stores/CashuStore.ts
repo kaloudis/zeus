@@ -370,29 +370,28 @@ export default class CashuStore {
         }
 
         // No valid stored cashu seed - derive from wallet seed
-        const walletSeedPhrase = this.settingsStore.seedPhrase;
-        if (!walletSeedPhrase || walletSeedPhrase.length === 0) {
-            console.warn('CDK: No wallet seed phrase available');
-            return null;
-        }
-
-        const walletMnemonic = walletSeedPhrase.join(' ');
+        // LDK Node stores mnemonic as a single string; LND as a word array
+        const ldkMnemonic = this.settingsStore.ldkMnemonic;
+        const lndSeedPhrase = this.settingsStore.seedPhrase;
 
         let cashuSeedPhrase: string;
-        if (walletSeedPhrase.length <= 12) {
+        if (ldkMnemonic) {
             // LDK Node uses a 12-word mnemonic - use it directly as the
             // cashu seed since it already has exactly 128 bits of entropy
-            cashuSeedPhrase = walletMnemonic;
-        } else {
+            cashuSeedPhrase = ldkMnemonic;
+        } else if (lndSeedPhrase && lndSeedPhrase.length > 0) {
             // LND uses a 24-word mnemonic - derive a 12-word cashu seed
             // from bytes [48:64] of the BIP-39 seed (v2-bip39 style)
-            const seedFromMnemonic =
-                bip39scure.mnemonicToSeedSync(walletMnemonic);
+            const lndMnemonic = lndSeedPhrase.join(' ');
+            const seedFromMnemonic = bip39scure.mnemonicToSeedSync(lndMnemonic);
             const entropy = seedFromMnemonic.slice(48, 64);
             cashuSeedPhrase = bip39scure.entropyToMnemonic(
                 entropy,
                 BIP39_WORD_LIST
             );
+        } else {
+            console.warn('CDK: No wallet seed phrase available');
+            return null;
         }
 
         // Store derived seed for future use
@@ -1533,7 +1532,10 @@ export default class CashuStore {
         try {
             // Ensure CDK is initialized
             if (!this.cdkInitialized) {
-                await this.initializeCDK();
+                const initialized = await this.initializeCDK();
+                if (!initialized) {
+                    throw new Error('CDK wallet not initialized');
+                }
             }
             if (this.mintUrls.length === 0 && this.seedVersion !== 'v1') {
                 const seedVersion = 'v2-bip39';
@@ -2867,7 +2869,10 @@ export default class CashuStore {
         try {
             // Ensure CDK is initialized
             if (!this.cdkInitialized) {
-                await this.initializeCDK();
+                const initialized = await this.initializeCDK();
+                if (!initialized) {
+                    throw new Error('CDK wallet not initialized');
+                }
             }
 
             // Check if token is valid
