@@ -369,22 +369,31 @@ export default class CashuStore {
             console.warn('CDK: Stored cashu seed is not valid BIP-39');
         }
 
-        // No valid stored cashu seed - derive from LND seed
-        const lndSeedPhrase = this.settingsStore.seedPhrase;
-        if (!lndSeedPhrase || lndSeedPhrase.length === 0) {
-            console.warn('CDK: No LND seed phrase available');
+        // No valid stored cashu seed - derive from wallet seed
+        const walletSeedPhrase = this.settingsStore.seedPhrase;
+        if (!walletSeedPhrase || walletSeedPhrase.length === 0) {
+            console.warn('CDK: No wallet seed phrase available');
             return null;
         }
 
-        const lndMnemonic = lndSeedPhrase.join(' ');
+        const walletMnemonic = walletSeedPhrase.join(' ');
 
-        // Derive cashu seed from LND seed (v2-bip39 style)
-        const seedFromMnemonic = bip39scure.mnemonicToSeedSync(lndMnemonic);
-        const entropy = seedFromMnemonic.slice(48, 64);
-        const cashuSeedPhrase = bip39scure.entropyToMnemonic(
-            entropy,
-            BIP39_WORD_LIST
-        );
+        let cashuSeedPhrase: string;
+        if (walletSeedPhrase.length <= 12) {
+            // LDK Node uses a 12-word mnemonic - use it directly as the
+            // cashu seed since it already has exactly 128 bits of entropy
+            cashuSeedPhrase = walletMnemonic;
+        } else {
+            // LND uses a 24-word mnemonic - derive a 12-word cashu seed
+            // from bytes [48:64] of the BIP-39 seed (v2-bip39 style)
+            const seedFromMnemonic =
+                bip39scure.mnemonicToSeedSync(walletMnemonic);
+            const entropy = seedFromMnemonic.slice(48, 64);
+            cashuSeedPhrase = bip39scure.entropyToMnemonic(
+                entropy,
+                BIP39_WORD_LIST
+            );
+        }
 
         // Store derived seed for future use
         const derivedSeedPhrase = cashuSeedPhrase.split(' ');
@@ -396,7 +405,7 @@ export default class CashuStore {
         this.seedVersion = 'v2-bip39';
         Storage.setItem(`${this.getLndDir()}-cashu-seed-version`, 'v2-bip39');
 
-        console.log('CDK: Derived and stored cashu seed from LND seed');
+        console.log('CDK: Derived and stored cashu seed from wallet seed');
         return cashuSeedPhrase;
     };
 
