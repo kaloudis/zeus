@@ -1755,6 +1755,11 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): Unit
 
+    fun uniffi_ldk_node_fn_method_node_reset_network_graph(
+        `ptr`: Pointer,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): Unit
+
     fun uniffi_ldk_node_fn_method_node_sign_message(
         `ptr`: Pointer,
         `msg`: RustBuffer.ByValue,
@@ -1815,6 +1820,11 @@ internal interface UniffiLib : Library {
         `channelConfig`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): Unit
+
+    fun uniffi_ldk_node_fn_method_node_update_rgs_snapshot(
+        `ptr`: Pointer,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): Int
 
     fun uniffi_ldk_node_fn_method_node_verify_signature(
         `ptr`: Pointer,
@@ -2638,6 +2648,8 @@ internal interface UniffiLib : Library {
 
     fun uniffi_ldk_node_checksum_method_node_remove_payment(): Short
 
+    fun uniffi_ldk_node_checksum_method_node_reset_network_graph(): Short
+
     fun uniffi_ldk_node_checksum_method_node_sign_message(): Short
 
     fun uniffi_ldk_node_checksum_method_node_splice_in(): Short
@@ -2657,6 +2669,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ldk_node_checksum_method_node_unified_qr_payment(): Short
 
     fun uniffi_ldk_node_checksum_method_node_update_channel_config(): Short
+
+    fun uniffi_ldk_node_checksum_method_node_update_rgs_snapshot(): Short
 
     fun uniffi_ldk_node_checksum_method_node_verify_signature(): Short
 
@@ -3140,6 +3154,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ldk_node_checksum_method_node_remove_payment() != 47952.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ldk_node_checksum_method_node_reset_network_graph() != 24091.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ldk_node_checksum_method_node_sign_message() != 49319.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -3168,6 +3185,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ldk_node_checksum_method_node_update_channel_config() != 37852.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ldk_node_checksum_method_node_update_rgs_snapshot() != 59073.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ldk_node_checksum_method_node_verify_signature() != 20486.toShort()) {
@@ -7697,6 +7717,8 @@ public interface NodeInterface {
 
     fun `removePayment`(`paymentId`: PaymentId)
 
+    fun `resetNetworkGraph`()
+
     fun `signMessage`(`msg`: List<kotlin.UByte>): kotlin.String
 
     fun `spliceIn`(
@@ -7729,6 +7751,8 @@ public interface NodeInterface {
         `counterpartyNodeId`: PublicKey,
         `channelConfig`: ChannelConfig,
     )
+
+    fun `updateRgsSnapshot`(): kotlin.UInt
 
     fun `verifySignature`(
         `msg`: List<kotlin.UByte>,
@@ -8132,6 +8156,14 @@ open class Node :
             }
         }
 
+    @Throws(NodeException::class)
+    override fun `resetNetworkGraph`() =
+        callWithPointer {
+            uniffiRustCallWithError(NodeException) { _status ->
+                UniffiLib.INSTANCE.uniffi_ldk_node_fn_method_node_reset_network_graph(it, _status)
+            }
+        }
+
     override fun `signMessage`(`msg`: List<kotlin.UByte>): kotlin.String =
         FfiConverterString.lift(
             callWithPointer {
@@ -8244,6 +8276,16 @@ open class Node :
             )
         }
     }
+
+    @Throws(NodeException::class)
+    override fun `updateRgsSnapshot`(): kotlin.UInt =
+        FfiConverterUInt.lift(
+            callWithPointer {
+                uniffiRustCallWithError(NodeException) { _status ->
+                    UniffiLib.INSTANCE.uniffi_ldk_node_fn_method_node_update_rgs_snapshot(it, _status)
+                }
+            },
+        )
 
     override fun `verifySignature`(
         `msg`: List<kotlin.UByte>,

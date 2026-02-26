@@ -173,6 +173,14 @@ const networkGraphInfo = async (): Promise<{
     return await LdkNodeModule.networkGraphInfo();
 };
 
+const resetNetworkGraph = async (): Promise<void> => {
+    return await LdkNodeModule.resetNetworkGraph();
+};
+
+const updateRgsSnapshot = async (): Promise<{ timestamp: number }> => {
+    return await LdkNodeModule.updateRgsSnapshot();
+};
+
 // ============================================================================
 // Channel Functions
 // ============================================================================
@@ -735,6 +743,8 @@ export interface ILdkNodeInjections {
             channelCount: number;
             nodeCount: number;
         }>;
+        resetNetworkGraph: () => Promise<void>;
+        updateRgsSnapshot: () => Promise<{ timestamp: number }>;
     };
     channel: {
         listChannels: () => Promise<ChannelDetails[]>;
@@ -905,7 +915,9 @@ const LdkNodeInjection: ILdkNodeInjections = {
         nodeId,
         status,
         listBalances,
-        networkGraphInfo
+        networkGraphInfo,
+        resetNetworkGraph,
+        updateRgsSnapshot
     },
     channel: {
         listChannels,
