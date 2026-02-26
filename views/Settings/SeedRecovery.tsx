@@ -505,6 +505,14 @@ export default class SeedRecovery extends React.PureComponent<
                         ? DEFAULT_LSPS1_PUBKEY_TESTNET
                         : DEFAULT_LSPS1_PUBKEY_MAINNET;
 
+                    const trustedPeers = [flowLspPubkey];
+                    if (
+                        lsps1Config?.nodeId &&
+                        lsps1Config.nodeId !== flowLspPubkey
+                    ) {
+                        trustedPeers.push(lsps1Config.nodeId);
+                    }
+
                     await createLdkNodeWallet({
                         nodeDir,
                         seedMnemonic: mnemonic,
@@ -514,7 +522,7 @@ export default class SeedRecovery extends React.PureComponent<
                             | 'signet'
                             | 'regtest',
                         lsps1Config,
-                        trustedPeers0conf: [flowLspPubkey],
+                        trustedPeers0conf: trustedPeers,
                         vssServerUrl: DEFAULT_VSS_SERVER
                     });
 

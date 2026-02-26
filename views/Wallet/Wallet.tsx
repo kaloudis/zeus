@@ -537,6 +537,16 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     ? DEFAULT_LSPS1_PUBKEY_TESTNET
                     : DEFAULT_LSPS1_PUBKEY_MAINNET;
 
+                // Include both the default Flow LSP and user-configured
+                // LSP as trusted 0-conf peers (dedup if they're the same)
+                const trustedPeers = [flowLspPubkey];
+                if (
+                    lsps1Config?.nodeId &&
+                    lsps1Config.nodeId !== flowLspPubkey
+                ) {
+                    trustedPeers.push(lsps1Config.nodeId);
+                }
+
                 const ldkResult = await startLdkNodeWallet({
                     nodeDir: ldkNodeDir,
                     seedMnemonic: ldkMnemonic,
@@ -549,7 +559,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     esploraServerUrl: ldkEsploraServer,
                     rgsServerUrl: ldkRgsServer,
                     lsps1Config,
-                    trustedPeers0conf: [flowLspPubkey],
+                    trustedPeers0conf: trustedPeers,
                     vssServerUrl: ldkVssServer || DEFAULT_VSS_SERVER
                 });
 

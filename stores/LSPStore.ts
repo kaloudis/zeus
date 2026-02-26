@@ -361,7 +361,9 @@ export default class LSPStore {
                 JSON.stringify({
                     bolt11,
                     fee_id: this.feeId,
-                    simpleTaproot: settings.requestSimpleTaproot
+                    simpleTaproot:
+                        settings.requestSimpleTaproot &&
+                        BackendUtils.supportsSimpleTaprootChannels()
                 })
             )
                 .then(async (response: any) => {
