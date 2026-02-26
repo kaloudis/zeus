@@ -572,6 +572,9 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                 if (ldkResult?.rgsError) {
                     AlertStore.setRgsError(ldkResult.rgsError);
                 }
+
+                if (settings?.ecash?.enableCashu)
+                    await CashuStore.initializeWallets();
             } else {
                 console.error(
                     'LDK Node configuration missing mnemonic or nodeDir'
