@@ -110,7 +110,7 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         try {
             val builder = this.builder ?: throw Exception("Builder not initialized")
             this.storedEsploraServerUrl = serverUrl
-            builder.setChainSourceEsplora(serverUrl, null)
+            builder.setChainSourceEsplora(serverUrl, createEsploraSyncConfig())
             promise.resolve(null)
         } catch (e: Exception) {
             promise.reject("error", e.message, e)
@@ -356,10 +356,20 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         }
     }
 
+    private fun createEsploraSyncConfig(): EsploraSyncConfig {
+        return EsploraSyncConfig(
+            backgroundSyncConfig = BackgroundSyncConfig(
+                onchainWalletSyncIntervalSecs = 60UL,
+                lightningWalletSyncIntervalSecs = 60UL,
+                feeRateCacheUpdateIntervalSecs = 600UL
+            )
+        )
+    }
+
     private fun applyBuilderSettings(builder: Builder) {
         this.storedEsploraServerUrl?.let {
             Log.d("LdkNodeModule", "applyBuilderSettings: Esplora server = $it")
-            builder.setChainSourceEsplora(it, null)
+            builder.setChainSourceEsplora(it, createEsploraSyncConfig())
         }
         this.storedRgsServerUrl?.let {
             Log.d("LdkNodeModule", "applyBuilderSettings: RGS server = $it")

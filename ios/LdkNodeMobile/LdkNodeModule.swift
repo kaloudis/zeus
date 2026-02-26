@@ -122,7 +122,7 @@ class LdkNodeModule: RCTEventEmitter {
         }
 
         self.storedEsploraServerUrl = serverUrl
-        builder.setChainSourceEsplora(serverUrl: serverUrl, config: nil)
+        builder.setChainSourceEsplora(serverUrl: serverUrl, config: createEsploraSyncConfig())
         resolve(["status": "ok"])
     }
 
@@ -353,10 +353,20 @@ class LdkNodeModule: RCTEventEmitter {
         }
     }
 
+    private func createEsploraSyncConfig() -> EsploraSyncConfig {
+        return EsploraSyncConfig(
+            backgroundSyncConfig: BackgroundSyncConfig(
+                onchainWalletSyncIntervalSecs: 60,
+                lightningWalletSyncIntervalSecs: 60,
+                feeRateCacheUpdateIntervalSecs: 600
+            )
+        )
+    }
+
     private func applyBuilderSettings(_ builder: Builder) {
         if let esploraUrl = self.storedEsploraServerUrl {
             NSLog("LdkNodeModule: applyBuilderSettings: Esplora server = \(esploraUrl)")
-            builder.setChainSourceEsplora(serverUrl: esploraUrl, config: nil)
+            builder.setChainSourceEsplora(serverUrl: esploraUrl, config: createEsploraSyncConfig())
         }
         if let rgsUrl = self.storedRgsServerUrl {
             NSLog("LdkNodeModule: applyBuilderSettings: RGS server = \(rgsUrl)")
