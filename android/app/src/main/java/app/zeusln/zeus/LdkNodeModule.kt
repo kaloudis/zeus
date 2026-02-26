@@ -760,12 +760,12 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     }
 
     @ReactMethod
-    fun sendAllToOnchainAddress(address: String, promise: Promise) {
+    fun sendAllToOnchainAddress(address: String, retainReserve: Boolean, promise: Promise) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 val node = this@LdkNodeModule.node ?: throw Exception("Node not initialized")
                 val onchain = node.onchainPayment()
-                val txid = onchain.sendAllToAddress(address, false, null)
+                val txid = onchain.sendAllToAddress(address, retainReserve, null)
                 val result = Arguments.createMap().apply {
                     putString("txid", txid)
                 }
