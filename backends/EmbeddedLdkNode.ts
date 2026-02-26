@@ -715,11 +715,6 @@ export default class EmbeddedLdkNode {
             pub_key: peer.nodeId,
             address: peer.address,
             inbound: false,
-            bytes_sent: '0',
-            bytes_recv: '0',
-            sat_sent: '0',
-            sat_recv: '0',
-            ping_time: '0',
             sync_type: peer.isConnected ? 'ACTIVE_SYNC' : 'UNKNOWN_SYNC'
         }));
     };
