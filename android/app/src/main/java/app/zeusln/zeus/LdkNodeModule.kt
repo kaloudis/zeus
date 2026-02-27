@@ -721,6 +721,9 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                     channel.inboundHtlcMaximumMsat?.let {
                         putDouble("inboundHtlcMaximumMsat", it.toLong().toDouble())
                     }
+                    channel.shortChannelId?.let {
+                        putString("shortChannelId", it.toLong().toString())
+                    }
                 }
                 result.pushMap(channelMap)
             }
@@ -1568,10 +1571,10 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
     private fun lsps7OrderStateToString(state: Lsps7OrderState): String {
         return when (state) {
-            Lsps7OrderState.CREATED -> "created"
-            Lsps7OrderState.COMPLETED -> "completed"
-            Lsps7OrderState.FAILED -> "failed"
-            else -> "unknown"
+            Lsps7OrderState.CREATED -> "CREATED"
+            Lsps7OrderState.COMPLETED -> "COMPLETED"
+            Lsps7OrderState.FAILED -> "FAILED"
+            else -> "UNKNOWN"
         }
     }
 

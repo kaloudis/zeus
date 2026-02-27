@@ -603,6 +603,9 @@ class LdkNodeModule: RCTEventEmitter {
             if let inboundHtlcMaximumMsat = channel.inboundHtlcMaximumMsat {
                 result["inboundHtlcMaximumMsat"] = inboundHtlcMaximumMsat
             }
+            if let shortChannelId = channel.shortChannelId {
+                result["shortChannelId"] = String(shortChannelId)
+            }
             return result
         }
         resolve(["channels": channelList])
@@ -1617,11 +1620,11 @@ class LdkNodeModule: RCTEventEmitter {
     private func serializeLsps7OrderState(_ state: Lsps7OrderState) -> String {
         switch state {
         case .created:
-            return "created"
+            return "CREATED"
         case .completed:
-            return "completed"
+            return "COMPLETED"
         case .failed:
-            return "failed"
+            return "FAILED"
         }
     }
 }

@@ -49,8 +49,8 @@ export default class LSPStore {
     @observable public createOrderResponse: any = {};
     @observable public getOrderResponse: any = {};
     // LSPS7
-    @observable public getExtendableOrdersId: string;
-    @observable public getExtendableOrdersData: any = [];
+    @observable public getExtendableChannelsId: string;
+    @observable public getExtendableChannelsData: any = [];
     @observable public createExtensionOrderId: string;
     @observable public createExtensionOrderResponse: any = {};
     @observable public getExtensionOrderId: string;
@@ -457,14 +457,15 @@ export default class LSPStore {
                 this.getOrderResponse = data;
             }
             this.loadingLSPS1 = false;
-        } else if (data.id === this.getExtendableOrdersId) {
+        } else if (data.id === this.getExtendableChannelsId) {
             if (data.error) {
                 this.error = true;
                 this.error_msg = data?.error?.message
                     ? errorToUserFriendly(data?.error?.message)
                     : '';
             } else {
-                this.getExtendableOrdersData = data?.result?.extendable_orders;
+                this.getExtendableChannelsData =
+                    data?.result?.extendable_channels;
             }
             this.loadingLSPS7 = false;
         } else if (data.id === this.createExtensionOrderId) {
@@ -938,7 +939,16 @@ export default class LSPStore {
             try {
                 const channels =
                     await BackendUtils.lsps7GetExtendableChannels();
-                this.getExtendableOrdersData = channels;
+                // Normalize camelCase keys from native module to snake_case
+                // to match the JSON-RPC custom message format
+                this.getExtendableChannelsData = channels.map((ch: any) => ({
+                    short_channel_id: ch.shortChannelId,
+                    max_channel_extension_expiry_blocks:
+                        ch.maxChannelExtensionExpiryBlocks,
+                    expiration_block: ch.expirationBlock,
+                    original_order: ch.originalOrder,
+                    extension_order_ids: ch.extensionOrderIds
+                }));
                 this.loadingLSPS7 = false;
                 return;
             } catch (error: any) {
@@ -951,7 +961,7 @@ export default class LSPStore {
         }
 
         // Fall back to custom message for other backends
-        this.getExtendableOrdersId = uuidv4();
+        this.getExtendableChannelsId = uuidv4();
         const method = 'lsps7.get_extendable_channels';
 
         this.sendCustomMessage({
@@ -961,7 +971,7 @@ export default class LSPStore {
                 jsonrpc: JSON_RPC_VERSION,
                 method,
                 params: {},
-                id: this.getExtendableOrdersId
+                id: this.getExtendableChannelsId
             })
         })
             .then((response) => {

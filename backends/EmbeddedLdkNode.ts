@@ -893,8 +893,8 @@ export default class EmbeddedLdkNode {
         const response = await LdkNode.lsps7.createOrder({
             shortChannelId: params.shortChannelId,
             channelExtensionExpiryBlocks: params.channelExtensionExpiryBlocks,
-            token: params.token,
-            refundOnchainAddress: params.refundOnchainAddress
+            token: params.token || null,
+            refundOnchainAddress: params.refundOnchainAddress || null
         });
 
         // Transform to match LSPStore expected format
@@ -1137,11 +1137,10 @@ export default class EmbeddedLdkNode {
             channel_point: channel.fundingTxo_txid
                 ? `${channel.fundingTxo_txid}:${channel.fundingTxo_vout}`
                 : '',
-            // Use channel_id (not chan_id) to avoid chanFormat conversion issues
-            // LDK channelId is a hex string, not a numeric short channel ID
+            // chan_id is the numeric SCID (used by chanFormat for NNNxNNNxNNN)
+            chan_id: channel.shortChannelId || '',
+            // channel_id is the 32-byte hex channel ID
             channel_id: channel.channelId,
-            // Provide short_channel_id directly to prevent chanFormat crash
-            short_channel_id: channel.channelId,
             capacity: channel.channelValueSats.toString(),
             local_balance: localBalanceSats.toString(),
             remote_balance: remoteBalanceSats.toString(),

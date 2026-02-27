@@ -184,6 +184,7 @@ export interface ChannelDetails {
     forceCloseSpendDelay?: number;
     inboundHtlcMinimumMsat: number;
     inboundHtlcMaximumMsat?: number;
+    shortChannelId?: string;
 }
 
 export interface PaymentDetails {
