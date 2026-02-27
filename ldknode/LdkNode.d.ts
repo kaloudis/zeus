@@ -560,6 +560,10 @@ export interface ILdkNodeModule {
     ): Promise<Lsps7OrderResponse>;
     lsps7CheckOrderStatus(orderId: string): Promise<Lsps7OrderResponse>;
 
+    // Log File Methods
+    tailLdkNodeLog(numLines: number): Promise<string>;
+    observeLdkNodeLogFile(): Promise<boolean>;
+
     // Message Signing Methods
     signMessage(message: string): Promise<{ signature: string }>;
     verifySignature(

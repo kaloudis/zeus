@@ -85,6 +85,10 @@ RCT_EXTERN_METHOD(lsps7GetExtendableChannels:(RCTPromiseResolveBlock)resolve rej
 RCT_EXTERN_METHOD(lsps7CreateOrder:(NSString *)shortChannelId channelExtensionExpiryBlocks:(double)channelExtensionExpiryBlocks token:(NSString *)token refundOnchainAddress:(NSString *)refundOnchainAddress resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(lsps7CheckOrderStatus:(NSString *)orderId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
+// Log File Methods
+RCT_EXTERN_METHOD(tailLdkNodeLog:(nonnull NSNumber *)numLines resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(observeLdkNodeLogFile:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+
 // Message Signing Methods
 RCT_EXTERN_METHOD(signMessage:(NSString *)message resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(verifySignature:(NSString *)message signature:(NSString *)signature publicKey:(NSString *)publicKey resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
