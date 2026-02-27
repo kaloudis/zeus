@@ -191,6 +191,7 @@ export interface PaymentDetails {
     id: string;
     kind: PaymentKind;
     amountMsat?: number;
+    feePaidMsat?: number;
     direction: PaymentDirection;
     status: PaymentStatus;
     latestUpdateTimestamp: number;
