@@ -253,9 +253,12 @@ export default class EmbeddedLdkNode {
 
         for (const channel of channels) {
             if (channel.isChannelReady) {
-                // Convert msat to sat
+                // Convert msat to sat, include local reserve in lightning balance
+                const localReserve = channel.unspendablePunishmentReserve || 0;
                 localBalance = localBalance.plus(
-                    new BigNumber(channel.outboundCapacityMsat).dividedBy(1000)
+                    new BigNumber(channel.outboundCapacityMsat)
+                        .dividedBy(1000)
+                        .plus(localReserve)
                 );
                 remoteBalance = remoteBalance.plus(
                     new BigNumber(channel.inboundCapacityMsat).dividedBy(1000)
