@@ -424,6 +424,13 @@ export default class WalletConfiguration extends React.Component<
                 embeddedLndNetwork,
                 lndDir,
                 isSqlite,
+                // embedded LDK Node
+                ldkMnemonic,
+                ldkPassphrase,
+                ldkNodeDir,
+                embeddedLdkNetwork,
+                ldkEsploraServer,
+                ldkRgsServer,
                 // NWC
                 nostrWalletConnectUrl
             } = node as any;
@@ -460,6 +467,14 @@ export default class WalletConfiguration extends React.Component<
                 embeddedLndNetwork,
                 lndDir,
                 isSqlite,
+                // embedded LDK Node
+                ldkMnemonic,
+                ldkPassphrase,
+                ldkNodeDir,
+                embeddedLdkNetwork,
+                ldkEsploraServer,
+                ldkRgsServer,
+                ldkNodeInitialized: !!ldkMnemonic,
                 // NWC
                 nostrWalletConnectUrl
             });
@@ -2561,21 +2576,6 @@ export default class WalletConfiguration extends React.Component<
                                         </View>
                                     </>
                                 )}
-                                {ldkNodeInitialized && ldkMnemonic && (
-                                    <Button
-                                        title={localeString(
-                                            'views.Settings.NodeConfiguration.backUpWallet'
-                                        )}
-                                        onPress={() =>
-                                            navigation.navigate('Seed', {
-                                                implementation:
-                                                    'embedded-ldk-node'
-                                            })
-                                        }
-                                        secondary
-                                        disabled={loading}
-                                    />
-                                )}
                             </View>
                         )}
 
@@ -2643,6 +2643,35 @@ export default class WalletConfiguration extends React.Component<
                             </View>
                         )}
 
+                        {((implementation === 'embedded-lnd' &&
+                            adminMacaroon &&
+                            seedPhrase) ||
+                            (implementation === 'embedded-ldk-node' &&
+                                ldkNodeInitialized &&
+                                ldkMnemonic)) && (
+                            <View style={styles.button}>
+                                <Button
+                                    title={localeString(
+                                        'views.Settings.NodeConfiguration.backUpWallet'
+                                    )}
+                                    onPress={() =>
+                                        navigation.navigate(
+                                            'Seed',
+                                            implementation ===
+                                                'embedded-ldk-node'
+                                                ? {
+                                                      implementation:
+                                                          'embedded-ldk-node'
+                                                  }
+                                                : undefined
+                                        )
+                                    }
+                                    secondary
+                                    disabled={loading}
+                                />
+                            </View>
+                        )}
+
                         {implementation === 'embedded-lnd' && (
                             <View style={{ ...styles.button }}>
                                 {!adminMacaroon && !creatingWallet && (
@@ -2697,18 +2726,6 @@ export default class WalletConfiguration extends React.Component<
                                             />
                                         </View>
                                     </>
-                                )}
-                                {adminMacaroon && seedPhrase && (
-                                    <Button
-                                        title={localeString(
-                                            'views.Settings.NodeConfiguration.backUpWallet'
-                                        )}
-                                        onPress={() =>
-                                            navigation.navigate('Seed')
-                                        }
-                                        secondary
-                                        disabled={loading}
-                                    />
                                 )}
                             </View>
                         )}
@@ -2840,30 +2857,34 @@ export default class WalletConfiguration extends React.Component<
                             </View>
                         )}
 
-                        {saved && implementation !== 'embedded-lnd' && (
-                            <View style={styles.button}>
-                                <Button
-                                    title={localeString(
-                                        'views.Settings.WalletConfiguration.duplicateWallet'
-                                    )}
-                                    onPress={() => {
-                                        /**
-                                         * Scrolls to the top of the screen when going to the node config
-                                         * page for the copied node. Without this, the user would have to
-                                         * manually scroll to the top to edit the copied node properties.
-                                         */
-                                        this.scrollViewRef.current?.scrollTo({
-                                            x: 0,
-                                            y: 0,
-                                            animated: true
-                                        });
-                                        this.copyNodeConfig();
-                                    }}
-                                    secondary
-                                    disabled={loading}
-                                />
-                            </View>
-                        )}
+                        {saved &&
+                            implementation !== 'embedded-lnd' &&
+                            implementation !== 'embedded-ldk-node' && (
+                                <View style={styles.button}>
+                                    <Button
+                                        title={localeString(
+                                            'views.Settings.WalletConfiguration.duplicateWallet'
+                                        )}
+                                        onPress={() => {
+                                            /**
+                                             * Scrolls to the top of the screen when going to the node config
+                                             * page for the copied node. Without this, the user would have to
+                                             * manually scroll to the top to edit the copied node properties.
+                                             */
+                                            this.scrollViewRef.current?.scrollTo(
+                                                {
+                                                    x: 0,
+                                                    y: 0,
+                                                    animated: true
+                                                }
+                                            );
+                                            this.copyNodeConfig();
+                                        }}
+                                        secondary
+                                        disabled={loading}
+                                    />
+                                </View>
+                            )}
 
                         {saved && (
                             <View style={styles.button}>
