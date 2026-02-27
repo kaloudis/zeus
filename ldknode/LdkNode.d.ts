@@ -66,7 +66,7 @@ export type PaymentFailureReason =
     | 'invoiceRequestRejected'
     | 'blindedPathCreationFailed';
 
-export type ClosureReason =
+export type ClosureReasonType =
     | 'counterpartyForceClosed'
     | 'holderForceClosed'
     | 'legacyCooperativeClosure'
@@ -83,6 +83,11 @@ export type ClosureReason =
     | 'htlcsTimedOut'
     | 'peerFeerateTooLow';
 
+export interface ClosureReason {
+    type: ClosureReasonType;
+    peerMessage?: string;
+}
+
 export type LightningBalanceType =
     | 'claimableOnChannelClose'
     | 'claimableAwaitingConfirmations'
@@ -90,6 +95,12 @@ export type LightningBalanceType =
     | 'maybeTimeoutClaimableHtlc'
     | 'maybePreimageClaimableHtlc'
     | 'counterpartyRevokedOutputClaimable';
+
+export type BalanceSource =
+    | 'holderForceClosed'
+    | 'counterpartyForceClosed'
+    | 'coopClose'
+    | 'htlc';
 
 export type PendingSweepBalanceType =
     | 'pendingBroadcast'
@@ -124,6 +135,7 @@ export interface LightningBalance {
     inboundHtlcRoundedMsat?: number;
     // ClaimableAwaitingConfirmations specific
     confirmationHeight?: number;
+    source?: BalanceSource;
     // ContentiousClaimable specific
     timeoutHeight?: number;
     paymentHash?: string;
@@ -185,6 +197,18 @@ export interface ChannelDetails {
     inboundHtlcMinimumMsat: number;
     inboundHtlcMaximumMsat?: number;
     shortChannelId?: string;
+}
+
+export interface ClosedChannelDetails {
+    channelId: string;
+    userChannelId: string;
+    counterpartyNodeId?: string;
+    fundingTxo_txid?: string;
+    fundingTxo_vout?: number;
+    channelCapacitySats?: number;
+    lastLocalBalanceMsat?: number;
+    closureReason?: ClosureReason;
+    closedAtTimestamp: number;
 }
 
 export interface PaymentDetails {
@@ -450,6 +474,7 @@ export interface ILdkNodeModule {
 
     // Channel Methods
     listChannels(): Promise<ChannelDetails[]>;
+    listClosedChannels(): Promise<{ channels: ClosedChannelDetails[] }>;
     openChannel(
         nodeId: string,
         address: string,

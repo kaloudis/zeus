@@ -192,7 +192,7 @@ class LdkNodeModule: RCTEventEmitter {
             try builder.setListeningAddresses(listeningAddresses: addresses)
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -349,7 +349,7 @@ class LdkNodeModule: RCTEventEmitter {
                 }
                 resolve(result)
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -402,7 +402,7 @@ class LdkNodeModule: RCTEventEmitter {
             try node.start()
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -419,7 +419,7 @@ class LdkNodeModule: RCTEventEmitter {
             self.node = nil
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -435,7 +435,7 @@ class LdkNodeModule: RCTEventEmitter {
                 try node.syncWallets()
                 resolve(["status": "ok"])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -520,7 +520,7 @@ class LdkNodeModule: RCTEventEmitter {
                 try node.resetNetworkGraph()
                 resolve(["status": "ok"])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -537,7 +537,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let timestamp = try node.updateRgsSnapshot()
                 resolve(["timestamp": timestamp])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -611,6 +611,41 @@ class LdkNodeModule: RCTEventEmitter {
         resolve(["channels": channelList])
     }
 
+    @objc(listClosedChannels:rejecter:)
+    func listClosedChannels(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let node = self.node else {
+            reject("error", "Node not initialized", nil)
+            return
+        }
+
+        let closedChannels = node.listClosedChannels()
+        let channelList = closedChannels.map { channel -> [String: Any] in
+            var result: [String: Any] = [
+                "channelId": channel.channelId,
+                "userChannelId": channel.userChannelId,
+                "closedAtTimestamp": channel.closedAtTimestamp
+            ]
+            if let counterpartyNodeId = channel.counterpartyNodeId {
+                result["counterpartyNodeId"] = counterpartyNodeId
+            }
+            if let fundingTxo = channel.fundingTxo {
+                result["fundingTxo_txid"] = fundingTxo.txid
+                result["fundingTxo_vout"] = fundingTxo.vout
+            }
+            if let channelCapacitySats = channel.channelCapacitySats {
+                result["channelCapacitySats"] = channelCapacitySats
+            }
+            if let lastLocalBalanceMsat = channel.lastLocalBalanceMsat {
+                result["lastLocalBalanceMsat"] = lastLocalBalanceMsat
+            }
+            if let closureReason = channel.closureReason {
+                result["closureReason"] = serializeClosureReason(closureReason)
+            }
+            return result
+        }
+        resolve(["channels": channelList])
+    }
+
     @objc(openChannel:address:channelAmountSats:pushToCounterpartyMsat:announceChannel:resolver:rejecter:)
     func openChannel(_ nodeId: String, address: String, channelAmountSats: NSNumber, pushToCounterpartyMsat: NSNumber, announceChannel: Bool, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         guard let node = self.node else {
@@ -642,7 +677,7 @@ class LdkNodeModule: RCTEventEmitter {
             }
             resolve(["userChannelId": userChannelId])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -657,7 +692,7 @@ class LdkNodeModule: RCTEventEmitter {
             try node.closeChannel(userChannelId: userChannelId, counterpartyNodeId: counterpartyNodeId)
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -675,7 +710,7 @@ class LdkNodeModule: RCTEventEmitter {
             let address = try onchain.newAddress()
             resolve(["address": address])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -691,7 +726,7 @@ class LdkNodeModule: RCTEventEmitter {
             let txid = try onchain.sendToAddress(address: address, amountSats: amountSats.uint64Value, feeRate: nil)
             resolve(["txid": txid])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -707,7 +742,7 @@ class LdkNodeModule: RCTEventEmitter {
             let txid = try onchain.sendAllToAddress(address: address, retainReserve: retainReserve, feeRate: nil)
             resolve(["txid": txid])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -726,7 +761,7 @@ class LdkNodeModule: RCTEventEmitter {
             let invoice = try bolt11.receive(amountMsat: UInt64(amountMsat), description: descriptionObj, expirySecs: UInt32(expirySecs))
             resolve(["invoice": invoice.description])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -743,7 +778,7 @@ class LdkNodeModule: RCTEventEmitter {
             let invoice = try bolt11.receiveVariableAmount(description: descriptionObj, expirySecs: UInt32(expirySecs))
             resolve(["invoice": invoice.description])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -761,7 +796,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let paymentId = try bolt11.send(invoice: bolt11Invoice, routeParameters: nil)
                 resolve(["paymentId": paymentId])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -780,7 +815,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let paymentId = try bolt11.sendUsingAmount(invoice: bolt11Invoice, amountMsat: UInt64(amountMsat), routeParameters: nil)
                 resolve(["paymentId": paymentId])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -799,7 +834,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let paymentId = try node.spontaneousPayment().send(amountMsat: UInt64(amountMsat), nodeId: nodeId, routeParameters: nil)
                 resolve(["paymentId": paymentId])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -818,7 +853,7 @@ class LdkNodeModule: RCTEventEmitter {
             let offer = try bolt12.receive(amountMsat: UInt64(amountMsat), description: description, expirySecs: expirySecs > 0 ? UInt32(expirySecs) : nil, quantity: nil)
             resolve(["offer": offer.description, "offerId": offer.id()])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -834,7 +869,7 @@ class LdkNodeModule: RCTEventEmitter {
             let offer = try bolt12.receiveVariableAmount(description: description, expirySecs: expirySecs > 0 ? UInt32(expirySecs) : nil)
             resolve(["offer": offer.description, "offerId": offer.id()])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -852,7 +887,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let paymentId = try bolt12.send(offer: offer, quantity: nil, payerNote: payerNote, routeParameters: nil)
                 resolve(["paymentId": paymentId])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -871,7 +906,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let paymentId = try bolt12.sendUsingAmount(offer: offer, amountMsat: UInt64(amountMsat), quantity: nil, payerNote: payerNote, routeParameters: nil)
                 resolve(["paymentId": paymentId])
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -888,7 +923,7 @@ class LdkNodeModule: RCTEventEmitter {
             let refund = try bolt12.initiateRefund(amountMsat: UInt64(amountMsat), expirySecs: UInt32(expirySecs), quantity: nil, payerNote: nil, routeParameters: nil)
             resolve(["refund": refund.description])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -905,7 +940,7 @@ class LdkNodeModule: RCTEventEmitter {
             let invoice = try bolt12.requestRefundPayment(refund: refund)
             resolve(["invoice": String(describing: invoice)])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -946,7 +981,7 @@ class LdkNodeModule: RCTEventEmitter {
             try node.connect(nodeId: nodeId, address: address, persist: persist)
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -961,7 +996,7 @@ class LdkNodeModule: RCTEventEmitter {
             try node.disconnect(nodeId: nodeId)
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -1023,7 +1058,7 @@ class LdkNodeModule: RCTEventEmitter {
             try node.eventHandled()
             resolve(["status": "ok"])
         } catch {
-            reject("error", error.localizedDescription, error)
+            reject("error", self.errorMessage(error), error)
         }
     }
 
@@ -1047,7 +1082,7 @@ class LdkNodeModule: RCTEventEmitter {
                 )
                 resolve(self.serializeLsps1OrderStatus(orderStatus))
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -1066,7 +1101,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let orderStatus = try lsps1.checkOrderStatus(orderId: orderId)
                 resolve(self.serializeLsps1OrderStatus(orderStatus))
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -1087,7 +1122,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let result = channels.map { self.serializeLsps7ExtendableChannel($0) }
                 resolve(result)
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -1110,7 +1145,7 @@ class LdkNodeModule: RCTEventEmitter {
                 )
                 resolve(self.serializeLsps7OrderResponse(response))
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -1128,7 +1163,7 @@ class LdkNodeModule: RCTEventEmitter {
                 let response = try lsps7.checkOrderStatus(orderId: orderId)
                 resolve(self.serializeLsps7OrderResponse(response))
             } catch {
-                reject("error", error.localizedDescription, error)
+                reject("error", self.errorMessage(error), error)
             }
         }
     }
@@ -1251,40 +1286,59 @@ class LdkNodeModule: RCTEventEmitter {
         }
     }
 
-    private func serializeClosureReason(_ reason: ClosureReason) -> String {
+    private func errorMessage(_ error: Error) -> String {
+        if let nodeError = error as? NodeError {
+            switch nodeError {
+            case .ChannelCreationFailed(let message):
+                return message
+            default:
+                // All NodeError cases have (message: String)
+                // Extract via Mirror to avoid exhaustive switch
+                let mirror = Mirror(reflecting: nodeError)
+                if let firstChild = mirror.children.first,
+                   let message = firstChild.value as? String {
+                    return message
+                }
+                return "\(nodeError)"
+            }
+        }
+        return error.localizedDescription
+    }
+
+    private func serializeClosureReason(_ reason: ClosureReason) -> [String: Any] {
         switch reason {
-        case .counterpartyForceClosed:
-            return "counterpartyForceClosed"
-        case .holderForceClosed:
-            return "holderForceClosed"
+        case .counterpartyForceClosed(let peerMsg):
+            return ["type": "counterpartyForceClosed", "peerMessage": "\(peerMsg)"]
+        case .holderForceClosed(_, let message):
+            return ["type": "holderForceClosed", "peerMessage": message]
         case .legacyCooperativeClosure:
-            return "legacyCooperativeClosure"
+            return ["type": "legacyCooperativeClosure"]
         case .counterpartyInitiatedCooperativeClosure:
-            return "counterpartyInitiatedCooperativeClosure"
+            return ["type": "counterpartyInitiatedCooperativeClosure"]
         case .locallyInitiatedCooperativeClosure:
-            return "locallyInitiatedCooperativeClosure"
+            return ["type": "locallyInitiatedCooperativeClosure"]
         case .commitmentTxConfirmed:
-            return "commitmentTxConfirmed"
+            return ["type": "commitmentTxConfirmed"]
         case .fundingTimedOut:
-            return "fundingTimedOut"
-        case .processingError:
-            return "processingError"
+            return ["type": "fundingTimedOut"]
+        case .processingError(let err):
+            return ["type": "processingError", "peerMessage": err]
         case .disconnectedPeer:
-            return "disconnectedPeer"
+            return ["type": "disconnectedPeer"]
         case .outdatedChannelManager:
-            return "outdatedChannelManager"
+            return ["type": "outdatedChannelManager"]
         case .counterpartyCoopClosedUnfundedChannel:
-            return "counterpartyCoopClosedUnfundedChannel"
+            return ["type": "counterpartyCoopClosedUnfundedChannel"]
         case .fundingBatchClosure:
-            return "fundingBatchClosure"
+            return ["type": "fundingBatchClosure"]
         case .locallyCoopClosedUnfundedChannel:
-            return "locallyCoopClosedUnfundedChannel"
+            return ["type": "locallyCoopClosedUnfundedChannel"]
         case .htlCsTimedOut:
-            return "htlCsTimedOut"
-        case .peerFeerateTooLow:
-            return "peerFeerateTooLow"
+            return ["type": "htlCsTimedOut"]
+        case .peerFeerateTooLow(let peerFeerate, let requiredFeerate):
+            return ["type": "peerFeerateTooLow", "peerMessage": "Peer feerate \(peerFeerate) sat/kw too low, required \(requiredFeerate) sat/kw"]
         @unknown default:
-            return "unknown"
+            return ["type": "unknown"]
         }
     }
 
@@ -1302,13 +1356,21 @@ class LdkNodeModule: RCTEventEmitter {
                 "inboundClaimingHtlcRoundedMsat": inboundClaimingHtlcRoundedMsat,
                 "inboundHtlcRoundedMsat": inboundHtlcRoundedMsat
             ]
-        case .claimableAwaitingConfirmations(let channelId, let counterpartyNodeId, let amountSatoshis, let confirmationHeight, _):
+        case .claimableAwaitingConfirmations(let channelId, let counterpartyNodeId, let amountSatoshis, let confirmationHeight, let source):
+            var sourceStr: String
+            switch source {
+            case .holderForceClosed: sourceStr = "holderForceClosed"
+            case .counterpartyForceClosed: sourceStr = "counterpartyForceClosed"
+            case .coopClose: sourceStr = "coopClose"
+            case .htlc: sourceStr = "htlc"
+            }
             return [
                 "type": "claimableAwaitingConfirmations",
                 "channelId": channelId,
                 "counterpartyNodeId": counterpartyNodeId,
                 "amountSatoshis": amountSatoshis,
-                "confirmationHeight": confirmationHeight
+                "confirmationHeight": confirmationHeight,
+                "source": sourceStr
             ]
         case .contentiousClaimable(let channelId, let counterpartyNodeId, let amountSatoshis, let timeoutHeight, let paymentHash, let paymentPreimage):
             return [
