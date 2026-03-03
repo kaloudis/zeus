@@ -284,6 +284,14 @@ export default class Nodes extends React.Component<NodesProps, NodesState> {
                                     }
                                 }
 
+                                if (
+                                    item.implementation === 'embedded-ldk-node'
+                                ) {
+                                    if (item.embeddedLdkNetwork) {
+                                        nodeSubtitle += ` (${item.embeddedLdkNetwork})`;
+                                    }
+                                }
+
                                 return (
                                     <TouchableOpacity
                                         key={index}
