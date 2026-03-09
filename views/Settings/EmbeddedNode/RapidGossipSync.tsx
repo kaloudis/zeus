@@ -116,7 +116,7 @@ export default class RapidGossipSync extends React.Component<
                                 }}
                             >
                                 {localeString(
-                                    'views.Settings.EmbeddedNode.RapidGossipSync.defaultServer'
+                                    'views.Settings.EmbeddedNode.defaultServer'
                                 )}
                                 : {defaultServer || 'None'}
                             </Text>
