@@ -367,7 +367,7 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     private fun applyBuilderSettings(builder: Builder) {
         this.storedEsploraServerUrl?.let {
             Log.d("LdkNodeModule", "applyBuilderSettings: Esplora server = $it")
-            builder.setChainSourceEsplora(it, null)
+            builder.setChainSourceEsplora(it, createEsploraSyncConfig())
         }
         this.storedRgsServerUrl?.let {
             Log.d("LdkNodeModule", "applyBuilderSettings: RGS server = $it")

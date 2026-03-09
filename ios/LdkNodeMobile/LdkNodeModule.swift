@@ -357,7 +357,7 @@ class LdkNodeModule: RCTEventEmitter {
     private func applyBuilderSettings(_ builder: Builder) {
         if let esploraUrl = self.storedEsploraServerUrl {
             NSLog("LdkNodeModule: applyBuilderSettings: Esplora server = \(esploraUrl)")
-            builder.setChainSourceEsplora(serverUrl: esploraUrl, config: nil)
+            builder.setChainSourceEsplora(serverUrl: esploraUrl, config: createEsploraSyncConfig())
         }
         if let rgsUrl = self.storedRgsServerUrl {
             NSLog("LdkNodeModule: applyBuilderSettings: RGS server = \(rgsUrl)")
