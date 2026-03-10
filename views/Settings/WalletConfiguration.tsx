@@ -1212,13 +1212,16 @@ export default class WalletConfiguration extends React.Component<
             seedPhrase
         } = SettingsStore;
 
+        const isLocalImpl =
+            implementation === 'embedded-lnd' ||
+            implementation === 'embedded-ldk-node';
         const supportsTor =
             implementation !== 'lightning-node-connect' &&
-            !BackendUtils.isLocalWallet() &&
+            !isLocalImpl &&
             implementation !== 'nostr-wallet-connect';
         const supportsCertVerification =
             implementation !== 'lightning-node-connect' &&
-            !BackendUtils.isLocalWallet() &&
+            !isLocalImpl &&
             implementation !== 'nostr-wallet-connect';
 
         const CertInstallInstructions = () => (
@@ -2714,7 +2717,7 @@ export default class WalletConfiguration extends React.Component<
                         </View>
 
                         {implementation === 'embedded-ldk-node' && (
-                            <View style={{ ...styles.button, marginTop: 20 }}>
+                            <View style={{ ...styles.button }}>
                                 {!ldkNodeInitialized &&
                                     !creatingWallet &&
                                     !saved && (
