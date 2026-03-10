@@ -2945,10 +2945,9 @@ export default class WalletConfiguration extends React.Component<
                                                 !saved &&
                                                 !certVerification &&
                                                 !enableTor &&
+                                                !isLocalImpl &&
                                                 implementation !==
                                                     'lightning-node-connect' &&
-                                                implementation !==
-                                                    'embedded-lnd' &&
                                                 implementation !==
                                                     'nostr-wallet-connect'
                                             ) {
