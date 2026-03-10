@@ -31,7 +31,7 @@ const VSS_DERIVATION_PATH = "m/130'/0'";
 /**
  * Derive a secp256k1 keypair from a BIP39 mnemonic for VSS authentication.
  */
-function deriveVssSigningKey(
+export function deriveVssSigningKey(
     mnemonic: string,
     passphrase?: string
 ): { privateKey: Uint8Array; publicKey: Uint8Array } {

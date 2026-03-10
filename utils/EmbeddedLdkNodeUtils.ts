@@ -9,6 +9,7 @@ import RNFS from 'react-native-fs';
 import LdkNode from '../ldknode/LdkNodeInjection';
 import type { Network } from '../ldknode/LdkNode.d';
 import { localeString } from './LocaleUtils';
+import { deriveVssSigningKey } from './VssAuthUtils';
 
 // Default Esplora servers
 export const ESPLORA_SERVERS_MAINNET = [
@@ -176,6 +177,9 @@ export async function createLdkNodeWallet({
 
     // Initialize the node
     const vssUrl = vssServerUrl || DEFAULT_VSS_SERVER;
+    const vssStoreId = Buffer.from(
+        deriveVssSigningKey(mnemonic, passphrase).publicKey
+    ).toString('hex');
     const { vssError } = await LdkNode.utils.initializeNode({
         network: networkType,
         storagePath,
@@ -188,7 +192,7 @@ export async function createLdkNodeWallet({
         trustedPeers0conf,
         vssConfig: {
             url: vssUrl,
-            storeId: nodeDir
+            storeId: vssStoreId
         }
     });
 
@@ -243,6 +247,9 @@ export async function startLdkNodeWallet({
 
         // Initialize the node with existing mnemonic
         const vssUrl = vssServerUrl || DEFAULT_VSS_SERVER;
+        const vssStoreId = Buffer.from(
+            deriveVssSigningKey(seedMnemonic, passphrase).publicKey
+        ).toString('hex');
         const result = await LdkNode.utils.initializeNode({
             network: networkType,
             storagePath,
@@ -255,7 +262,7 @@ export async function startLdkNodeWallet({
             trustedPeers0conf,
             vssConfig: {
                 url: vssUrl,
-                storeId: nodeDir
+                storeId: vssStoreId
             }
         });
         vssError = result.vssError;
