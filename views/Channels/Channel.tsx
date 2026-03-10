@@ -427,9 +427,7 @@ export default class ChannelView extends React.Component<
                         ChannelsStore.clearCloseChannelErr();
                     }}
                     rightComponent={
-                        editableFees &&
-                        this.props.SettingsStore.implementation !==
-                            'embedded-lnd' ? (
+                        editableFees && !BackendUtils.isLocalWallet() ? (
                             <EditFees />
                         ) : (
                             <></>
