@@ -432,17 +432,17 @@ class LdkNodeModule: RCTEventEmitter {
         self.logFileObserver = nil
         self.node = nil
 
-        // Resolve immediately so the JS side isn't blocked
-        resolve(["status": "ok"])
-
-        // Stop the node on a background (non-Tokio) GCD thread.
-        // After stop() returns, keep the reference alive briefly so that
-        // internal Tokio tasks can drop their Arc references first.
-        // When our reference is finally released here (on this GCD thread),
-        // if it happens to be the last Arc, the Rust Runtime destructor
-        // runs on a non-Tokio thread — avoiding the panic.
-        DispatchQueue.global(qos: .utility).async {
+        // Stop the node on a non-Tokio GCD thread and resolve after it
+        // completes. This ensures callers can safely delete wallet files
+        // or start a new node after stop() resolves.
+        // Keep the reference alive briefly after stop() so that internal
+        // Tokio tasks can drop their Arc refs before ours — preventing the
+        // Runtime-dropped-on-worker panic.
+        DispatchQueue.global(qos: .userInitiated).async {
             do { try node.stop() } catch { /* Node may not have been started */ }
+            DispatchQueue.main.async {
+                resolve(["status": "ok"])
+            }
             // Hold the reference for 2 seconds to let Tokio tasks finish cleanup
             DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 2.0) {
                 withExtendedLifetime(node) {}

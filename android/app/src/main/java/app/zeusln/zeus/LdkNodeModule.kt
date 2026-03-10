@@ -453,18 +453,19 @@ class LdkNodeModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         this@LdkNodeModule.logFileObserver = null
         this@LdkNodeModule.node = null
 
-        // Resolve immediately so the JS side isn't blocked
-        promise.resolve(null)
-
-        // Stop the node on a dedicated (non-Tokio) thread.
-        // After stop() returns, keep the reference alive briefly so that
-        // internal Tokio tasks can drop their Arc references first.
-        // When our reference is finally released here (on this thread),
-        // if it happens to be the last Arc, the Rust Runtime destructor
-        // runs on a non-Tokio thread — avoiding the panic.
-        val nodeRef = node // prevent lambda capture optimization
+        // Stop the node on a dedicated (non-Tokio) thread and resolve
+        // after it completes. This ensures callers can safely delete wallet
+        // files or start a new node after stop() resolves.
+        // Keep the reference alive briefly after stop() so that internal
+        // Tokio tasks can drop their Arc refs before ours — preventing the
+        // Runtime-dropped-on-worker panic.
+        val nodeRef = node
         Thread {
             try { nodeRef.stop() } catch (_: Exception) { /* may not have been started */ }
+            // Resolve on main thread after stop completes
+            reactApplicationContext.runOnUiQueueThread {
+                promise.resolve(null)
+            }
             // Hold the reference for 2s to let Tokio tasks finish cleanup
             Thread.sleep(2000)
             nodeRef.hashCode() // prevent GC from collecting before sleep finishes
