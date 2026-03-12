@@ -1,0 +1,143 @@
+NWC Pending Events Security Assessment & Fixes
+================================================
+Date: 2026-03-11
+File: stores/NostrWalletConnectStore.ts
+
+ORIGINAL CLAIM ASSESSMENT
+=========================
+
+Claim: On iOS, ZEUS fetches pending NWC events from /restore on every service
+initialization and automatically executes pending pay_keysend requests. The
+client does not acknowledge processed events back to the handoff service and
+does not persistently de-duplicate processed pending event IDs. As a result,
+if the same valid encrypted pending event is re-served later, ZEUS will execute
+it again with no user interaction. This is exploitable by a malicious/compromised
+handoff server, and by a network attacker replaying previously captured events
+because /restore and /handoff use trusty: true.
+
+Verdict: Largely valid. Point-by-point:
+
+1. initializeService() calls fetchPendingEvents() on iOS
+   STATUS: TRUE (lines 267-268)
+
+2. /restore fetched with trusty: true (disables TLS cert validation)
+   STATUS: TRUE (line 3171-3172)
+
+3. /handoff fetched with trusty: true
+   STATUS: TRUE (line 3750-3752)
+
+4. pay_keysend auto-executes without user approval
+   STATUS: TRUE (lines 3293-3318). Contrast with pay_invoice which shows
+   NWCPendingPaymentsModal for user approval.
+
+5. No ack/delete of processed pending events to server
+   STATUS: TRUE. Nothing is sent back to /restore to mark events consumed.
+
+6. No persistent deduplication of pending event IDs
+   STATUS: TRUE. processedPendingPayInvoiceEventIds (line 198) is an in-memory
+   @observable array that resets on app restart. No AsyncStorage tracking.
+
+7. No NIP-01 signature verification
+   STATUS: TRUE. validateAndParsePendingEvent() checked kind, content, pubkey,
+   and id but never verified sig. The NostrEvent interface didn't include a sig
+   field.
+
+8. hasPermission() not checked in pending path
+   STATUS: PARTIALLY TRUE. The pending path calls handleEventRequest() ->
+   handlePayKeysend() which does call validateBudgetBeforePayment() (line 1911),
+   providing budget-based protection. But this is not a permission check.
+   Connection lookup (line 3366) does require the event's pubkey to match an
+   active connection.
+
+9. CVSS 9.3 Critical
+   STATUS: ARGUABLY OVERSTATED. Attack requires a compromised handoff server or
+   network MITM (enabled by trusty: true). Budget validation in handlePayKeysend
+   limits maximum drain per budget period. High severity (7-8 range) seems more
+   appropriate than Critical.
+
+FIXES APPLIED
+=============
+
+Fix 1: Disable trusty on /restore and /handoff
+-----------------------------------------------
+Changed trusty: true to trusty: false on both endpoints:
+- /restore fetch (line ~3214)
+- /handoff fetch (line ~3808)
+
+This re-enables TLS certificate validation, preventing MITM replay attacks.
+
+Fix 2: Persistent replay prevention
+------------------------------------
+Added three private methods for event ID persistence:
+
+- loadProcessedEventIds(): Reads persisted event IDs from AsyncStorage
+  key 'zeus-nwc-processed-event-ids'.
+
+- markEventProcessed(eventId): Appends event ID to persisted set. Capped
+  at 1000 entries (oldest evicted) to prevent unbounded storage growth.
+
+- isEventAlreadyProcessed(eventId): Checks if event ID exists in persisted set.
+
+Integration points:
+
+a) Pre-filter in validatingPendingPaymentEvents (line ~3278): After parsing and
+   validating an event but before classifying it as keysend/invoice, checks if
+   the event ID was already processed. Returns null (skip) if so.
+
+b) Post-process marking for pay_keysend: Marked after handleEventRequest
+   completes, in both success and catch paths (lines ~3352, ~3365).
+
+c) Post-process marking for pay_invoice: Marked after handleEventRequest in
+   processPendingPaymentsEvents, in both success and catch paths
+   (lines ~3497, ~3547).
+
+Events are marked as processed regardless of success/failure to prevent an
+attacker from replaying events that error out (e.g. due to budget limits)
+hoping they succeed later when budget resets.
+
+Fix 3: NIP-01 event signature verification
+-------------------------------------------
+a) Added verifySignature import from nostr-tools.
+
+b) Extended NostrEvent interface with sig (string), created_at (number),
+   and tags (string[][]) fields - required by verifySignature which
+   recomputes the event hash from [0, pubkey, created_at, kind, tags, content].
+
+c) Format validation in validateAndParsePendingEvent now requires sig,
+   created_at, and tags to be present.
+
+d) After parsing but before connection lookup or decryption, calls
+   verifySignature(event) which verifies both:
+   - id == sha256(serialized_event)
+   - sig is a valid schnorr signature over id by pubkey
+   Events with invalid signatures are rejected with a thrown error.
+
+REMAINING RECOMMENDATIONS (NOT YET IMPLEMENTED)
+================================================
+
+1. Require user approval for pending pay_keysend (same modal flow as pay_invoice).
+
+2. Add ack/delete flow so successfully processed events are removed server-side
+   from /restore responses.
+
+3. Enforce hasPermission() checks in the pending-event path before dispatch,
+   not just budget validation.
+
+DIFF SUMMARY
+=============
+File changed: stores/NostrWalletConnectStore.ts
+Insertions: ~78 lines
+Deletions: ~3 lines
+
+Key changes:
+- Line 37: Added verifySignature to nostr-tools imports
+- Line 92: Added NWC_PROCESSED_EVENT_IDS storage key constant
+- Lines 133-138: Extended NostrEvent interface with sig, created_at, tags
+- Lines 977-1020: New methods loadProcessedEventIds, markEventProcessed,
+  isEventAlreadyProcessed
+- Line ~3214: trusty: true -> trusty: false on /restore
+- Lines ~3278-3285: Replay check before event classification
+- Lines ~3352,3365: markEventProcessed calls in pay_keysend processing
+- Lines ~3420-3427: NIP-01 signature verification in validateAndParsePendingEvent
+- Lines ~3497,3547: markEventProcessed calls in pay_invoice processing
+- Line ~3808: trusty: true -> trusty: false on /handoff

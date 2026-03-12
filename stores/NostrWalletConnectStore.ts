@@ -34,6 +34,7 @@ import {
     relayInit,
     getEventHash,
     getSignature,
+    verifySignature,
     UnsignedEvent
 } from 'nostr-tools';
 import * as nip04 from '@nostr/tools/nip04';
@@ -89,6 +90,7 @@ export const NWC_CLIENT_KEYS = 'zeus-nwc-client-keys';
 export const NWC_SERVICE_KEYS = 'zeus-nwc-service-keys';
 export const NWC_CASHU_ENABLED = 'zeus-nwc-cashu-enabled';
 export const NWC_PERSISTENT_SERVICE_ENABLED = 'persistentNWCServicesEnabled';
+export const NWC_PROCESSED_EVENT_IDS = 'zeus-nwc-processed-event-ids';
 export const NWC_IOS_EVENTS_LISTENER_SERVER_URL =
     'https://nwc-ios-handoff.zeusln.com/api/v1';
 
@@ -133,6 +135,9 @@ interface NostrEvent {
     pubkey: string;
     content: string;
     id: string;
+    sig: string;
+    created_at: number;
+    tags: string[][];
 }
 interface RestoreResponse {
     connections: { relay: string; pubkey: string }[];
@@ -975,6 +980,41 @@ export default class NostrWalletConnectStore {
             return [];
         }
     };
+
+    // Replay prevention: persist processed event IDs across restarts
+    private async loadProcessedEventIds(): Promise<Set<string>> {
+        try {
+            const data = await Storage.getItem(NWC_PROCESSED_EVENT_IDS);
+            if (data) {
+                const ids: string[] = JSON.parse(data);
+                return new Set(ids);
+            }
+        } catch (error) {
+            console.error('NWC: Failed to load processed event IDs', error);
+        }
+        return new Set();
+    }
+
+    private async markEventProcessed(eventId: string): Promise<void> {
+        try {
+            const processed = await this.loadProcessedEventIds();
+            processed.add(eventId);
+            // Cap stored IDs to prevent unbounded growth
+            const MAX_STORED_IDS = 1000;
+            let ids = Array.from(processed);
+            if (ids.length > MAX_STORED_IDS) {
+                ids = ids.slice(ids.length - MAX_STORED_IDS);
+            }
+            await Storage.setItem(NWC_PROCESSED_EVENT_IDS, JSON.stringify(ids));
+        } catch (error) {
+            console.error('NWC: Failed to persist processed event ID', error);
+        }
+    }
+
+    private async isEventAlreadyProcessed(eventId: string): Promise<boolean> {
+        const processed = await this.loadProcessedEventIds();
+        return processed.has(eventId);
+    }
 
     public getConnection = (
         connectionId: string
@@ -3169,7 +3209,7 @@ export default class NostrWalletConnectStore {
             const data = await this.retryWithBackoff(
                 async (): Promise<RestoreResponse | void> => {
                     const response = await ReactNativeBlobUtil.config({
-                        trusty: true
+                        trusty: false
                     }).fetch(
                         'GET',
                         `${NWC_IOS_EVENTS_LISTENER_SERVER_URL}/restore?device_token=${encodeURIComponent(
@@ -3233,6 +3273,14 @@ export default class NostrWalletConnectStore {
                                 ),
                             3
                         );
+                    // Replay prevention: skip already-processed events
+                    if (await this.isEventAlreadyProcessed(eventId)) {
+                        console.info(
+                            'NWC: Skipping already-processed event',
+                            eventId
+                        );
+                        return null;
+                    }
                     // Only process pay_invoice and pay_keysend methods
                     if (request.method === 'pay_invoice') {
                         const invoice = request.params?.invoice;
@@ -3299,6 +3347,9 @@ export default class NostrWalletConnectStore {
                         event.eventId,
                         true // skipNotification for pending events
                     );
+                    // Mark as processed regardless of success/failure
+                    // to prevent replay of events that error out
+                    await this.markEventProcessed(event.eventId);
                     if (!result.success && result.errorMessage) {
                         console.warn(
                             'NWC: Failed to process pay_keysend event',
@@ -3309,6 +3360,7 @@ export default class NostrWalletConnectStore {
                         );
                     }
                 } catch (error) {
+                    await this.markEventProcessed(event.eventId);
                     console.warn('NWC: Failed to process pay_keysend event', {
                         error,
                         eventId: event.eventId
@@ -3353,7 +3405,10 @@ export default class NostrWalletConnectStore {
                 event.kind !== 23194 ||
                 !event.content ||
                 !event.pubkey ||
-                !event.id
+                !event.id ||
+                !event.sig ||
+                !event.created_at ||
+                !Array.isArray(event.tags)
             ) {
                 console.warn('NWC: Invalid event format, skipping', {
                     event
@@ -3362,6 +3417,14 @@ export default class NostrWalletConnectStore {
             }
         } catch (error) {
             throw new Error('Failed to parse event');
+        }
+        // NIP-01 signature verification
+        if (!verifySignature(event)) {
+            console.warn(
+                'NWC: Event signature verification failed, rejecting',
+                { id: event.id, pubkey: event.pubkey }
+            );
+            throw new Error('Event signature verification failed');
         }
         const connection = this.activeConnections.find(
             (c) => c.pubkey === event.pubkey
@@ -3440,6 +3503,8 @@ export default class NostrWalletConnectStore {
                         event.eventId,
                         true // skip single payment Notification for pending events
                     );
+                    // Mark as processed to prevent replay
+                    await this.markEventProcessed(event.eventId);
                     runInAction(async () => {
                         if (result.success) {
                             this.processedPendingPayInvoiceEventIds.push(
@@ -3488,6 +3553,7 @@ export default class NostrWalletConnectStore {
                         error,
                         eventId: event.eventId
                     });
+                    await this.markEventProcessed(event.eventId);
                     runInAction(async () => {
                         this.failedPendingPayInvoiceEventIds.push(
                             event.eventId
@@ -3748,7 +3814,7 @@ export default class NostrWalletConnectStore {
                 }))
             };
             const response = await ReactNativeBlobUtil.config({
-                trusty: true
+                trusty: false
             }).fetch(
                 'POST',
                 `${NWC_IOS_EVENTS_LISTENER_SERVER_URL}/handoff`,
