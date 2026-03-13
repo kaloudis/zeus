@@ -92,7 +92,7 @@ export default class LDKLogs extends React.Component<
                     >
                         <CopyButton
                             title={localeString(
-                                'views.Settings.EmbeddedNode.LDKLogs.copyLogs'
+                                'views.Settings.EmbeddedNode.LNDLogs.copyLogs'
                             )}
                             copyValue={log}
                         />

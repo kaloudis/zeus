@@ -919,7 +919,7 @@ export default class EmbeddedLdkNode {
 
         if (!channel) {
             throw new Error(
-                `Channel with funding txid ${fundingTxid} not found`
+                localeString('error.channelNotFound', { fundingTxid })
             );
         }
 
@@ -1617,7 +1617,7 @@ export default class EmbeddedLdkNode {
                 break;
             }
             if (payment?.status === 'failed') {
-                throw new Error('Payment failed');
+                throw new Error(localeString('error.paymentFailed'));
             }
 
             await new Promise((resolve) => setTimeout(resolve, delayMs));
