@@ -1564,7 +1564,6 @@ export default class SettingsStore {
     @observable public embeddedLndStarted: boolean = false;
     @observable public walletJustCreated: boolean = false;
     @observable public lndFolderMissing: boolean = false;
-    @observable public ldkNodeSyncing: boolean = false;
     // Embedded LDK Node
     @observable public ldkNodeDir?: string;
     @observable public ldkMnemonic?: string;
@@ -1573,6 +1572,7 @@ export default class SettingsStore {
     @observable public ldkEsploraServer?: string;
     @observable public ldkRgsServer?: string;
     @observable public ldkVssServer?: string;
+    @observable public ldkNodeSyncing: boolean = false;
     // NWC
     @observable public nostrWalletConnectUrl: string;
     // Favorite currencies
