@@ -22,6 +22,7 @@ interface VssServerProps {
 
 interface VssServerState {
     vssServer: string;
+    savedVssServer: string;
 }
 
 @inject('SettingsStore')
@@ -31,7 +32,8 @@ export default class VssServer extends React.Component<
     VssServerState
 > {
     state = {
-        vssServer: this.props.SettingsStore.ldkVssServer || ''
+        vssServer: this.props.SettingsStore.ldkVssServer || '',
+        savedVssServer: this.props.SettingsStore.ldkVssServer || ''
     };
 
     render() {
@@ -91,10 +93,15 @@ export default class VssServer extends React.Component<
                                 });
                             }}
                             onBlur={async () => {
-                                await updateSettings({
-                                    ldkVssServer: vssServer
-                                });
-                                restartNeeded();
+                                if (vssServer !== this.state.savedVssServer) {
+                                    await updateSettings({
+                                        ldkVssServer: vssServer
+                                    });
+                                    this.setState({
+                                        savedVssServer: vssServer
+                                    });
+                                    restartNeeded();
+                                }
                             }}
                             autoCapitalize="none"
                             autoCorrect={false}

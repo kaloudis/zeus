@@ -22,6 +22,7 @@ interface RapidGossipSyncProps {
 
 interface RapidGossipSyncState {
     rgsServer: string;
+    savedRgsServer: string;
 }
 
 @inject('SettingsStore')
@@ -31,7 +32,8 @@ export default class RapidGossipSync extends React.Component<
     RapidGossipSyncState
 > {
     state = {
-        rgsServer: this.props.SettingsStore.ldkRgsServer || ''
+        rgsServer: this.props.SettingsStore.ldkRgsServer || '',
+        savedRgsServer: this.props.SettingsStore.ldkRgsServer || ''
     };
 
     render() {
@@ -99,10 +101,15 @@ export default class RapidGossipSync extends React.Component<
                                 });
                             }}
                             onBlur={async () => {
-                                await updateSettings({
-                                    ldkRgsServer: rgsServer
-                                });
-                                restartNeeded();
+                                if (rgsServer !== this.state.savedRgsServer) {
+                                    await updateSettings({
+                                        ldkRgsServer: rgsServer
+                                    });
+                                    this.setState({
+                                        savedRgsServer: rgsServer
+                                    });
+                                    restartNeeded();
+                                }
                             }}
                             autoCapitalize="none"
                             autoCorrect={false}

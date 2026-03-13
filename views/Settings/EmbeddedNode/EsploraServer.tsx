@@ -22,6 +22,7 @@ interface EsploraServerProps {
 
 interface EsploraServerState {
     esploraServer: string;
+    savedEsploraServer: string;
 }
 
 @inject('SettingsStore')
@@ -31,7 +32,8 @@ export default class EsploraServer extends React.Component<
     EsploraServerState
 > {
     state = {
-        esploraServer: this.props.SettingsStore.ldkEsploraServer || ''
+        esploraServer: this.props.SettingsStore.ldkEsploraServer || '',
+        savedEsploraServer: this.props.SettingsStore.ldkEsploraServer || ''
     };
 
     render() {
@@ -100,10 +102,18 @@ export default class EsploraServer extends React.Component<
                                 });
                             }}
                             onBlur={async () => {
-                                await updateSettings({
-                                    ldkEsploraServer: esploraServer
-                                });
-                                restartNeeded();
+                                if (
+                                    esploraServer !==
+                                    this.state.savedEsploraServer
+                                ) {
+                                    await updateSettings({
+                                        ldkEsploraServer: esploraServer
+                                    });
+                                    this.setState({
+                                        savedEsploraServer: esploraServer
+                                    });
+                                    restartNeeded();
+                                }
                             }}
                             autoCapitalize="none"
                             autoCorrect={false}
