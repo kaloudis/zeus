@@ -424,12 +424,12 @@ export default class CashuStore {
         // Store derived seed for future use
         const derivedSeedPhrase = cashuSeedPhrase.split(' ');
         Storage.setItem(
-            `${this.getLndDir()}-cashu-seed-phrase`,
+            `${this.getNodeDir()}-cashu-seed-phrase`,
             derivedSeedPhrase
         );
         this.seedPhrase = derivedSeedPhrase;
         this.seedVersion = 'v2-bip39';
-        Storage.setItem(`${this.getLndDir()}-cashu-seed-version`, 'v2-bip39');
+        Storage.setItem(`${this.getNodeDir()}-cashu-seed-version`, 'v2-bip39');
 
         console.log('CDK: Derived and stored cashu seed from wallet seed');
         return cashuSeedPhrase;
@@ -846,7 +846,7 @@ export default class CashuStore {
      * Enrich tokens with value if missing (migration for old tokens)
      */
     private enrichTokensWithProofs = async () => {
-        const lndDir = this.getLndDir();
+        const lndDir = this.getNodeDir();
         let updated = false;
 
         // Enrich sent tokens
@@ -1193,6 +1193,17 @@ export default class CashuStore {
 
     getLndDir = () => {
         return this.settingsStore.lndDir || 'lnd';
+    };
+
+    // Returns a unique directory key for Cashu storage namespacing.
+    // LDK nodes don't set lndDir, so getLndDir() returns 'lnd' for all of them,
+    // causing Cashu data to collide across LDK wallets. Use ldkNodeDir instead.
+    getNodeDir = () => {
+        const { implementation, ldkNodeDir, lndDir } = this.settingsStore;
+        if (implementation === 'embedded-ldk-node') {
+            return ldkNodeDir || 'ldk';
+        }
+        return lndDir || 'lnd';
     };
 
     get selectedMintPubkey() {
@@ -1680,7 +1691,7 @@ export default class CashuStore {
     public setSelectedMint = async (mintUrl: string) => {
         this.clearInvoice();
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-selectedMintUrl`,
+            `${this.getNodeDir()}-cashu-selectedMintUrl`,
             mintUrl
         );
 
@@ -1694,7 +1705,7 @@ export default class CashuStore {
     @action
     public setRandomizeMintSelection = async (value: boolean) => {
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-randomizeMintSelection`,
+            `${this.getNodeDir()}-cashu-randomizeMintSelection`,
             value ? 'true' : 'false'
         );
         runInAction(() => {
@@ -1735,7 +1746,7 @@ export default class CashuStore {
             if (this.mintUrls.length === 0 && this.seedVersion !== 'v1') {
                 const seedVersion = 'v2-bip39';
                 await Storage.setItem(
-                    `${this.getLndDir()}-cashu-seed-version`,
+                    `${this.getNodeDir()}-cashu-seed-version`,
                     seedVersion
                 );
                 this.seedVersion = seedVersion;
@@ -1779,7 +1790,7 @@ export default class CashuStore {
 
             // Backup to local storage for migration on restart
             await Storage.setItem(
-                `${this.getLndDir()}-cashu-mintUrls`,
+                `${this.getNodeDir()}-cashu-mintUrls`,
                 JSON.stringify(this.mintUrls)
             );
 
@@ -1824,7 +1835,7 @@ export default class CashuStore {
         this.mintUrls = await CashuDevKit.getMintUrls();
 
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-mintUrls`,
+            `${this.getNodeDir()}-cashu-mintUrls`,
             JSON.stringify(this.mintUrls)
         );
 
@@ -1837,13 +1848,13 @@ export default class CashuStore {
             } else {
                 this.selectedMintUrl = '';
                 await Storage.removeItem(
-                    `${this.getLndDir()}-cashu-selectedMintUrl`
+                    `${this.getNodeDir()}-cashu-selectedMintUrl`
                 );
             }
         }
 
         // Clean up any legacy local storage for this mint
-        const walletId = `${this.getLndDir()}==${mintUrl}`;
+        const walletId = `${this.getNodeDir()}==${mintUrl}`;
         await Storage.removeItem(`${walletId}-counter`);
         await Storage.removeItem(`${walletId}-proofs`);
         await Storage.removeItem(`${walletId}-balance`);
@@ -1872,7 +1883,7 @@ export default class CashuStore {
     @action
     public loadDismissedUpgradeThreshold = async () => {
         const stored = await Storage.getItem(
-            `${this.getLndDir()}-cashu-dismissedUpgradeThreshold`
+            `${this.getNodeDir()}-cashu-dismissedUpgradeThreshold`
         );
         runInAction(() => {
             this.dismissedUpgradeThreshold = stored ? Number(stored) : 0;
@@ -1885,7 +1896,7 @@ export default class CashuStore {
             this.dismissedUpgradeThreshold = threshold;
         });
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-dismissedUpgradeThreshold`,
+            `${this.getNodeDir()}-cashu-dismissedUpgradeThreshold`,
             threshold
         );
 
@@ -2131,7 +2142,7 @@ export default class CashuStore {
 
         this.startConnectivityMonitoring();
 
-        const lndDir = this.getLndDir();
+        const lndDir = this.getNodeDir();
 
         // Load app-specific data from local storage (activity, preferences, seed)
         const [
@@ -2559,7 +2570,7 @@ export default class CashuStore {
             console.log('initializing wallet for URL', mintUrl);
         }
 
-        const walletId = `${this.getLndDir()}==${mintUrl}`;
+        const walletId = `${this.getNodeDir()}==${mintUrl}`;
 
         // Load stored pubkey or derive from seed
         let pubkey = await Storage.getItem(`${walletId}-pubkey`);
@@ -2655,7 +2666,7 @@ export default class CashuStore {
                 });
                 this.invoices?.push(invoice);
                 await Storage.setItem(
-                    `${this.getLndDir()}-cashu-invoices`,
+                    `${this.getNodeDir()}-cashu-invoices`,
                     this.invoices
                 );
             }
@@ -2818,7 +2829,7 @@ export default class CashuStore {
                 });
 
                 await Storage.setItem(
-                    `${this.getLndDir()}-cashu-invoices`,
+                    `${this.getNodeDir()}-cashu-invoices`,
                     this.invoices
                 );
 
@@ -3094,7 +3105,7 @@ export default class CashuStore {
             this.payments?.push(payment);
 
             await Storage.setItem(
-                `${this.getLndDir()}-cashu-payments`,
+                `${this.getNodeDir()}-cashu-payments`,
                 this.payments
             );
 
@@ -3232,7 +3243,7 @@ export default class CashuStore {
         // save new instance of token
         this.sentTokens?.push(updatedToken);
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-sent-tokens`,
+            `${this.getNodeDir()}-cashu-sent-tokens`,
             this.sentTokens
         );
 
@@ -3272,7 +3283,7 @@ export default class CashuStore {
         });
 
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-offline-pending-tokens`,
+            `${this.getNodeDir()}-cashu-offline-pending-tokens`,
             this.offlinePendingTokens
         );
 
@@ -3295,7 +3306,7 @@ export default class CashuStore {
             0
         );
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-offline-pending-tokens`,
+            `${this.getNodeDir()}-cashu-offline-pending-tokens`,
             this.offlinePendingTokens
         );
     };
@@ -3306,7 +3317,7 @@ export default class CashuStore {
             (t) => t.encodedToken !== encodedToken
         );
         await Storage.setItem(
-            `${this.getLndDir()}-cashu-offline-spent-tokens`,
+            `${this.getNodeDir()}-cashu-offline-spent-tokens`,
             this.offlineSpentTokens
         );
     };
@@ -3425,16 +3436,16 @@ export default class CashuStore {
 
             // Persist arrays
             await Storage.setItem(
-                `${this.getLndDir()}-cashu-offline-pending-tokens`,
+                `${this.getNodeDir()}-cashu-offline-pending-tokens`,
                 this.offlinePendingTokens
             );
             await Storage.setItem(
-                `${this.getLndDir()}-cashu-received-tokens`,
+                `${this.getNodeDir()}-cashu-received-tokens`,
                 this.receivedTokens
             );
             if (spent.length > 0) {
                 await Storage.setItem(
-                    `${this.getLndDir()}-cashu-offline-spent-tokens`,
+                    `${this.getNodeDir()}-cashu-offline-spent-tokens`,
                     this.offlineSpentTokens
                 );
             }
@@ -3579,7 +3590,7 @@ export default class CashuStore {
                     })
                 );
                 await Storage.setItem(
-                    `${this.getLndDir()}-cashu-received-tokens`,
+                    `${this.getNodeDir()}-cashu-received-tokens`,
                     this.receivedTokens
                 );
 
@@ -3916,7 +3927,7 @@ export default class CashuStore {
             // Record sent token activity
             this.sentTokens?.push(decoded);
             await Storage.setItem(
-                `${this.getLndDir()}-cashu-sent-tokens`,
+                `${this.getNodeDir()}-cashu-sent-tokens`,
                 this.sentTokens
             );
 
@@ -3945,7 +3956,7 @@ export default class CashuStore {
     @action
     public deleteCashuData = async () => {
         this.loading = true;
-        const lndDir = this.getLndDir();
+        const lndDir = this.getNodeDir();
 
         try {
             // Remove all mints from CDK
