@@ -174,7 +174,9 @@ const writeLndConfig = async ({
             : `
 
     [sqlite]
-    db.sqlite.pragmaoptions=temp_store=memory`
+    db.sqlite.pragmaoptions=temp_store=memory
+    db.sqlite.pragmaoptions=mmap_size=0
+    db.sqlite.pragmaoptions=synchronous=normal`
     }`;
 
     const config = `[Application Options]
