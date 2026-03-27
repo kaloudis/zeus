@@ -434,6 +434,14 @@ public class LndMobileService extends Service {
 
       @Override
       public void run() {
+        // Set TMPDIR to app cache dir so lnd (Go) uses a writable temp path
+        try {
+          android.system.Os.setenv("TMPDIR",
+            getApplicationContext().getCacheDir().getAbsolutePath(), true);
+        } catch (Exception e) {
+          android.util.Log.e("LndMobileService", "Failed to set TMPDIR", e);
+        }
+
         Lndmobile.start(args, new lndmobile.Callback() {
 
           @Override

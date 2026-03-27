@@ -206,6 +206,10 @@ open class Lnd {
       lndStartedCallback(data, error)
     }()}
 
+    // Set TMPDIR to app caches dir so lnd (Go) uses a writable temp path
+    let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].path
+    setenv("TMPDIR", cacheDir, 1)
+
     LndmobileStart(
       lndArgs,
       LndmobileCallback(method: "start", callback: started)
