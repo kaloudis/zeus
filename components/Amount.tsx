@@ -555,7 +555,8 @@ export default class Amount extends React.Component<AmountProps, {}> {
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        direction: 'ltr'
     },
     textContainer: {
         flexDirection: 'row',

@@ -62,7 +62,11 @@ import {
     stopLdkNode,
     DEFAULT_VSS_SERVER
 } from '../../utils/LdkNodeUtils';
-import { localeString, bridgeJavaStrings } from '../../utils/LocaleUtils';
+import {
+    localeString,
+    bridgeJavaStrings,
+    applyRTL
+} from '../../utils/LocaleUtils';
 import { isBatterySaverEnabled } from '../../utils/BatteryUtils';
 import { IS_BACKED_UP_KEY } from '../../utils/MigrationUtils';
 import { protectedNavigation } from '../../utils/NavigationUtils';
@@ -424,8 +428,9 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             const shareIntentResult = await processSharedQRImageFast();
             const shareIntentData =
                 explicitShareIntentData || shareIntentResult?.params;
+            const locale = settings.locale || 'en';
+            applyRTL(locale);
             if (Platform.OS === 'android') {
-                const locale = settings.locale || 'en';
                 bridgeJavaStrings(locale);
             }
 

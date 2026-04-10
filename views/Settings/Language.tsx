@@ -9,7 +9,12 @@ import Screen from '../../components/Screen';
 
 import SettingsStore, { LOCALE_KEYS } from '../../stores/SettingsStore';
 
-import { localeString, bridgeJavaStrings } from '../../utils/LocaleUtils';
+import {
+    localeString,
+    bridgeJavaStrings,
+    applyRTL
+} from '../../utils/LocaleUtils';
+import { restartNeeded } from '../../utils/RestartUtils';
 import { themeColor } from '../../utils/ThemeUtils';
 
 interface LanguageProps {
@@ -121,9 +126,14 @@ export default class Language extends React.Component<
                                     await updateSettings({
                                         locale: item.key
                                     }).then(() => {
+                                        const rtlChanged = applyRTL(item.key);
                                         if (Platform.OS === 'android')
                                             bridgeJavaStrings(item.key);
-                                        navigation.goBack();
+                                        if (rtlChanged) {
+                                            restartNeeded(true);
+                                        } else {
+                                            navigation.goBack();
+                                        }
                                     });
                                 }}
                             >

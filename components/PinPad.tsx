@@ -120,7 +120,7 @@ export default function PinPad({
     };
 
     return (
-        <View style={styles.pad}>
+        <View style={[styles.pad, { direction: 'ltr' }]}>
             {/* Rows 1-3: Numbers 1-9 */}
             {[
                 [1, 2, 3],

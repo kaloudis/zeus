@@ -1,5 +1,10 @@
 import React from 'react';
-import { StyleProp, ViewStyle, TouchableOpacity } from 'react-native';
+import {
+    I18nManager,
+    StyleProp,
+    ViewStyle,
+    TouchableOpacity
+} from 'react-native';
 import { Header, TextProps } from '@rneui/themed';
 import { initialWindowMetrics } from 'react-native-safe-area-context';
 import type { IconObject } from '@rneui/base/dist/Icon/Icon';
@@ -59,7 +64,10 @@ function ZeusHeader(props: HeaderProps) {
                 fill={themeColor('text')}
                 width="30"
                 height="30"
-                style={{ alignSelf: 'center' }}
+                style={{
+                    alignSelf: 'center',
+                    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }]
+                }}
             />
         </TouchableOpacity>
     );

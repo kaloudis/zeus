@@ -91,13 +91,9 @@ export default class KeyValue extends React.Component<
         const lurkerMode: boolean =
             SettingsStore?.settings?.privacy?.lurkerMode || false;
 
-        {
-            /* TODO: rig up RTL */
-        }
         const isCopyable = disableCopy
             ? false
             : typeof value === 'string' || typeof value === 'number';
-        const rtl = false;
         const KeyBase = (
             <Body>
                 {indicatorColor && (
@@ -197,14 +193,12 @@ export default class KeyValue extends React.Component<
 
         const KeyValueRow = () => (
             <Row justify="space-between">
-                <View style={rtl ? styles.rtlValue : styles.key}>
+                <View style={styles.key}>
                     <Text style={{ color: themeColor('secondaryText') }}>
-                        {rtl ? Value : Key}
+                        {Key}
                     </Text>
                 </View>
-                <View style={rtl ? styles.rtlKey : styles.value}>
-                    {rtl ? Key : Value}
-                </View>
+                <View style={styles.value}>{Value}</View>
             </Row>
         );
 
@@ -229,15 +223,5 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         flexDirection: 'row',
         justifyContent: 'flex-end'
-    },
-    rtlKey: {
-        alignSelf: 'flex-end',
-        flex: 1,
-        flexWrap: 'wrap',
-        flexDirection: 'row',
-        justifyContent: 'flex-end'
-    },
-    rtlValue: {
-        paddingRight: 10
     }
 });

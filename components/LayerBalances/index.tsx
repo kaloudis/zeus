@@ -60,8 +60,7 @@ interface LayerBalancesProps {
     refreshing?: boolean;
 }
 
-//  To toggle LTR/RTL change to `true`
-I18nManager.allowRTL(false);
+I18nManager.allowRTL(true);
 
 type MintInfo = {
     url: string;

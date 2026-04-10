@@ -130,7 +130,8 @@ export default class KeypadAmountDisplay extends React.Component<KeypadAmountDis
                             fontSize,
                             textAlign: 'center',
                             fontFamily: 'PPNeueMontreal-Medium',
-                            lineHeight
+                            lineHeight,
+                            writingDirection: 'ltr'
                         }}
                     >
                         {prefix}

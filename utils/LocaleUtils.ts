@@ -1,4 +1,4 @@
-import { NativeModules } from 'react-native';
+import { I18nManager, NativeModules } from 'react-native';
 
 import { settingsStore } from '../stores/Stores';
 import * as EN from '../locales/en.json';
@@ -36,6 +36,7 @@ import * as IT from '../locales/it.json';
 import * as VI from '../locales/vi.json';
 import * as JA from '../locales/ja.json';
 import * as KO from '../locales/ko.json';
+import * as AR from '../locales/ar.json';
 import * as BG from '../locales/bg.json';
 import * as ID from '../locales/id.json';
 
@@ -71,6 +72,7 @@ const Croatian: any = HR;
 const Korean: any = KO;
 const Hindi: any = hi_EN;
 const TaiwaneseMandarin: any = zh_TW;
+const Arabic: any = AR;
 const Bulgarian: any = BG;
 const Indonesian: any = ID;
 
@@ -93,6 +95,8 @@ export function localeString(
     let translation: string;
     const getString = () => {
         switch (locale) {
+            case 'ar':
+                return Arabic[localeString] || English[localeString];
             case 'es':
                 return Spanish[localeString] || English[localeString];
             case 'pt':
@@ -179,6 +183,21 @@ export function localeString(
 
     return translation;
 }
+
+const RTL_LOCALES = ['ar', 'he', 'fa'];
+
+export const isRTLLocale = (locale: string): boolean =>
+    RTL_LOCALES.includes(locale);
+
+export const applyRTL = (locale: string): boolean => {
+    const shouldBeRTL = isRTLLocale(locale);
+    I18nManager.allowRTL(true);
+    const changed = I18nManager.isRTL !== shouldBeRTL;
+    if (changed) {
+        I18nManager.forceRTL(shouldBeRTL);
+    }
+    return changed;
+};
 
 export const languagesWithNounCapitalization = ['de', 'pl', 'cs', 'sk'];
 

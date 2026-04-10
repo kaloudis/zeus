@@ -43,8 +43,7 @@ interface PaymentMethodListProps {
     }>;
 }
 
-//  To toggle LTR/RTL change to `true`
-I18nManager.allowRTL(false);
+I18nManager.allowRTL(true);
 
 type DataRow = {
     layer: string;

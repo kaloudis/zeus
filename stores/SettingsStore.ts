@@ -443,6 +443,7 @@ export const LOCALE_KEYS = [
     { key: 'uk', value: 'украї́нська мо́ва' },
     { key: 'ro', value: 'Limba română' },
     { key: 'el', value: 'Ελληνικά' },
+    { key: 'ar', value: 'العربية' },
     { key: 'fa', value: 'زبان فارسي' },
     { key: 'sl', value: 'Slovenski jezik' },
     { key: 'ru', value: 'русский язык' },

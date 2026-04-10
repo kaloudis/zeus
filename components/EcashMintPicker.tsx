@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    I18nManager,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { inject, observer } from 'mobx-react';
@@ -140,7 +146,17 @@ export default class EcashMintPicker extends React.Component<
                                 />
                             </View>
                         )}
-                        <View style={{ marginRight: 8, flexShrink: 0 }}>
+                        <View
+                            style={{
+                                marginRight: 8,
+                                flexShrink: 0,
+                                transform: [
+                                    {
+                                        scaleX: I18nManager.isRTL ? -1 : 1
+                                    }
+                                ]
+                            }}
+                        >
                             <CaretRight
                                 stroke={themeColor('text')}
                                 fill={themeColor('text')}

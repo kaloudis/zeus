@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+    I18nManager,
     ScrollView,
     StyleSheet,
     Text,
@@ -1041,7 +1042,8 @@ const styles = StyleSheet.create({
     ForwardArrow: {
         alignItems: 'flex-end',
         padding: 6,
-        marginRight: 6
+        marginRight: 6,
+        transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }]
     },
     form: {
         paddingTop: 20,
