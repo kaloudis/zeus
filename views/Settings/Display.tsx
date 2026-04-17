@@ -6,7 +6,9 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import SettingsStore, {
     DEFAULT_VIEW_KEYS,
-    THEME_KEYS
+    SATS_SYMBOL_KEYS,
+    THEME_KEYS,
+    DEFAULT_SATS_SYMBOL
 } from '../../stores/SettingsStore';
 import { localeString } from '../../utils/LocaleUtils';
 import { isLightTheme, themeColor } from '../../utils/ThemeUtils';
@@ -31,6 +33,7 @@ interface DisplayState {
     removeDecimalSpaces: boolean;
     showMillisatoshiAmounts: boolean;
     selectNodeOnStartup: boolean;
+    satsSymbol: string;
 }
 
 @inject('SettingsStore')
@@ -47,7 +50,8 @@ export default class Display extends React.Component<
         showAllDecimalPlaces: false,
         removeDecimalSpaces: false,
         showMillisatoshiAmounts: false,
-        selectNodeOnStartup: false
+        selectNodeOnStartup: false,
+        satsSymbol: 'beta'
     };
 
     async componentDidMount() {
@@ -74,7 +78,10 @@ export default class Display extends React.Component<
                 (settings.display &&
                     settings.display.showMillisatoshiAmounts) ||
                 false,
-            selectNodeOnStartup: settings.selectNodeOnStartup || false
+            selectNodeOnStartup: settings.selectNodeOnStartup || false,
+            satsSymbol:
+                (settings.display && settings.display.satsSymbol) ||
+                DEFAULT_SATS_SYMBOL
         });
     }
 
@@ -97,7 +104,8 @@ export default class Display extends React.Component<
             showAllDecimalPlaces,
             removeDecimalSpaces,
             showMillisatoshiAmounts,
-            selectNodeOnStartup
+            selectNodeOnStartup,
+            satsSymbol
         } = this.state;
         const { settings, updateSettings }: any = SettingsStore;
 
@@ -161,6 +169,26 @@ export default class Display extends React.Component<
                             });
                         }}
                         values={DEFAULT_VIEW_KEYS}
+                    />
+
+                    <DropdownSetting
+                        title={localeString(
+                            'views.Settings.Display.satsSymbol'
+                        )}
+                        selectedValue={satsSymbol}
+                        disabled={SettingsStore.settingsUpdateInProgress}
+                        onValueChange={async (value: string) => {
+                            this.setState({
+                                satsSymbol: value
+                            });
+                            await updateSettings({
+                                display: {
+                                    ...settings.display,
+                                    satsSymbol: value
+                                }
+                            });
+                        }}
+                        values={SATS_SYMBOL_KEYS}
                     />
 
                     <View style={{ flexDirection: 'row', marginTop: 20 }}>

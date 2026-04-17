@@ -5,6 +5,7 @@ import { inject, observer } from 'mobx-react';
 import Conversion from './Conversion';
 
 import FiatStore from '../stores/FiatStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from '../stores/SettingsStore';
 import UnitsStore from '../stores/UnitsStore';
 
 import { themeColor } from '../utils/ThemeUtils';
@@ -27,11 +28,12 @@ interface KeypadAmountDisplayProps {
     childrenBeforeConversion?: boolean;
     forceUnit?: string;
     FiatStore?: FiatStore;
+    SettingsStore?: SettingsStore;
     UnitsStore?: UnitsStore;
     children?: React.ReactNode;
 }
 
-@inject('FiatStore', 'UnitsStore')
+@inject('FiatStore', 'SettingsStore', 'UnitsStore')
 @observer
 export default class KeypadAmountDisplay extends React.Component<KeypadAmountDisplayProps> {
     render() {
@@ -47,6 +49,7 @@ export default class KeypadAmountDisplay extends React.Component<KeypadAmountDis
             childrenBeforeConversion = false,
             forceUnit,
             FiatStore,
+            SettingsStore,
             UnitsStore,
             children
         } = this.props;
@@ -75,6 +78,8 @@ export default class KeypadAmountDisplay extends React.Component<KeypadAmountDis
                 ? numberWithDecimals(amount)
                 : numberWithCommas(amount);
 
+        const satsSymbol =
+            SettingsStore?.settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
         const isSingularSat = units === 'sats' && parseFloat(amount) === 1;
 
         let prefix = '';
@@ -82,7 +87,10 @@ export default class KeypadAmountDisplay extends React.Component<KeypadAmountDis
         if (units === 'BTC') {
             prefix = '₿';
         } else if (units === 'sats') {
-            suffix = ` ${isSingularSat ? 'sat' : 'sats'}`;
+            suffix =
+                satsSymbol === 'beta'
+                    ? ' β'
+                    : ` ${isSingularSat ? 'sat' : 'sats'}`;
         } else if (units === 'fiat') {
             if (rtl) {
                 suffix = `${space ? ' ' : ''}${symbol}`;
@@ -145,7 +153,10 @@ export default class KeypadAmountDisplay extends React.Component<KeypadAmountDis
                         {suffix ? (
                             <Text
                                 style={{
-                                    fontSize: fontSize * 0.2
+                                    fontSize:
+                                        satsSymbol === 'beta'
+                                            ? fontSize
+                                            : fontSize * 0.2
                                 }}
                             >
                                 {suffix}

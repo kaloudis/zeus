@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 import { settingsStore, fiatStore, unitsStore } from '../stores/Stores';
+import { DEFAULT_SATS_SYMBOL } from '../stores/SettingsStore';
 import {
     numberWithCommas,
     numberWithDecimals,
@@ -9,6 +10,19 @@ import {
 import type { Units } from './UnitsUtils';
 import FeeUtils from './FeeUtils';
 import { localeString } from './LocaleUtils';
+
+/**
+ * Returns the appropriate sats unit label based on user settings.
+ * When beta symbol is selected: returns 'β'
+ * Otherwise: returns 'sat' or 'sats' based on plurality.
+ */
+export function getSatLabel(value?: string | number): string {
+    const satsSymbol =
+        settingsStore?.settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
+    if (satsSymbol === 'beta') return 'β';
+    const num = Number(value);
+    return num === 1 || num === -1 ? 'sat' : 'sats';
+}
 
 export interface AmountDisplayResult {
     displayAmount: string;
@@ -220,9 +234,9 @@ export function getAmountFromSats(
 
         return `₿${FeeUtils.toFixed(Number(wholeSats || 0) / SATS_PER_BTC)}`;
     } else if (units === 'sats') {
-        const sats = `${numberWithCommas(wholeSats || value) || 0} ${
-            Number(value) === 1 || Number(value) === -1 ? 'sat' : 'sats'
-        }`;
+        const sats = `${
+            numberWithCommas(wholeSats || value) || 0
+        } ${getSatLabel(value)}`;
         return sats;
     } else if (units === 'fiat' && fiat) {
         if (fiatStore.fiatRates) {
@@ -279,9 +293,9 @@ export function getFormattedAmount(
         return `₿${FeeUtils.toFixed(Number(value || 0))}`;
     } else if (units === 'sats') {
         const [wholeSats] = value.toString().split('.');
-        const sats = `${numberWithCommas(wholeSats || value) || 0} ${
-            Number(value) === 1 || Number(value) === -1 ? 'sat' : 'sats'
-        }`;
+        const sats = `${
+            numberWithCommas(wholeSats || value) || 0
+        } ${getSatLabel(value)}`;
         return sats;
     } else if (units === 'fiat' && fiat) {
         if (fiatStore.fiatRates) {

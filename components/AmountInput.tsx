@@ -16,7 +16,7 @@ import {
 
 import { fiatStore, settingsStore, unitsStore } from '../stores/Stores';
 import FiatStore from '../stores/FiatStore';
-import SettingsStore from '../stores/SettingsStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from '../stores/SettingsStore';
 import UnitsStore from '../stores/UnitsStore';
 
 import ExchangeBitcoinSVG from '../assets/images/SVG/ExchangeBitcoin.svg';
@@ -188,6 +188,8 @@ export default class AmountInput extends React.Component<
         const { fiatEnabled } = settings;
         const displayValue = this.getDisplayValue();
 
+        const satsSymbol = settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
+
         let formattedAmount: string;
         if (effectiveUnits === 'BTC') {
             formattedAmount = `₿${formatBitcoinWithSpaces(
@@ -198,10 +200,14 @@ export default class AmountInput extends React.Component<
                 displayValue || '0'
             );
         } else {
-            const isSingular = parseFloat(displayValue) === 1;
-            formattedAmount = `${numberWithCommas(displayValue || '0')} ${
-                isSingular ? 'sat' : 'sats'
-            }`;
+            if (satsSymbol === 'beta') {
+                formattedAmount = `${numberWithCommas(displayValue || '0')} β`;
+            } else {
+                const isSingular = parseFloat(displayValue) === 1;
+                formattedAmount = `${numberWithCommas(displayValue || '0')} ${
+                    isSingular ? 'sat' : 'sats'
+                }`;
+            }
         }
 
         return (

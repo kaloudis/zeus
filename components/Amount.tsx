@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 
 import FiatStore from '../stores/FiatStore';
 import UnitsStore from '../stores/UnitsStore';
-import SettingsStore from '../stores/SettingsStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from '../stores/SettingsStore';
 
 import { Spacer } from './layout/Spacer';
 import { Row } from './layout/Row';
@@ -50,6 +50,7 @@ interface AmountDisplayProps {
     accessibilityLabel?: string;
     roundAmount?: boolean;
     separatorSwap?: boolean;
+    satsLabel?: string;
     onPendingPress?: () => void;
 }
 
@@ -77,6 +78,7 @@ function AmountDisplay({
     accessibilityLabel,
     roundAmount = false,
     separatorSwap = false,
+    satsLabel,
     onPendingPress
 }: AmountDisplayProps) {
     if (unit === 'fiat' && !symbol) {
@@ -172,6 +174,7 @@ function AmountDisplay({
         shouldShowRounding: boolean
     ) => {
         const isPlural = displayAmount !== '1';
+        const useBeta = satsLabel === 'beta';
 
         return (
             <Row
@@ -194,25 +197,51 @@ function AmountDisplay({
                         {displayAmount}
                     </Body>
                     <Spacer width={2} />
-                    <View accessible={accessible}>
+                    {useBeta ? (
                         <Body
                             secondary
-                            small={!jumboText && !fontSize}
-                            defaultSize={defaultTextSize}
+                            jumbo={jumboText}
                             fontSize={fontSize}
                             color={color}
                             colorOverride={colorOverride}
                             accessible={accessible}
+                            accessibilityLabel="sats"
                         >
-                            {isPlural ? 'sats' : 'sat'}
-                            {fee
-                                ? ' ' +
-                                  formatInlineNoun(
-                                      localeString('views.Payment.fee')
-                                  )
-                                : ''}
+                            β
                         </Body>
-                    </View>
+                    ) : (
+                        <View accessible={accessible}>
+                            <Body
+                                secondary
+                                small={!jumboText && !fontSize}
+                                defaultSize={defaultTextSize}
+                                fontSize={fontSize}
+                                color={color}
+                                colorOverride={colorOverride}
+                                accessible={accessible}
+                            >
+                                {isPlural ? 'sats' : 'sat'}
+                            </Body>
+                        </View>
+                    )}
+                    {fee && (
+                        <View accessible={accessible}>
+                            <Body
+                                secondary
+                                small={!jumboText && !fontSize}
+                                defaultSize={defaultTextSize}
+                                fontSize={fontSize}
+                                color={color}
+                                colorOverride={colorOverride}
+                                accessible={accessible}
+                            >
+                                {' ' +
+                                    formatInlineNoun(
+                                        localeString('views.Payment.fee')
+                                    )}
+                            </Body>
+                        </View>
+                    )}
                 </View>
             </Row>
         );
@@ -400,6 +429,8 @@ export default class Amount extends React.Component<AmountProps, {}> {
             SettingsStore.settings.privacy &&
             SettingsStore.settings.privacy.lurkerMode;
         const lurkerExposed = SettingsStore.lurkerExposed;
+        const satsLabel =
+            SettingsStore.settings.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
 
         // TODO: This doesn't feel like the right place for this but it makes the component "reactive"
         const units = fixedUnits ? fixedUnits : UnitsStore.units;
@@ -446,6 +477,7 @@ export default class Amount extends React.Component<AmountProps, {}> {
                             accessible={accessible}
                             accessibilityLabel={accessibilityLabel}
                             roundAmount={roundAmount}
+                            satsLabel={satsLabel}
                             onPendingPress={
                                 pending ? onPendingPress : undefined
                             }
@@ -468,6 +500,7 @@ export default class Amount extends React.Component<AmountProps, {}> {
                     accessible={accessible}
                     accessibilityLabel={accessibilityLabel}
                     roundAmount={roundAmount}
+                    satsLabel={satsLabel}
                     onPendingPress={pending ? onPendingPress : undefined}
                 />
             );
@@ -525,6 +558,7 @@ export default class Amount extends React.Component<AmountProps, {}> {
                         accessible={accessible}
                         accessibilityLabel={accessibilityLabel}
                         roundAmount={roundAmount}
+                        satsLabel={satsLabel}
                         onPendingPress={pending ? onPendingPress : undefined}
                     />
                 </TouchableOpacity>
@@ -546,6 +580,7 @@ export default class Amount extends React.Component<AmountProps, {}> {
                 accessible={accessible}
                 accessibilityLabel={accessibilityLabel}
                 roundAmount={roundAmount}
+                satsLabel={satsLabel}
                 onPendingPress={pending ? onPendingPress : undefined}
             />
         );

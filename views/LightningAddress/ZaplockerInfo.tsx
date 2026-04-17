@@ -15,6 +15,7 @@ import { themeColor } from '../../utils/ThemeUtils';
 import UrlUtils from '../../utils/UrlUtils';
 
 import LightningAddressStore from '../../stores/LightningAddressStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from '../../stores/SettingsStore';
 
 import NostrichNotLoaded from '../../assets/images/SVG/Nostrich_not-loaded.svg';
 import NostrichValid from '../../assets/images/SVG/Nostrich_valid.svg';
@@ -25,17 +26,21 @@ import Receive from '../../assets/images/SVG/Receive.svg';
 interface ZaplockerInfoProps {
     navigation: NativeStackNavigationProp<any, any>;
     LightningAddressStore: LightningAddressStore;
+    SettingsStore: SettingsStore;
 }
 
-@inject('LightningAddressStore')
+@inject('LightningAddressStore', 'SettingsStore')
 @observer
 export default class ZaplockerInfo extends React.Component<
     ZaplockerInfoProps,
     {}
 > {
     render() {
-        const { navigation, LightningAddressStore } = this.props;
+        const { navigation, LightningAddressStore, SettingsStore } = this.props;
         const { fees, minimumSats } = LightningAddressStore;
+        const satsSymbol =
+            SettingsStore?.settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
+        const satLabel = satsSymbol === 'beta' ? 'β' : 'sats';
 
         const LIMIT_QUALIFIERS = {
             lt: '<',
@@ -46,7 +51,7 @@ export default class ZaplockerInfo extends React.Component<
 
         const FEE_QUALIFIERS = {
             percentage: '%',
-            fixedSats: ' sats'
+            fixedSats: ` ${satLabel}`
         };
 
         return (
@@ -114,7 +119,11 @@ export default class ZaplockerInfo extends React.Component<
                                         'views.Settings.LightningAddressInfo.minimumAmount'
                                     )}
                                     value={`${minimumSats} ${
-                                        minimumSats === 1 ? 'sat' : 'sats'
+                                        satsSymbol === 'beta'
+                                            ? 'β'
+                                            : minimumSats === 1
+                                            ? 'sat'
+                                            : 'sats'
                                     }`}
                                 />
                             )}
@@ -147,7 +156,9 @@ export default class ZaplockerInfo extends React.Component<
                                                         limitQualifier
                                                     ]
                                                 } ${limitAmount} ${
-                                                    limitAmount === 1
+                                                    satsSymbol === 'beta'
+                                                        ? 'β'
+                                                        : limitAmount === 1
                                                         ? 'sat'
                                                         : 'sats'
                                                 }`}

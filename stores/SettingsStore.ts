@@ -81,6 +81,7 @@ interface DisplaySettings {
     showAllDecimalPlaces?: boolean;
     removeDecimalSpaces?: boolean;
     showMillisatoshiAmounts?: boolean;
+    satsSymbol?: string;
 }
 
 export enum PosEnabled {
@@ -1202,6 +1203,11 @@ export const THEME_KEYS = [
     }
 ];
 
+export const SATS_SYMBOL_KEYS = [
+    { key: 'β (beta)', value: 'beta' },
+    { key: 'sats', value: 'sats' }
+];
+
 export const DEFAULT_VIEW_KEYS = [
     {
         key: 'Balance',
@@ -1241,6 +1247,7 @@ export const DEFAULT_INVOICE_TYPE_KEYS = [
     }
 ];
 
+export const DEFAULT_SATS_SYMBOL = 'beta';
 export const DEFAULT_THEME = 'kyriaki';
 export const DEFAULT_FIAT = 'USD';
 export const DEFAULT_FIAT_RATES_SOURCE = 'Zeus';
@@ -1469,7 +1476,8 @@ export default class SettingsStore {
             bigKeypadButtons: false,
             showAllDecimalPlaces: false,
             removeDecimalSpaces: false,
-            showMillisatoshiAmounts: false
+            showMillisatoshiAmounts: false,
+            satsSymbol: DEFAULT_SATS_SYMBOL
         },
         pos: {
             posEnabled: PosEnabled.Disabled,

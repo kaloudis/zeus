@@ -18,7 +18,7 @@ import { sha256 } from 'js-sha256';
 
 import CashuStore from './CashuStore';
 import NodeInfoStore from './NodeInfoStore';
-import SettingsStore from './SettingsStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from './SettingsStore';
 
 import BackendUtils from '../utils/BackendUtils';
 import Base64Utils from '../utils/Base64Utils';
@@ -814,11 +814,19 @@ export default class LightningAddressStore {
                 ','
             );
 
+            const satsSymbol =
+                this.settingsStore?.settings?.display?.satsSymbol ||
+                DEFAULT_SATS_SYMBOL;
+            const satUnit =
+                satsSymbol === 'beta'
+                    ? 'β'
+                    : value_commas === '1'
+                    ? 'sat'
+                    : localeString('general.sats');
             const title = localeString('zeuspay.paymentReceived.title');
             const body = localeString('zeuspay.paymentReceived.body', {
                 value: value_commas,
-                unit:
-                    value_commas === '1' ? 'sat' : localeString('general.sats')
+                unit: satUnit
             });
             if (Platform.OS === 'android') {
                 // @ts-ignore:next-line
@@ -1121,13 +1129,18 @@ export default class LightningAddressStore {
             );
 
             const fireLocalNotification = () => {
+                const satsSymbol =
+                    this.settingsStore?.settings?.display?.satsSymbol || 'beta';
+                const satUnit =
+                    satsSymbol === 'beta'
+                        ? 'β'
+                        : value_commas === '1'
+                        ? 'sat'
+                        : localeString('general.sats');
                 const title = localeString('zeuspay.paymentReceived.title');
                 const body = localeString('zeuspay.paymentReceived.body', {
                     value: value_commas,
-                    unit:
-                        value_commas === '1'
-                            ? 'sat'
-                            : localeString('general.sats')
+                    unit: satUnit
                 });
                 if (Platform.OS === 'android') {
                     // @ts-ignore:next-line

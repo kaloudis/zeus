@@ -6,7 +6,8 @@ import { inject, observer } from 'mobx-react';
 import SettingsStore, {
     CURRENCY_KEYS,
     DEFAULT_FIAT,
-    DEFAULT_FIAT_RATES_SOURCE
+    DEFAULT_FIAT_RATES_SOURCE,
+    DEFAULT_SATS_SYMBOL
 } from '../stores/SettingsStore';
 import UnitsStore from '../stores/UnitsStore';
 import FiatStore from '../stores/FiatStore';
@@ -29,11 +30,6 @@ interface CurrencyListState {
     search: string;
     currencies: typeof CURRENCY_KEYS;
 }
-
-const BITCOIN_UNITS = [
-    { key: 'Satoshis (sats)', value: 'sats' },
-    { key: 'Bitcoin (BTC)', value: 'BTC' }
-];
 
 @inject('SettingsStore', 'UnitsStore', 'FiatStore')
 @observer
@@ -89,12 +85,23 @@ export default class CurrencyList extends React.Component<
     };
 
     renderBitcoinUnits = () => {
-        const { UnitsStore } = this.props;
+        const { SettingsStore, UnitsStore } = this.props;
         const currentUnit = UnitsStore!.units;
+        const satsSymbol =
+            SettingsStore?.settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
+        const useBeta = satsSymbol === 'beta';
+
+        const bitcoinUnits = [
+            {
+                key: useBeta ? 'Satoshis (β)' : 'Satoshis (sats)',
+                value: 'sats'
+            },
+            { key: 'Bitcoin (BTC)', value: 'BTC' }
+        ];
 
         return (
             <View style={{ marginBottom: 8 }}>
-                {BITCOIN_UNITS.map((item, index) => (
+                {bitcoinUnits.map((item, index) => (
                     <React.Fragment key={item.value}>
                         <ListItem
                             containerStyle={{
@@ -128,7 +135,9 @@ export default class CurrencyList extends React.Component<
                                             fontSize: 12
                                         }}
                                     >
-                                        100,000,000 sats = 1 BTC
+                                        {useBeta
+                                            ? '100,000,000 β = 1 BTC'
+                                            : '100,000,000 sats = 1 BTC'}
                                     </ListItem.Subtitle>
                                 )}
                             </ListItem.Content>
@@ -139,7 +148,7 @@ export default class CurrencyList extends React.Component<
                                 />
                             )}
                         </ListItem>
-                        {index < BITCOIN_UNITS.length - 1 &&
+                        {index < bitcoinUnits.length - 1 &&
                             this.renderSeparator()}
                     </React.Fragment>
                 ))}

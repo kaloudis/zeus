@@ -5,7 +5,10 @@ import { inject, observer } from 'mobx-react';
 import Button from '../components/Button';
 
 import UnitsStore from '../stores/UnitsStore';
-import SettingsStore, { CURRENCY_KEYS } from '../stores/SettingsStore';
+import SettingsStore, {
+    CURRENCY_KEYS,
+    DEFAULT_SATS_SYMBOL
+} from '../stores/SettingsStore';
 
 import { themeColor } from '../utils/ThemeUtils';
 
@@ -37,6 +40,8 @@ export default class UnitToggle extends React.Component<UnitToggleProps, {}> {
         const { changeUnits, units } = UnitsStore!;
         const { settings } = SettingsStore!;
         const { fiat, fiatEnabled } = settings;
+
+        const satsSymbol = settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
 
         const getDisplayTitle = (): string | React.ReactElement => {
             if (units === 'fiat' && fiat) {
@@ -82,7 +87,7 @@ export default class UnitToggle extends React.Component<UnitToggleProps, {}> {
                 }
                 return fiat;
             }
-            return units;
+            return units === 'sats' && satsSymbol === 'beta' ? 'β sats' : units;
         };
 
         const handlePress = () => {

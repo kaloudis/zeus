@@ -11,21 +11,27 @@ import { localeString } from '../../../utils/LocaleUtils';
 import { themeColor } from '../../../utils/ThemeUtils';
 
 import LightningAddressStore from '../../../stores/LightningAddressStore';
+import SettingsStore, {
+    DEFAULT_SATS_SYMBOL
+} from '../../../stores/SettingsStore';
 
 interface CashuLightningAddressInfoProps {
     navigation: NativeStackNavigationProp<any, any>;
     LightningAddressStore: LightningAddressStore;
+    SettingsStore: SettingsStore;
 }
 
-@inject('LightningAddressStore')
+@inject('LightningAddressStore', 'SettingsStore')
 @observer
 export default class CashuLightningAddressInfo extends React.Component<
     CashuLightningAddressInfoProps,
     {}
 > {
     render() {
-        const { navigation, LightningAddressStore } = this.props;
+        const { navigation, LightningAddressStore, SettingsStore } = this.props;
         const { minimumSats } = LightningAddressStore;
+        const satsSymbol =
+            SettingsStore?.settings?.display?.satsSymbol || DEFAULT_SATS_SYMBOL;
 
         return (
             <Screen>
@@ -89,7 +95,11 @@ export default class CashuLightningAddressInfo extends React.Component<
                                         'views.Settings.LightningAddressInfo.minimumAmount'
                                     )}
                                     value={`${minimumSats} ${
-                                        minimumSats === 1 ? 'sat' : 'sats'
+                                        satsSymbol === 'beta'
+                                            ? 'β'
+                                            : minimumSats === 1
+                                            ? 'sat'
+                                            : 'sats'
                                     }`}
                                 />
                             )}

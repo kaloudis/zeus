@@ -2,7 +2,7 @@ import { action, observable, runInAction } from 'mobx';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import BigNumber from 'bignumber.js';
 
-import SettingsStore from './SettingsStore';
+import SettingsStore, { DEFAULT_SATS_SYMBOL } from './SettingsStore';
 import {
     SATS_PER_BTC,
     numberWithCommas,
@@ -662,7 +662,11 @@ export default class FiatStore {
                 : numberWithCommas(moscowTime);
 
             if (sats) {
-                return `${formattedMoscow} sats = 1 ${fiat}`;
+                const satsSymbol =
+                    this.settingsStore?.settings?.display?.satsSymbol ||
+                    DEFAULT_SATS_SYMBOL;
+                const label = satsSymbol === 'beta' ? 'β' : 'sats';
+                return `${formattedMoscow} ${label} = 1 ${fiat}`;
             }
 
             if (rtl) {
