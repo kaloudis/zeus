@@ -348,15 +348,16 @@ export async function startLdkNodeWallet({
     } catch (e: any) {
         const errorMsg = e?.message || e?.toString?.() || String(e);
         console.warn('LDK Node: Start error:', errorMsg);
-        if (
-            errorMsg.includes('FeerateEstimation') ||
-            errorMsg.includes('fee rate')
-        ) {
-            esploraError = errorMsg;
-            // Node may still be running despite fee estimation failure —
-            // attempt sync to detect RGS errors too
-            nodeStarted = true;
-        }
+        // if (
+        //     errorMsg.includes('FeerateEstimation') ||
+        //     errorMsg.includes('fee rate')
+        // ) {
+        //     esploraError = errorMsg;
+        //     // Node may still be running despite fee estimation failure —
+        //     // attempt sync to detect RGS errors too
+        //     nodeStarted = true;
+        // }
+        nodeStarted = true;
     }
 
     // Only sync if the node actually started

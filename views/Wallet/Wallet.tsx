@@ -85,6 +85,7 @@ import BalanceStore from '../../stores/BalanceStore';
 import CashuStore from '../../stores/CashuStore';
 import ChannelBackupStore from '../../stores/ChannelBackupStore';
 import ChannelsStore from '../../stores/ChannelsStore';
+import ConnectivityStore from '../../stores/ConnectivityStore';
 import TransactionsStore from '../../stores/TransactionsStore';
 import FiatStore from '../../stores/FiatStore';
 import InvoicesStore from '../../stores/InvoicesStore';
@@ -127,6 +128,7 @@ interface WalletProps {
     BalanceStore: BalanceStore;
     CashuStore: CashuStore;
     ChannelsStore: ChannelsStore;
+    ConnectivityStore: ConnectivityStore;
     TransactionsStore: TransactionsStore;
     InvoicesStore: InvoicesStore;
     NodeInfoStore: NodeInfoStore;
@@ -160,6 +162,7 @@ interface WalletState {
     'BalanceStore',
     'CashuStore',
     'ChannelsStore',
+    'ConnectivityStore',
     'TransactionsStore',
     'InvoicesStore',
     'NodeInfoStore',
@@ -519,6 +522,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
             BalanceStore,
             CashuStore,
             ChannelsStore,
+            ConnectivityStore,
             TransactionsStore,
             UTXOsStore,
             ContactStore,
@@ -612,6 +616,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
         }
 
         // Initialize and start LDK Node
+        let ldkStartDeferred = false;
         if (implementation === 'ldk-node' && connecting) {
             const justCreated = SettingsStore.walletJustCreated;
 
@@ -626,79 +631,110 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                 SettingsStore.walletJustCreated = false;
             }
 
-            if (ldkMnemonic && ldkNodeDir) {
-                // Get LSPS1 config from settings based on network
-                const lspConfig = getLspConfigForNetwork(
-                    settings,
-                    ldkNetwork || 'mainnet'
-                );
-                const lsps1Token = settings.lsps1Token;
+            const startLdk = async () => {
+                if (ldkMnemonic && ldkNodeDir) {
+                    // Get LSPS1 config from settings based on network
+                    const lspConfig = getLspConfigForNetwork(
+                        settings,
+                        ldkNetwork || 'mainnet'
+                    );
+                    const lsps1Token = settings.lsps1Token;
 
-                const lsps1Config =
-                    lspConfig.lsps1Pubkey && lspConfig.lsps1Host
-                        ? {
-                              nodeId: lspConfig.lsps1Pubkey,
-                              address: lspConfig.lsps1Host,
-                              token: lsps1Token || null
-                          }
-                        : undefined;
+                    const lsps1Config =
+                        lspConfig.lsps1Pubkey && lspConfig.lsps1Host
+                            ? {
+                                  nodeId: lspConfig.lsps1Pubkey,
+                                  address: lspConfig.lsps1Host,
+                                  token: lsps1Token || null
+                              }
+                            : undefined;
 
-                // Always include Flow LSP pubkey as trusted 0-conf peer
-                const flowLspPubkey = lspConfig.defaultPubkey;
+                    // Always include Flow LSP pubkey as trusted 0-conf peer
+                    const flowLspPubkey = lspConfig.defaultPubkey;
 
-                // Include both the default Flow LSP and user-configured
-                // LSP as trusted 0-conf peers (dedup if they're the same)
-                const trustedPeers = [flowLspPubkey];
-                if (
-                    lsps1Config?.nodeId &&
-                    lsps1Config.nodeId !== flowLspPubkey
-                ) {
-                    trustedPeers.push(lsps1Config.nodeId);
-                }
-
-                console.log('[LDK startup] calling startLdkNodeWallet');
-                const ldkResult = await startLdkNodeWallet({
-                    nodeDir: ldkNodeDir,
-                    seedMnemonic: ldkMnemonic,
-                    passphrase: ldkPassphrase,
-                    network: (ldkNetwork || 'mainnet') as
-                        | 'mainnet'
-                        | 'testnet'
-                        | 'signet'
-                        | 'regtest',
-                    esploraServerUrl: ldkEsploraServer,
-                    rgsServerUrl: ldkRgsServer,
-                    scorerUrl:
-                        ldkScorerUrl === undefined
-                            ? DEFAULT_SCORER_URL
-                            : ldkScorerUrl,
-                    lsps1Config,
-                    trustedPeers0conf: trustedPeers,
-                    vssServerUrl: ldkVssServer || DEFAULT_VSS_SERVER,
-                    skipInit: justCreated,
-                    onSyncStart: () => {
-                        SettingsStore.ldkNodeSyncing = true;
+                    // Include both the default Flow LSP and user-configured
+                    // LSP as trusted 0-conf peers (dedup if they're the same)
+                    const trustedPeers = [flowLspPubkey];
+                    if (
+                        lsps1Config?.nodeId &&
+                        lsps1Config.nodeId !== flowLspPubkey
+                    ) {
+                        trustedPeers.push(lsps1Config.nodeId);
                     }
-                });
 
-                console.log('[LDK startup] startLdkNodeWallet returned');
-                SettingsStore.ldkNodeSyncing = false;
-                if (ldkResult?.vssError) {
-                    AlertStore.setVssError(ldkResult.vssError);
-                }
-                if (ldkResult?.esploraError) {
-                    AlertStore.setEsploraError(ldkResult.esploraError);
-                }
-                if (ldkResult?.rgsError) {
-                    AlertStore.setRgsError(ldkResult.rgsError);
-                }
+                    console.log('[LDK startup] calling startLdkNodeWallet');
+                    const ldkResult = await startLdkNodeWallet({
+                        nodeDir: ldkNodeDir,
+                        seedMnemonic: ldkMnemonic,
+                        passphrase: ldkPassphrase,
+                        network: (ldkNetwork || 'mainnet') as
+                            | 'mainnet'
+                            | 'testnet'
+                            | 'signet'
+                            | 'regtest',
+                        esploraServerUrl: ldkEsploraServer,
+                        rgsServerUrl: ldkRgsServer,
+                        scorerUrl:
+                            ldkScorerUrl === undefined
+                                ? DEFAULT_SCORER_URL
+                                : ldkScorerUrl,
+                        lsps1Config,
+                        trustedPeers0conf: trustedPeers,
+                        vssServerUrl: ldkVssServer || DEFAULT_VSS_SERVER,
+                        skipInit: justCreated,
+                        onSyncStart: () => {
+                            SettingsStore.ldkNodeSyncing = true;
+                        }
+                    });
 
-                if (settings?.ecash?.enableCashu)
-                    await CashuStore.initializeWallets();
-            } else {
-                console.error(
-                    'LDK Node configuration missing mnemonic or nodeDir'
+                    console.log('[LDK startup] startLdkNodeWallet returned');
+                    SettingsStore.ldkNodeSyncing = false;
+                    if (ldkResult?.vssError) {
+                        AlertStore.setVssError(ldkResult.vssError);
+                    }
+                    if (ldkResult?.esploraError) {
+                        AlertStore.setEsploraError(ldkResult.esploraError);
+                    }
+                    if (ldkResult?.rgsError) {
+                        AlertStore.setRgsError(ldkResult.rgsError);
+                    }
+
+                    if (settings?.ecash?.enableCashu)
+                        await CashuStore.initializeWallets();
+
+                    return ldkResult;
+                } else {
+                    console.error(
+                        'LDK Node configuration missing mnemonic or nodeDir'
+                    );
+                    return undefined;
+                }
+            };
+
+            const ldkResult = await startLdk();
+            if (ldkResult?.esploraError) {
+                // Fee estimation failed — likely offline. Clear connecting
+                // state so the UI isn't stuck, and retry on reconnect.
+                console.log(
+                    '[LDK startup] esplora error — deferring until connectivity is restored'
                 );
+                ldkStartDeferred = true;
+                setConnectingStatus(false);
+                ConnectivityStore.onReconnect(async () => {
+                    setConnectingStatus(true);
+                    await startLdk();
+                    try {
+                        await NodeInfoStore.getNodeInfo();
+                        await BalanceStore.getCombinedBalance();
+                        ChannelsStore.getChannelsWithPolling();
+                    } catch (e) {
+                        console.log(
+                            '[LDK startup] post-reconnect error:',
+                            e
+                        );
+                    }
+                    setConnectingStatus(false);
+                });
             }
         }
 
@@ -1153,7 +1189,7 @@ export default class Wallet extends React.Component<WalletProps, WalletState> {
                     return;
                 }
             }
-        } else if (implementation === 'ldk-node') {
+        } else if (implementation === 'ldk-node' && !ldkStartDeferred) {
             try {
                 console.log('[LDK startup] fetching node info');
                 await NodeInfoStore.getNodeInfo();
