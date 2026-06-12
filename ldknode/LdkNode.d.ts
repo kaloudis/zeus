@@ -454,6 +454,7 @@ export interface ILdkNodeModule {
     ): Promise<void>;
 
     setVssBuildTimeout(timeoutSeconds: number): Promise<void>;
+    setPaymentRetryTimeout(timeoutSeconds: number): Promise<void>;
 
     // Crypto Methods
     mnemonicToSeed(

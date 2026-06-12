@@ -5,8 +5,8 @@
         "iosSha256": "f7a585150fbdba0942637badd9c990dc3bc4de158cd0322789bad8d6b1844af4"
     },
     "ldk-node": {
-        "version": "v0.7.0-zeus-vss",
-        "iosSha256": "1a128a0b023d163432d39479d779b3a2683c9ab1eb6fdaa834e83d0211304909"
+        "version": "v0.7.0-zeus-bimodal",
+        "iosSha256": "be0d83e65d5cb10e45461ca3c34fc8bf621c43366b33f7dfe10342f9d683c34b"
     },
     "cdk": {
         "version": "0.14.2",
