@@ -5,13 +5,19 @@ import com.facebook.react.bridge.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.io.File
+import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 import org.cashudevkit.*
+import org.lightningdevkit.ldknode.LogFileObserver
 import uniffi.zeus_cashu_restore.restoreFromSeed as zeusRestoreFromSeed
 import uniffi.zeus_cashu_restore.RestoreException
 
@@ -45,11 +51,38 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
     // a teardown from racing an initialization
     private val handleLock = Any()
 
+    // High-signal file logging for diagnostics. cdk-ffi exposes no logger hook
+    // and its Rust internals emit nothing capturable, so we record ZEUS-side
+    // events (which op ran + mapped FFI errors) to a file the Diagnostics tool
+    // can tail. Reuses the generic LogFileObserver helper from the LDK module.
+    private var logFileObserver: LogFileObserver? = null
+    private val logLock = Any()
+    private val logDateFormat =
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+
     companion object {
         private const val TAG = "CashuDevKitModule"
     }
 
     override fun getName(): String = "CashuDevKitModule"
+
+    private fun getCashuLogPath(): String =
+        File(reactContext.filesDir, "cashu.log").absolutePath
+
+    private fun logToFile(message: String) {
+        synchronized(logLock) {
+            try {
+                val line = "${logDateFormat.format(Date())} $message\n"
+                val file = File(getCashuLogPath())
+                file.parentFile?.mkdirs()
+                FileOutputStream(file, true).use {
+                    it.write(line.toByteArray(Charsets.UTF_8))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "logToFile error", e)
+            }
+        }
+    }
 
     // ========================================================================
     // Handle Lifecycle
@@ -371,12 +404,16 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
      * error codes, plus Internal(errorMessage) for infrastructure errors.
      */
     private fun mapFfiException(e: FfiException): Pair<String, String> {
-        return when (e) {
+        val mapped = when (e) {
             is FfiException.Cdk ->
                 legacyErrorCode(e.code, e.errorMessage) to e.errorMessage
             is FfiException.Internal ->
                 legacyErrorCode(null, e.errorMessage) to e.errorMessage
         }
+        // Central choke point: every FFI error passes through here, so log it
+        // once for diagnostics rather than at each of the ~30 call sites.
+        logToFile("FFI error [${mapped.first}]: ${mapped.second}")
+        return mapped
     }
 
     private fun legacyErrorCode(protocolCode: UInt?, message: String): String {
@@ -521,6 +558,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun initializeWallet(mnemonic: String, unit: String, promise: Promise) {
+        logToFile("op: initializeWallet unit=$unit")
         scope.launch {
             try {
                 val dbPath = getDatabasePath(mnemonic)
@@ -578,6 +616,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun addMint(mintUrl: String, targetProofCount: Int?, promise: Promise) {
+        logToFile("op: addMint $mintUrl")
         val repo = getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -838,6 +877,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun createMintQuote(mintUrl: String, amount: Double, description: String?, promise: Promise) {
+        logToFile("op: createMintQuote $mintUrl amount=$amount")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -973,6 +1013,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
         secretKey: String?,
         promise: Promise
     ) {
+        logToFile("op: addExternalMintQuote $mintUrl quote=$quoteId amount=$amount")
         if (!isInitialized || db == null) {
             promise.reject("NO_WALLET", "Wallet not initialized")
             return
@@ -1061,6 +1102,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun mintExternal(mintUrl: String, quoteId: String, amount: Double, promise: Promise) {
+        logToFile("op: mintExternal $mintUrl quote=$quoteId amount=$amount")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1101,6 +1143,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun mint(mintUrl: String, quoteId: String, conditionsJson: String?, promise: Promise) {
+        logToFile("op: mint $mintUrl quote=$quoteId")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1152,6 +1195,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun createMeltQuote(mintUrl: String, request: String, optionsJson: String?, promise: Promise) {
+        logToFile("op: createMeltQuote $mintUrl")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1212,6 +1256,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun melt(mintUrl: String, quoteId: String, promise: Promise) {
+        logToFile("op: melt $mintUrl quote=$quoteId")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1239,6 +1284,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun meltPartial(mintUrl: String, bolt11: String, mppAmountMsat: Double, promise: Promise) {
+        logToFile("op: meltPartial $mintUrl mppAmountMsat=$mppAmountMsat")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1308,6 +1354,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun prepareSend(mintUrl: String, amount: Double, optionsJson: String?, promise: Promise) {
+        logToFile("op: prepareSend $mintUrl amount=$amount")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1388,6 +1435,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun confirmSend(preparedSendId: String, memo: String?, promise: Promise) {
+        logToFile("op: confirmSend id=$preparedSendId")
         val prepared = preparedSends[preparedSendId]
         if (prepared == null) {
             promise.reject("NO_PREPARED_SEND", "Prepared send not found")
@@ -1463,6 +1511,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun receive(encodedToken: String, optionsJson: String?, promise: Promise) {
+        logToFile("op: receive")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1570,6 +1619,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun restore(mintUrl: String, promise: Promise) {
+        logToFile("op: restore $mintUrl")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -1599,6 +1649,7 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun restoreFromSeed(mintUrl: String, seedHex: String, promise: Promise) {
+        logToFile("op: restoreFromSeed $mintUrl")
         getInitializedRepo(promise) ?: return
 
         scope.launch {
@@ -2019,11 +2070,47 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
     }
 
     // ========================================================================
+    // Diagnostics logging
+    // ========================================================================
+
+    @ReactMethod
+    fun tailCashuLog(numLines: Int, promise: Promise) {
+        try {
+            promise.resolve(
+                LogFileObserver.tailFile(getCashuLogPath(), numLines)
+            )
+        } catch (e: Exception) {
+            promise.reject("TAIL_LOG_ERROR", e.message, e)
+        }
+    }
+
+    @ReactMethod
+    fun observeCashuLogFile(promise: Promise) {
+        try {
+            if (logFileObserver == null) {
+                logFileObserver = LogFileObserver(getCashuLogPath()) { line ->
+                    reactApplicationContext
+                        .getJSModule(
+                            DeviceEventManagerModule.RCTDeviceEventEmitter::class.java
+                        )
+                        .emit("cashulog", line + "\n")
+                }
+                logFileObserver?.startObserving()
+            }
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("OBSERVE_LOG_ERROR", e.message, e)
+        }
+    }
+
+    // ========================================================================
     // Cleanup
     // ========================================================================
 
     override fun onCatalystInstanceDestroy() {
         scope.cancel()
+        logFileObserver?.stopObserving()
+        logFileObserver = null
         // Destroy, not just dereference: a bridge teardown that is not a
         // process restart (an iOS-style JS reload, a dev reload) would
         // otherwise leave the previous instance's connection open
