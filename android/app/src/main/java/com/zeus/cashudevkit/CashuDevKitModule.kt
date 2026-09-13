@@ -5,9 +5,9 @@ import com.facebook.react.bridge.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
-import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.io.File
 import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 import org.cashudevkit.*
 import org.lightningdevkit.ldknode.LogFileObserver
@@ -55,13 +56,21 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
     // and its Rust internals emit nothing capturable, so we record ZEUS-side
     // events (which op ran + mapped FFI errors) to a file the Diagnostics tool
     // can tail. Reuses the generic LogFileObserver helper from the LDK module.
-    private var logFileObserver: LogFileObserver? = null
-    private val logLock = Any()
+    // A single-thread executor keeps disk I/O off the native-modules thread
+    // while preserving line order; the timestamp is captured at call time so
+    // it reflects when the op ran, not when the write drained.
+    private val logExecutor = Executors.newSingleThreadExecutor()
     private val logDateFormat =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+    private var logTrimChecked = false
 
     companion object {
         private const val TAG = "CashuDevKitModule"
+        // Cap the log's disk footprint: trimmed back to TRIM_TO_BYTES once
+        // the file passes MAX_LOG_BYTES, checked once per process. The tail
+        // readers only ever look at the last 256KB anyway.
+        private const val MAX_LOG_BYTES = 2L * 1024 * 1024
+        private const val TRIM_TO_BYTES = 256L * 1024
     }
 
     override fun getName(): String = "CashuDevKitModule"
@@ -69,18 +78,42 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
     private fun getCashuLogPath(): String =
         File(reactContext.filesDir, "cashu.log").absolutePath
 
+    private fun trimLogIfNeeded(file: File) {
+        if (logTrimChecked) return
+        logTrimChecked = true
+        if (!file.exists() || file.length() <= MAX_LOG_BYTES) return
+        val keep = ByteArray(TRIM_TO_BYTES.toInt())
+        RandomAccessFile(file, "r").use {
+            it.seek(file.length() - TRIM_TO_BYTES)
+            it.readFully(keep)
+        }
+        file.writeBytes(keep)
+    }
+
     private fun logToFile(message: String) {
-        synchronized(logLock) {
-            try {
-                val line = "${logDateFormat.format(Date())} $message\n"
-                val file = File(getCashuLogPath())
-                file.parentFile?.mkdirs()
-                FileOutputStream(file, true).use {
-                    it.write(line.toByteArray(Charsets.UTF_8))
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "logToFile error", e)
+        val timestamp = Date()
+        // execute() can only reject after onCatalystInstanceDestroy has shut
+        // the executor down, at which point dropping the line is fine.
+        try {
+            logExecutor.execute { writeLogLine(timestamp, message) }
+        } catch (e: Exception) {
+            // rejected: executor already shut down
+        }
+    }
+
+    // Only ever runs on logExecutor, which also confines the (non-thread-safe)
+    // SimpleDateFormat and the trim check to a single thread.
+    private fun writeLogLine(timestamp: Date, message: String) {
+        try {
+            val line = "${logDateFormat.format(timestamp)} $message\n"
+            val file = File(getCashuLogPath())
+            file.parentFile?.mkdirs()
+            trimLogIfNeeded(file)
+            FileOutputStream(file, true).use {
+                it.write(line.toByteArray(Charsets.UTF_8))
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "logToFile error", e)
         }
     }
 
@@ -2084,33 +2117,13 @@ class CashuDevKitModule(private val reactContext: ReactApplicationContext) :
         }
     }
 
-    @ReactMethod
-    fun observeCashuLogFile(promise: Promise) {
-        try {
-            if (logFileObserver == null) {
-                logFileObserver = LogFileObserver(getCashuLogPath()) { line ->
-                    reactApplicationContext
-                        .getJSModule(
-                            DeviceEventManagerModule.RCTDeviceEventEmitter::class.java
-                        )
-                        .emit("cashulog", line + "\n")
-                }
-                logFileObserver?.startObserving()
-            }
-            promise.resolve(true)
-        } catch (e: Exception) {
-            promise.reject("OBSERVE_LOG_ERROR", e.message, e)
-        }
-    }
-
     // ========================================================================
     // Cleanup
     // ========================================================================
 
     override fun onCatalystInstanceDestroy() {
         scope.cancel()
-        logFileObserver?.stopObserving()
-        logFileObserver = null
+        logExecutor.shutdown()
         // Destroy, not just dereference: a bridge teardown that is not a
         // process restart (an iOS-style JS reload, a dev reload) would
         // otherwise leave the previous instance's connection open
