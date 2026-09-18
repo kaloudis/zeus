@@ -23,6 +23,10 @@ jobs:
         with:
           name: coverage-baseline
           path: coverage/coverage-summary.json
+      - name: Simulate malicious artifact (e2e test only)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo '{"total":{"statements":{"pct":"[official notice](https://evil.example) @everyone","covered":1,"total":1},"branches":{"pct":50,"covered":1,"total":2},"functions":{"pct":50,"covered":1,"total":2},"lines":{"pct":50,"covered":1,"total":2}}}' > coverage/coverage-summary.json
       - name: Save PR number for coverage comment
         if: github.event_name == 'pull_request'
         run: echo "${{ github.event.pull_request.number }}" > coverage/PR_NUMBER
