@@ -5,11 +5,8 @@ import { Route } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useSharedValue } from 'react-native-reanimated';
-import type { LegacyPanGesture } from 'react-native-gesture-handler';
-import Carousel, {
-    Pagination,
-    ICarouselInstance
-} from 'react-native-reanimated-carousel';
+import { Carousel, Pagination } from 'react-native-reanimated-carousel';
+import type { CarouselRef } from 'react-native-reanimated-carousel';
 
 import Header from '../components/Header';
 import Text from '../components/Text';
@@ -35,7 +32,7 @@ const MultiQR: React.FC<MultiQRProps> = (props: MultiQRProps) => {
 
     const { navigation, route } = props;
 
-    const ref = useRef<ICarouselInstance>(null);
+    const ref = useRef<CarouselRef>(null);
     const progress = useSharedValue<number>(0);
 
     useEffect(() => {
@@ -71,10 +68,7 @@ const MultiQR: React.FC<MultiQRProps> = (props: MultiQRProps) => {
     const screenWidth = Dimensions.get('window').width;
 
     const onPressPagination = (index: number) => {
-        ref.current?.scrollTo({
-            count: index - progress.value,
-            animated: true
-        });
+        ref.current?.scrollTo({ index, animated: true });
     };
 
     const renderItem = ({ item, index }: { item: any; index: number }) => (
@@ -119,39 +113,32 @@ const MultiQR: React.FC<MultiQRProps> = (props: MultiQRProps) => {
             >
                 <Carousel
                     ref={ref}
-                    withAnimation={{
+                    animation={{
                         type: 'spring',
-                        config: {
-                            damping: 40,
-                            stiffness: 200
-                        }
+                        damping: 40,
+                        stiffness: 200
                     }}
                     data={addressData}
-                    width={screenWidth}
+                    style={{ width: screenWidth }}
                     renderItem={renderItem}
-                    onProgressChange={progress}
+                    progress={progress}
                     loop={false}
-                    scrollAnimationDuration={500}
-                    snapEnabled={true}
-                    pagingEnabled={true}
+                    snapMode="page"
                     overscrollEnabled={false}
-                    mode="parallax"
-                    modeConfig={{
-                        parallaxScrollingScale: 0.9,
-                        parallaxScrollingOffset: 0
+                    layout={{
+                        type: 'parallax',
+                        scale: 0.9,
+                        offset: 0
                     }}
                     onConfigurePanGesture={(gesture) => {
-                        'worklet';
-                        const g = gesture as unknown as LegacyPanGesture;
-                        g.activeOffsetX([-20, 20]);
-                        g.failOffsetY([-5, 5]);
+                        gesture.activeOffsetX([-20, 20]).failOffsetY([-5, 5]);
                     }}
                 />
             </View>
             {addressData.length > 1 && (
-                <Pagination.Basic
+                <Pagination
                     progress={progress}
-                    data={addressData}
+                    count={addressData.length}
                     dotStyle={{
                         backgroundColor: themeColor('secondaryText'),
                         borderRadius: 50
